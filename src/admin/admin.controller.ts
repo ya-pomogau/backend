@@ -59,7 +59,7 @@ export class AdminController {
   async deleteRequest(@Param('id') id: number, @Param('requestId') requestId: number): Promise<Admin> {
     return this.adminService.deleteRequest(id, requestId);
   }
-  
+
   // Подтвердить выполнение заявки
   @Patch('recipients/:id/requests/:requestId/confirm')
   async confirmRequest(@Param('id') id: number, @Param('requestId') requestId: number): Promise<Admin> {
