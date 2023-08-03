@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { VolunteersModule } from './volunteers/volunteer.module';
-import { Volunteer } from './volunteers/entities/volunteers.entity';
+import { UserModule } from './users/user.module';
+import { User } from './users/entities/user.entity';
 
 @Module({
   imports: [
@@ -11,10 +11,10 @@ import { Volunteer } from './volunteers/entities/volunteers.entity';
       host: 'localhost',
       port: 27017,
       database: 'ihelp',
-      entities: [Volunteer],
+      entities: [User],
       synchronize: true,
     }),
-    VolunteersModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [],

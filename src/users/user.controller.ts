@@ -1,0 +1,61 @@
+import { User } from './entities/user.entity';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UserService } from './user.service';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  HttpException,
+  HttpStatus,
+  ValidationPipe,
+  Patch,
+} from '@nestjs/common';
+import { ObjectId } from 'mongodb';
+import { UpdateUserDto } from './dto/update-user.dto';
+
+@Controller('users')
+export class UserController {
+  constructor(private readonly userService: UserService) {}
+
+  @Get()
+  async findAll(): Promise<User[]> {
+    return await this.userService.findAll();
+  }
+
+  @Post()
+  async createUser(
+    @Body(new ValidationPipe()) userData: CreateUserDto,
+  ): Promise<any> {
+    try {
+      return await this.userService.createUser(userData);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Get(':id')
+  async getUserById(@Param('id') id: string): Promise<User | undefined> {
+    console.log('Handling getUserById', id);
+    const objectId = new ObjectId(id);
+    return this.userService.findUserById(objectId);
+  }
+
+  @Delete(':id')
+  async deleteUser(@Param('id') id: string): Promise<void> {
+    const objectId = new ObjectId(id);
+    console.log('deleted');
+    await this.userService.deleteUserById(objectId);
+  }
+
+  @Patch(':id')
+  async updateUser(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    const _id = new ObjectId(id);
+    return this.userService.updateOne(_id, updateUserDto);
+  }
+}

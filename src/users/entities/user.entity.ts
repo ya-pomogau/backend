@@ -8,26 +8,26 @@ import {
   ObjectId,
 } from 'typeorm';
 
-enum VolunteerStatus {
-  NOT_APPROVED = 'не одобрен',
-  APPROVED = 'одобрен',
-  APPROVED_CHECKED = 'одобрен и проверен',
-  APPROVED_CHECKED_ACTIVATED = 'одобрен проверен активирован ключ',
+export enum UserRole {
+  CHIEF = 'Главный администратор',
+  ADMIN = 'Администратор',
+  RECIPIENT = 'Реципиент',
+  VOLUNTEER = 'Волонтер',
 }
 
 @Entity()
-export class Volunteer {
+export class User {
   @ObjectIdColumn()
   _id: ObjectId;
 
   @Column()
   @IsString()
-  @Length(2, 30)
+  @Length(2, 20)
   fullname: string;
 
   @Column()
   @IsString()
-  role: string;
+  role: UserRole;
 
   @Column()
   @IsUrl()
@@ -50,13 +50,23 @@ export class Volunteer {
   coordinates: number[];
 
   @Column()
-  status: VolunteerStatus;
+  approved: boolean;
+
+  @Column()
+  checked: boolean;
+
+  @Column()
+  keys: boolean;
+
+  @Column()
+  adminStatus: number;
 
   @Column()
   scores: number;
 
   @Column()
   completed: number;
+
   @CreateDateColumn()
   @IsDate()
   createdAt: Date;
@@ -65,11 +75,10 @@ export class Volunteer {
   @IsDate()
   updatedAt: Date;
 
-  //У волонтеров может быть несколько рецепиентов у рецпиентов много волонтеров
+  //Примерная логика связи сообщений
 
-  //   @ManyToMany(() => Recepient)
-  //   @JoinTable()
-  //   items: Recepient[];
+  // @OneToMany(() => Message, (message) => task.owner)
+  // messages: message[];
 
   //У тасок один волонтер(пока, м.б. нужна будет возможность нескольких назначать)
 
