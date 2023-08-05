@@ -1,10 +1,11 @@
 import { Column, CreateDateColumn, Entity, ObjectIdColumn } from 'typeorm';
 import { IsDate, IsString, Length } from 'class-validator';
+import { ObjectId } from 'mongodb';
 
 @Entity()
 export class Task {
   @ObjectIdColumn()
-  id: number;
+  id: ObjectId;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -28,20 +29,20 @@ export class Task {
 
   @Column()
   @IsString()
-  category: string; //заменить на ManyToOne
+  category: string; // заменить на ManyToOne
 
   @Column()
   @IsString()
   @Length(1, 50)
-  address: string; //формат адреса?
+  address: string; // формат адреса?
 
   @Column()
   @IsString()
-  recipient: string; //заменить на OneToMane
+  recipient: string; // заменить на OneToMane
 
   @Column()
   @IsString()
-  volunteer?: string; //заменить на OneToMane
+  volunteer?: string; // заменить на OneToMane
 
   @Column()
   completed: {

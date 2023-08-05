@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import configuration from './config/configuration';
 import { TypeOrmConfigService } from './config/database-config.factory';
 import { TasksModule } from './tasks/tasks.module';
+import { CategoriesModule } from './categories/categories.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { TasksModule } from './tasks/tasks.module';
       useClass: TypeOrmConfigService,
     }),
     TasksModule,
+    CategoriesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
