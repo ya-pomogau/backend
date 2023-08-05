@@ -1,19 +1,7 @@
 import { Length, IsString, IsUrl, IsDate } from 'class-validator';
-import {
-  Entity,
-  ObjectIdColumn,
-  Column,
-  CreateDateColumn,
-  UpdateDateColumn,
-  ObjectId,
-} from 'typeorm';
-
-export enum UserRole {
-  CHIEF = 'Главный администратор',
-  ADMIN = 'Администратор',
-  RECIPIENT = 'Реципиент',
-  VOLUNTEER = 'Волонтер',
-}
+import { Entity, ObjectIdColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { ObjectId } from 'mongodb';
+import { UserRole, StatusType, PermissionType } from '../../common/types/user-types';
 
 @Entity()
 export class User {
@@ -25,9 +13,12 @@ export class User {
   @Length(2, 20)
   fullname: string;
 
-  @Column()
+  @Column({ nullable: true })
   @IsString()
-  role: UserRole;
+  role: UserRole | null;
+
+  @Column({ nullable: true })
+  status: StatusType | null;
 
   @Column()
   @IsUrl()
@@ -35,7 +26,7 @@ export class User {
 
   @Column()
   @IsUrl()
-  photo: string;
+  avatar: string;
 
   @Column()
   @IsString()
@@ -49,24 +40,6 @@ export class User {
   @IsString()
   coordinates: number[];
 
-  @Column()
-  approved: boolean;
-
-  @Column()
-  checked: boolean;
-
-  @Column()
-  keys: boolean;
-
-  @Column()
-  adminStatus: number;
-
-  @Column()
-  scores: number;
-
-  @Column()
-  completed: number;
-
   @CreateDateColumn()
   @IsDate()
   createdAt: Date;
@@ -75,12 +48,21 @@ export class User {
   @IsDate()
   updatedAt: Date;
 
-  //Примерная логика связи сообщений
+  @Column({ nullable: true })
+  keys?: number | null;
+
+  @Column()
+  scores?: number;
+
+  @Column()
+  permissions?: Array<PermissionType> | null;
+
+  // Примерная логика связи сообщений
 
   // @OneToMany(() => Message, (message) => task.owner)
   // messages: message[];
 
-  //У тасок один волонтер(пока, м.б. нужна будет возможность нескольких назначать)
+  // У тасок один волонтер(пока, м.б. нужна будет возможность нескольких назначать)
 
   // @OneToMany(() => Tasks, (task) => task.owner)
   // tasks: task[];

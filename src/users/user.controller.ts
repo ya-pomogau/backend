@@ -1,6 +1,3 @@
-import { User } from './entities/user.entity';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UserService } from './user.service';
 import {
   Controller,
   Get,
@@ -14,6 +11,9 @@ import {
   Patch,
 } from '@nestjs/common';
 import { ObjectId } from 'mongodb';
+import { User } from './entities/user.entity';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('users')
@@ -22,13 +22,11 @@ export class UserController {
 
   @Get()
   async findAll(): Promise<User[]> {
-    return await this.userService.findAll();
+    return this.userService.findAll();
   }
 
   @Post()
-  async createUser(
-    @Body(new ValidationPipe()) userData: CreateUserDto,
-  ): Promise<User> {
+  async createUser(@Body(new ValidationPipe()) userData: CreateUserDto): Promise<User> {
     try {
       return await this.userService.createUser(userData);
     } catch (error) {
@@ -50,7 +48,7 @@ export class UserController {
   @Patch(':id')
   async updateUser(
     @Param('id') id: string,
-    @Body(new ValidationPipe()) updateUserDto: UpdateUserDto,
+    @Body(new ValidationPipe()) updateUserDto: UpdateUserDto
   ): Promise<User> {
     try {
       return this.userService.updateOne(id, updateUserDto);

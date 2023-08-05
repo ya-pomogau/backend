@@ -7,7 +7,7 @@ import {
   IsPhoneNumber,
   IsOptional,
 } from 'class-validator';
-import { UserRole } from '../entities/user.entity';
+import { UserRole, StatusType, PermissionType } from '../../common/types/user-types';
 
 export class UpdateUserDto {
   @IsOptional()
@@ -17,6 +17,12 @@ export class UpdateUserDto {
   fullname: string;
 
   @IsOptional()
+  role: UserRole | null;
+
+  @IsOptional()
+  status: StatusType | null;
+
+  @IsOptional()
   @IsUrl({ require_protocol: true }, { message: 'Не корректный URL' })
   @IsNotEmpty({ message: 'Адрес не должен быть пустым' })
   vk: string;
@@ -24,7 +30,7 @@ export class UpdateUserDto {
   @IsOptional()
   @IsUrl({ require_protocol: true }, { message: 'Не корректный URL' })
   @IsNotEmpty({ message: 'Адрес не должен быть пустым' })
-  photo: string;
+  avatar: string;
 
   @IsOptional()
   @IsPhoneNumber('RU', { message: 'Некорректный номер телефона' })
@@ -37,23 +43,14 @@ export class UpdateUserDto {
   address: string;
 
   @IsOptional()
-  role: UserRole;
-
-  @IsOptional()
   coordinates: number[];
 
   @IsOptional()
-  approved: boolean;
+  keys?: number | null;
 
   @IsOptional()
-  checked: boolean;
+  scores?: number;
 
   @IsOptional()
-  keys: boolean;
-
-  @IsOptional()
-  scores: number;
-
-  @IsOptional()
-  completed: number;
+  permissions?: Array<PermissionType> | null;
 }
