@@ -1,28 +1,24 @@
-import { Strategy, ExtractJwt } from 'passport-jwt';
-import { PassportStrategy } from '@nestjs/passport';
+// auth/jwt.strategy.ts
+
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { AuthService } from '../../AuthService/auth.service';
-import { MainAdminService } from '../main-admin.service';
+import { PassportStrategy } from '@nestjs/passport';
+import { Strategy, ExtractJwt } from 'passport-jwt';
+import { AuthService } from '../../auth/auth.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly mainAdminService: MainAdminService,
-  ) {
+  constructor(private authService: AuthService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: 'your_secret_key', // Replace with your JWT secret key
+      secretOrKey: 'your-secret-key', // Replace with your actual secret key
     });
   }
 
   async validate(payload: any) {
-    const mainAdmin = await this.mainAdminService.findOneById(payload.sub);
-  
+    const mainAdmin = await this.authService.findAdminById(payload.sub);
     if (!mainAdmin) {
-      throw new UnauthorizedException('Invalid token');
+      throw new UnauthorizedException();
     }
-  
     return mainAdmin;
-  }  
+  }
 }

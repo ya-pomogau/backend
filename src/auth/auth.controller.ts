@@ -1,9 +1,10 @@
+// auth/auth.controller.ts
+
 import { Controller, Post, Body } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { SignInAdminDto } from '../main-admin/dto/sign-in-admin.dto';
 
-@Controller()
-export class AppController {
+@Controller('auth')
+export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('signinadmin')

@@ -1,11 +1,11 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
-@Entity()
+@Entity('main_admins')
 export class MainAdmin {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ unique: true })
   username: string;
 
   @Column()
