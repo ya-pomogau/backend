@@ -1,10 +1,11 @@
 import { Column, CreateDateColumn, Entity, ObjectIdColumn } from 'typeorm';
 import { IsDate, IsString, Length } from 'class-validator';
+import { ObjectId } from 'mongodb';
 
 @Entity()
 export class Task {
   @ObjectIdColumn()
-  id: number;
+  id: ObjectId;
 
   @CreateDateColumn()
   createdAt: Date;
