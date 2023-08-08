@@ -1,25 +1,22 @@
-// app.module.ts
-
-import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { AppController } from './app.controller';
+import { Module } from "@nestjs/common";
+import {ConfigModule} from "@nestjs/config";
 import { AuthModule } from './auth/auth.module';
-import { MainAdminModule } from './main-admin/main-admin.module';
+import { MainAdminModule } from "./main-admin/main-admin.module";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { TypeOrmConfigService } from "./config/database-config.factory";
+import configuration from "./config/configuration";
 
 @Module({
-  imports: [
-    TypeOrmModule.forRoot({
-      type: 'mongodb',
-      host: 'localhost',
-      port: 27017,
-      database: 'ihelp',
-      entities: [],
-      synchronize: true,
-    }), // Add your TypeORM configuration here
-    AuthModule,
-    MainAdminModule,
-  ],
-  controllers: [AppController],
+  controllers: [],
   providers: [],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true, load: [configuration] }),
+    TypeOrmModule.forRootAsync({
+      imports: [],
+      useClass: TypeOrmConfigService,
+    }),
+    MainAdminModule,
+    AuthModule,
+  ]
 })
-export class AppModule {}
+export class AppModule { }
