@@ -1,17 +1,19 @@
-import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { forwardRef, Module } from '@nestjs/common';
+import { SequelizeModule } from "@nestjs/sequelize";
+import { AuthModule } from "../auth/auth.module";
 import { MainAdminController } from './main-admin.controller';
+import { MainAdmin } from './main-admin.model';
 import { MainAdminService } from './main-admin.service';
-import { MainAdmin } from './main-admin.entity';
-import { JwtStrategy } from './strategy/jwt.strategy';
-import { PassportModule } from '@nestjs/passport';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([MainAdmin]),
-    PassportModule.register({ defaultStrategy: 'jwt' }),
-  ],
   controllers: [MainAdminController],
-  providers: [MainAdminService, JwtStrategy],
+  providers: [MainAdminService],
+  imports: [
+    SequelizeModule.forFeature([MainAdmin]),
+    forwardRef(() => AuthModule),
+  ],
+  exports: [
+    MainAdminService,
+  ]
 })
-export class MainAdminModule {}
+export class MainAdminModule { }

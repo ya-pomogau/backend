@@ -1,14 +1,15 @@
-// auth/auth.controller.ts
-
-import { Controller, Post, Body } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
+import { ApiTags } from "@nestjs/swagger";
+import { CreateMainAdminDto } from 'src/main-admin/dto/create-main-admin.dto';
 import { AuthService } from './auth.service';
 
+@ApiTags('Авторизация')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private authService: AuthService) { }
 
-  @Post('signinadmin')
-  async signInAdmin(@Body() credentials: { username: string; password: string }) {
-    return this.authService.signInAdmin(credentials);
+  @Post('/signinadmin')
+  login(@Body() mainAdminDto: CreateMainAdminDto) {
+    return this.authService.login(mainAdminDto)
   }
 }

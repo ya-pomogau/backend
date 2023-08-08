@@ -1,16 +1,18 @@
-import { Controller, Post, Request, UseGuards } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
-import { LocalAuthGuard } from 'src/auth/local-auth.guard';
-import { AuthService } from '../auth/auth.service';
+import { Body, Controller, Get, Post, UseGuards, UsePipes } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { CreateMainAdminDto } from './dto/create-main-admin.dto';
+import { MainAdmin } from './main-admin.model';
+import { MainAdminService } from './main-admin.service';
 
-@Controller()
+@ApiTags('Пользователи')
+@Controller('mainAdmin')
 export class MainAdminController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private mainAdminService: MainAdminService) { }
 
-  @UseGuards(LocalAuthGuard) // Use the LocalAuthGuard to authenticate
-  @Post('signinadmin')
-  async signInAdmin(@Request() req) {
-    const { user } = req;
-    return this.authService.generateAdminToken(user);
+  @ApiOperation({ summary: 'Авторизация пользователя' })
+  @ApiResponse({ status: 200, type: MainAdmin })
+  @Post()
+  authorization(@Body() mainAdminDto: CreateMainAdminDto) {
+    return this.mainAdminService.authorization(mainAdminDto);
   }
 }

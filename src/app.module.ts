@@ -8,7 +8,14 @@ import { MainAdminModule } from './main-admin/main-admin.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot(), // Add your TypeORM configuration here
+    TypeOrmModule.forRoot({
+      type: 'mongodb',
+      host: 'localhost',
+      port: 27017,
+      database: 'ihelp',
+      entities: [],
+      synchronize: true,
+    }), // Add your TypeORM configuration here
     AuthModule,
     MainAdminModule,
   ],
