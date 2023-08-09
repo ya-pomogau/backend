@@ -1,4 +1,5 @@
 import { Controller, Get, Post } from '@nestjs/common';
+import { Param, Redirect } from '@nestjs/common/decorators';
 import { ApiTags } from "@nestjs/swagger";
 import { RoutesService } from './routes.service';
 
@@ -33,16 +34,17 @@ export class RoutesController {
   }
 
   @Get('/users/:id')
-  userId(id: string) {
+  userId(@Param('id') id: string) {
     return this.routesService.getUserById(id) /* по айдишнику: /users/{id} */
   }
 
   @Post('/users/:id')
-  userupdate(id: string) {
+  userupdate(@Param('id') id: string) {
     return this.routesService.updateUserById(id) /*  */
   }
 
   @Get('/profile')
+  @Redirect('/signin') // Пример редиректа для невозможности доступа без авторизации
   profile() {
     return this.routesService.getProfile() /* личные кабинеты пользаков (редиректы по правам): /profile */
   }
