@@ -35,12 +35,12 @@ export class RoutesController {
 
   @Get('/users/:id')
   userId(@Param('id') id: string) {
-    return this.routesService.getUserById(id) /* по айдишнику: /users/{id} */
+    return this.routesService.getUserById(id) /*Get по айдишнику: /users/{id} */
   }
 
   @Post('/users/:id')
   userupdate(@Param('id') id: string) {
-    return this.routesService.updateUserById(id) /*  */
+    return this.routesService.updateUserById(id) /* Post по айдишнику: /users/{id} */
   }
 
   @Get('/profile')
