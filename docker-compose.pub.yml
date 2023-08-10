@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+  backend:
+    container_name: backend
+    build: 
+      context: backend
+      dockerfile: Dockerfile.dev
+    env_file: .env
+    ports:
+      - '4000:3001'
+    depends_on:
+      - mongodb
+    restart: always
+    networks:
+      - backend  
+
+  mongodb:
+    container_name: mongo
+    image: mongo:6-jammy
+    ports:
+      - '27017:27017'
+
+    restart: always
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - backend  
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8008:8080
+    depends_on:
+      - postgres
+    networks:
+      - backend    
+volumes:
+  mongodb_data:
+networks:
+  backend:
