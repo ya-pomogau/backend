@@ -6,6 +6,10 @@ import { AppService } from './app.service';
 import configuration from './config/configuration';
 import { TypeOrmConfigService } from './config/database-config.factory';
 import { TasksModule } from './tasks/tasks.module';
+import { UserModule } from './users/user.module';
+import { ChatsService } from './chats/chats.service';
+import { ChatsController } from './chats/chats.controller';
+import { ChatsModule } from './chats/chats.module';
 
 @Module({
   imports: [
@@ -15,8 +19,10 @@ import { TasksModule } from './tasks/tasks.module';
       useClass: TypeOrmConfigService,
     }),
     TasksModule,
+    UserModule,
+    ChatsModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, ChatsController],
+  providers: [AppService, ChatsService],
 })
 export class AppModule {}

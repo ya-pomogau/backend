@@ -1,6 +1,14 @@
 import { Length, IsString, IsUrl, IsDate } from 'class-validator';
-import { Entity, ObjectIdColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Entity,
+  ObjectIdColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToMany,
+} from 'typeorm';
 import { ObjectId } from 'mongodb';
+import { Task } from '../../tasks/entities/task.entity';
 import { UserRole, StatusType, PermissionType } from '../../common/types/user-types';
 
 @Entity()
@@ -54,16 +62,9 @@ export class User {
   @Column()
   scores?: number;
 
-  @Column()
+  @Column({ nullable: true })
   permissions?: Array<PermissionType> | null;
 
-  // Примерная логика связи сообщений
-
-  // @OneToMany(() => Message, (message) => task.owner)
-  // messages: message[];
-
-  // У тасок один волонтер(пока, м.б. нужна будет возможность нескольких назначать)
-
-  // @OneToMany(() => Tasks, (task) => task.owner)
-  // tasks: task[];
+  @OneToMany(() => Task, (task) => task.userId) // Указываем обратное поле в Task сущности
+  tasks: Task[];
 }

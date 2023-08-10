@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, ObjectIdColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, ObjectIdColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { IsDate, IsString, Length } from 'class-validator';
 
 @Entity()
@@ -40,8 +40,7 @@ export class Task {
   recipient: string; // заменить на OneToMane
 
   @Column()
-  @IsString()
-  volunteer?: string; // заменить на OneToMane
+  userId: number;
 
   @Column()
   completed: {
