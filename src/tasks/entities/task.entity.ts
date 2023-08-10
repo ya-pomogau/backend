@@ -1,16 +1,35 @@
-import { Column, CreateDateColumn, Entity, ObjectIdColumn } from 'typeorm';
-import { IsDate, IsString, Length } from 'class-validator';
+import { Column, CreateDateColumn, Entity, ObjectIdColumn, UpdateDateColumn } from 'typeorm';
+import { IsDate, IsInt, IsString, Length } from 'class-validator';
 import { ObjectId } from 'mongodb';
+import { User } from '../../users/entities/user.entity';
+
+interface ITaskConfirmation {
+  recipient: boolean | null;
+  volunteer: boolean | null;
+}
+
+export enum Status {
+  CREATED = 'created',
+  ACCEPTED = 'accepted',
+  CLOSED = 'closed',
+}
+
+interface IStatusHistory {
+  date: Date;
+  status: Status;
+  completed: boolean;
+  volunteer: User | null;
+}
 
 @Entity()
 export class Task {
   @ObjectIdColumn()
-  id: ObjectId;
+  _id: ObjectId;
 
   @CreateDateColumn()
   createdAt: Date;
 
-  @CreateDateColumn()
+  @UpdateDateColumn()
   updatedAt: Date;
 
   @Column()
@@ -25,28 +44,41 @@ export class Task {
 
   @Column()
   @IsDate()
-  date: Date;
+  completionDate: Date;
 
   @Column()
   @IsString()
-  category: string; // заменить на ManyToOne
+  categoryId: string;
 
   @Column()
   @IsString()
-  @Length(1, 50)
-  address: string; // формат адреса?
+  @Length(1, 100)
+  address: string;
 
   @Column()
-  @IsString()
-  recipient: string; // заменить на OneToMane
+  coordinates: [number, number];
+
+  @Column(() => User)
+  recipient: User;
+
+  @Column(() => User)
+  volunteer?: User;
 
   @Column()
-  @IsString()
-  volunteer?: string; // заменить на OneToMane
+  @IsInt()
+  points: number;
 
   @Column()
-  completed: {
-    recipient?: boolean;
-    volunteer?: boolean;
-  };
+  status: Status = Status.CREATED;
+
+  @Column()
+  statusHistory: IStatusHistory[] = [
+    { date: new Date(), status: Status.CREATED, completed: false, volunteer: null },
+  ];
+
+  @Column()
+  completed = false;
+
+  @Column()
+  confirmation: ITaskConfirmation = { recipient: null, volunteer: null };
 }

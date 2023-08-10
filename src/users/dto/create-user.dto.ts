@@ -1,11 +1,4 @@
-import {
-  IsNotEmpty,
-  IsUrl,
-  Length,
-  IsString,
-  MinLength,
-  IsPhoneNumber,
-} from 'class-validator';
+import { IsNotEmpty, IsUrl, Length, IsString, MinLength, IsPhoneNumber } from 'class-validator';
 
 enum UserRole {
   ADMIN = 'администратор',
@@ -19,13 +12,11 @@ export class CreateUserDto {
   @Length(2, 30, { message: 'должен быть не меньше 2 и не больше 30' })
   fullname: string;
 
-  @IsUrl({ require_protocol: true }, { message: 'Не корректный URL' })
   @IsNotEmpty({ message: 'Адрес не должен быть пустым' })
   vk: string;
 
   role: UserRole;
 
-  @IsUrl({ require_protocol: true }, { message: 'Не корректный URL' })
   @IsNotEmpty({ message: 'Адрес не должен быть пустым' })
   photo: string;
 

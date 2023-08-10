@@ -6,7 +6,9 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ObjectId,
-} from 'typeorm';
+  OneToMany, JoinColumn, JoinTable
+} from "typeorm";
+import { Task } from "../../tasks/entities/task.entity";
 
 export enum UserRole {
   CHIEF = 'Главный администратор',
@@ -75,12 +77,12 @@ export class User {
   @IsDate()
   updatedAt: Date;
 
-  //Примерная логика связи сообщений
+  // Примерная логика связи сообщений
 
   // @OneToMany(() => Message, (message) => task.owner)
   // messages: message[];
 
-  //У тасок один волонтер(пока, м.б. нужна будет возможность нескольких назначать)
+  // У тасок один волонтер(пока, м.б. нужна будет возможность нескольких назначать)
 
   // @OneToMany(() => Tasks, (task) => task.owner)
   // tasks: task[];

@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, ObjectIdColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ObjectIdColumn, UpdateDateColumn } from "typeorm";
 import { ObjectId } from 'mongodb';
 import { IsInt, IsPositive, IsString, Length } from "class-validator";
 import validationOptions from '../../common/constants/validation-options';
@@ -11,7 +11,7 @@ export class Category {
   @CreateDateColumn()
   createdAt: Date;
 
-  @CreateDateColumn()
+  @UpdateDateColumn()
   updatedAt: Date;
 
   @Column()

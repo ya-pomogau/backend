@@ -25,7 +25,7 @@ export class CategoriesController {
   }
 
   @Get()
-  findAll() {
+  async findAll() {
     return this.categoriesService.findAll();
   }
 
