@@ -17,29 +17,13 @@ services:
 
   mongodb:
     container_name: mongo
-    image: mongo:6-jammy
-    env_file: .env
+    image: mongo:latest
     restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
     volumes:
       - mongodb_data:/data/db
-    networks:
-      - backendSwitch
-
-  mongo-express:
-    image: mongo-express
-    container_name: mongo-express
-    restart: always
-    ports:
-      - "28081:8081"
-    environment:
-      ME_CONFIG_MONGODB_SERVER: mongo
-      ME_CONFIG_BASICAUTH_USERNAME: 
-      ME_CONFIG_BASICAUTH_PASSWORD: 
-      #ME_CONFIG_MONGODB_AUTH_DATABASE: admin
-      ME_CONFIG_MONGODB_ADMINUSERNAME: 
-      ME_CONFIG_MONGODB_ADMINPASSWORD: 
-    depends_on:
-      - mongodb
     networks:
       - backendSwitch
 
