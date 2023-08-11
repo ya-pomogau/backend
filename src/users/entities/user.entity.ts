@@ -1,21 +1,7 @@
 import { Length, IsString, IsUrl, IsDate } from 'class-validator';
-import {
-  Entity,
-  ObjectIdColumn,
-  Column,
-  CreateDateColumn,
-  UpdateDateColumn,
-  ObjectId,
-  OneToMany, JoinColumn, JoinTable
-} from "typeorm";
-import { Task } from "../../tasks/entities/task.entity";
-
-export enum UserRole {
-  CHIEF = 'Главный администратор',
-  ADMIN = 'Администратор',
-  RECIPIENT = 'Реципиент',
-  VOLUNTEER = 'Волонтер',
-}
+import { Entity, ObjectIdColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { ObjectId } from 'mongodb';
+import { UserRole, StatusType, PermissionType } from '../../common/types/user-types';
 
 @Entity()
 export class User {
@@ -27,9 +13,12 @@ export class User {
   @Length(2, 20)
   fullname: string;
 
-  @Column()
+  @Column({ nullable: true })
   @IsString()
-  role: UserRole;
+  role: UserRole | null;
+
+  @Column({ nullable: true })
+  status: StatusType = 'uncomfirmed';
 
   @Column()
   @IsUrl()
@@ -37,7 +26,7 @@ export class User {
 
   @Column()
   @IsUrl()
-  photo: string;
+  avatar: string;
 
   @Column()
   @IsString()
@@ -51,24 +40,6 @@ export class User {
   @IsString()
   coordinates: number[];
 
-  @Column()
-  approved: boolean;
-
-  @Column()
-  checked: boolean;
-
-  @Column()
-  keys: boolean;
-
-  @Column()
-  adminStatus: number;
-
-  @Column()
-  scores: number;
-
-  @Column()
-  completed: number;
-
   @CreateDateColumn()
   @IsDate()
   createdAt: Date;
@@ -76,6 +47,15 @@ export class User {
   @UpdateDateColumn()
   @IsDate()
   updatedAt: Date;
+
+  @Column({ nullable: true })
+  keys?: number | null;
+
+  @Column()
+  scores = 0;
+
+  @Column()
+  permissions?: Array<PermissionType> | null;
 
   // Примерная логика связи сообщений
 

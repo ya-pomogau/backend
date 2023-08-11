@@ -29,5 +29,8 @@ module.exports = {
         ts: 'never',
       },
     ],
+    'import/prefer-default-export': 'off', // Отключаем правило
+    'no-useless-constructor': 'off',
+    'no-underscore-dangle': 'off',
   },
 };

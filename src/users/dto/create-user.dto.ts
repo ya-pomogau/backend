@@ -1,10 +1,13 @@
-import { IsNotEmpty, IsUrl, Length, IsString, MinLength, IsPhoneNumber } from 'class-validator';
-
-enum UserRole {
-  ADMIN = 'администратор',
-  VOLUNTEER = 'Реципиент',
-  RECIPIENT = 'Волонтер',
-}
+import {
+  IsNotEmpty,
+  IsUrl,
+  Length,
+  IsString,
+  MinLength,
+  IsPhoneNumber,
+  IsOptional,
+} from 'class-validator';
+import { UserRole, StatusType, PermissionType } from '../../common/types/user-types';
 
 export class CreateUserDto {
   @IsString({ message: 'Должно быть строкой' })
@@ -12,21 +15,35 @@ export class CreateUserDto {
   @Length(2, 30, { message: 'должен быть не меньше 2 и не больше 30' })
   fullname: string;
 
+  role: UserRole | null;
+
+  status: StatusType | null;
+
+  @IsUrl({ require_protocol: true }, { message: 'Не корректный URL' })
   @IsNotEmpty({ message: 'Адрес не должен быть пустым' })
   vk: string;
 
-  role: UserRole;
-
+  @IsUrl({ require_protocol: true }, { message: 'Не корректный URL' })
   @IsNotEmpty({ message: 'Адрес не должен быть пустым' })
-  photo: string;
+  avatar: string;
+
+  @IsPhoneNumber('RU', { message: 'Некорректный номер телефона' })
+  phone: string;
 
   @IsString({ message: 'Должно быть строкой' })
   @IsNotEmpty({ message: 'Адрес не должен быть пустым' })
   @MinLength(6, { message: 'должен быть больше 6' })
   address: string;
 
-  @IsPhoneNumber('RU', { message: 'Некорректный номер телефона' })
-  phone: string;
-
+  @IsNotEmpty({ message: 'Заполните поле для координат' })
   coordinates: number[];
+
+  @IsOptional()
+  keys?: number | null;
+
+  @IsOptional()
+  scores?: number;
+
+  @IsOptional()
+  permissions?: Array<PermissionType> | null;
 }

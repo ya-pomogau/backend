@@ -19,6 +19,9 @@ export class CreateTaskDto {
   address: string;
 
   @IsString()
-  @IsOptional()
   recipientId: string;
+
+  @IsString()
+  @IsOptional()
+  volunteerId: string;
 }

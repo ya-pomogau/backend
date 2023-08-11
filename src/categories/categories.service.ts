@@ -1,13 +1,13 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { DataSource, Not, Repository } from "typeorm";
-import { ObjectId } from "mongodb";
-import { CreateCategoryDto } from "./dto/create-category.dto";
-import { UpdateCategoryDto } from "./dto/update-category.dto";
-import { Category } from "./entities/category.entity";
-import exeptions from "../common/constants/exeptions";
-import queryRunner from "../common/helpers/queryRunner";
-import { Status, Task } from "../tasks/entities/task.entity";
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Not, Repository } from 'typeorm';
+import { ObjectId } from 'mongodb';
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
+import { Category } from './entities/category.entity';
+import exeptions from '../common/constants/exceptions';
+import queryRunner from '../common/helpers/queryRunner';
+import { Status, Task } from '../tasks/entities/task.entity';
 
 @Injectable()
 export class CategoriesService {

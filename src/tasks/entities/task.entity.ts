@@ -72,7 +72,7 @@ export class Task {
   status: Status = Status.CREATED;
 
   @Column()
-  statusHistory: IStatusHistory[] = [
+  taskHistory: IStatusHistory[] = [
     { date: new Date(), status: Status.CREATED, completed: false, volunteer: null },
   ];
 
