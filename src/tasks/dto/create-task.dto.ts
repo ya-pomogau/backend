@@ -1,4 +1,5 @@
-import { Length, IsInt, IsDate } from 'class-validator';
+import { Length, IsDate, IsString, IsOptional } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreateTaskDto {
   @Length(3, 30)
@@ -7,12 +8,20 @@ export class CreateTaskDto {
   @Length(20, 200)
   description: string;
 
-  @IsInt()
-  categoryId: number;
+  @IsString()
+  categoryId: string;
 
   @IsDate()
-  date: Date;
+  @Type(() => Date)
+  completionDate: Date;
 
   @Length(1, 50)
   address: string;
+
+  @IsString()
+  recipientId: string;
+
+  @IsString()
+  @IsOptional()
+  volunteerId: string;
 }

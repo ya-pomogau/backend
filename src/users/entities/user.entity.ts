@@ -18,7 +18,7 @@ export class User {
   role: UserRole | null;
 
   @Column({ nullable: true })
-  status: StatusType | null;
+  status: StatusType = 'uncomfirmed';
 
   @Column()
   @IsUrl()
@@ -52,7 +52,7 @@ export class User {
   keys?: number | null;
 
   @Column()
-  scores?: number;
+  scores = 0;
 
   @Column()
   permissions?: Array<PermissionType> | null;
