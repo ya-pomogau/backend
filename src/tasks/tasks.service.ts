@@ -13,12 +13,6 @@ import { dayInMs } from '../common/constants';
 import queryRunner from '../common/helpers/queryRunner';
 import { UpdateTaskDto } from './dto/update-task.dto';
 
-interface ITaskQuery {
-  status: { $in: Status[] };
-  'recipient._id'?: ObjectId;
-  'volunteer._id'?: ObjectId;
-}
-
 @Injectable()
 export class TasksService {
   constructor(
@@ -82,19 +76,17 @@ export class TasksService {
     return task;
   }
 
-  async findByStatus(
-    statuses: string,
+  // выделить логику поиска собственных заявок после добавления авторизации
+  async findBy(
+    query: object,
     recipientId: string | null = null,
     volunteerId: string | null = null
   ) {
-    let statusArray: Status[];
-    if (!statuses) {
-      statusArray = [Status.CREATED, Status.ACCEPTED, Status.CLOSED];
-    } else {
-      statusArray = statuses.split(',') as Status[];
-    }
+    const taskQuery: object = {};
 
-    const taskQuery: ITaskQuery = { status: { $in: statusArray } };
+    for (const property in query) {
+      taskQuery[property] = { $in: query[property].split(',') };
+    }
 
     if (recipientId) {
       taskQuery['recipient._id'] = new ObjectId(recipientId);

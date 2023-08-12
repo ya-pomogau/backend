@@ -26,25 +26,26 @@ export class TasksController {
   }
 
   @Get('find')
-  async findAllByStatus(@Query('status') statusList: string) {
-    return this.tasksService.findByStatus(statusList);
+  async findBy(@Query() query: object) {
+    return this.tasksService.findBy(query);
   }
 
-  @Get(':recipientId/find')
-  async findRecipientTasksByStatus(
-    @Query('status') statusList: string,
-    @Param('recipientId') recipientId: string
-  ) {
-    return this.tasksService.findByStatus(statusList, recipientId);
-  }
-
-  @Get(':volunteer/find')
-  async findVolunteerTasksByStatus(
-    @Query('status') statusList: string,
-    @Param('volunteerId') volunteerId: string
-  ) {
-    return this.tasksService.findByStatus(statusList, volunteerId);
-  }
+  // нужна авторизация для execution context
+  // @Get(':recipientId/find')
+  // async findRecipientTasksByStatus(
+  //   @Query('status') statusList: string,
+  //   @Param('recipientId') recipientId: string
+  // ) {
+  //   return this.tasksService.findBy(statusList, recipientId);
+  // }
+  //
+  // @Get(':volunteer/find')
+  // async findVolunteerTasksByStatus(
+  //   @Query('status') statusList: string,
+  //   @Param('volunteerId') volunteerId: string
+  // ) {
+  //   return this.tasksService.findBy(statusList, volunteerId);
+  // }
 
   @Get()
   async findAll() {
