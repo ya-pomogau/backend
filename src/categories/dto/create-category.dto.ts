@@ -1,4 +1,12 @@
-import { IsInt, IsNotEmpty, IsPositive, IsString, Length, MaxLength, MinLength } from "class-validator";
+import {
+  IsInt,
+  IsNotEmpty,
+  IsPositive,
+  IsString,
+  Length,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 import validationOptions from '../../common/constants/validation-options';
 
 export class CreateCategoryDto {

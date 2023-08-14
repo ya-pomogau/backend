@@ -1,7 +1,24 @@
-import { Length, IsString, IsUrl, IsDate } from 'class-validator';
+/* eslint-disable no-shadow */
+import { Length, IsString, IsUrl, IsDate, ValidateNested } from 'class-validator';
 import { Entity, ObjectIdColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { ObjectId } from 'mongodb';
-import { UserRole, StatusType, PermissionType } from '../../common/types/user-types';
+import { Type } from 'class-transformer';
+import { PermissionTypeDto } from '../dto/permisionType.dto';
+import { PermissionTypeValidator } from '../dto/PermissionTypeValidator.dto';
+
+export enum StatusType {
+  Unconfirmed = 'unconfirmed',
+  Confirmed = 'confirmed',
+  Activated = 'activated',
+  Verified = 'verified',
+}
+
+export enum UserRole {
+  Master = 'master',
+  Admin = 'admin',
+  Recipient = 'recipient',
+  Volunteer = 'volunteer',
+}
 
 @Entity()
 export class User {
@@ -18,7 +35,7 @@ export class User {
   role: UserRole | null;
 
   @Column({ nullable: true })
-  status: StatusType = 'uncomfirmed';
+  status: StatusType = StatusType.Unconfirmed;
 
   @Column()
   @IsUrl()
@@ -55,15 +72,7 @@ export class User {
   scores = 0;
 
   @Column()
-  permissions?: Array<PermissionType> | null;
-
-  // Примерная логика связи сообщений
-
-  // @OneToMany(() => Message, (message) => task.owner)
-  // messages: message[];
-
-  // У тасок один волонтер(пока, м.б. нужна будет возможность нескольких назначать)
-
-  // @OneToMany(() => Tasks, (task) => task.owner)
-  // tasks: task[];
+  @ValidateNested({ each: true })
+  @Type(() => PermissionTypeValidator)
+  permissions?: PermissionTypeDto[] | null;
 }

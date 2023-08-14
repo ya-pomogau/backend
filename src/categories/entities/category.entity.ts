@@ -1,6 +1,6 @@
-import { Column, CreateDateColumn, Entity, ObjectIdColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ObjectIdColumn, UpdateDateColumn } from 'typeorm';
 import { ObjectId } from 'mongodb';
-import { IsInt, IsPositive, IsString, Length } from "class-validator";
+import { IsInt, IsPositive, IsString, Length } from 'class-validator';
 import validationOptions from '../../common/constants/validation-options';
 
 @Entity()
