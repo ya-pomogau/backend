@@ -8,21 +8,35 @@ import {
   Delete,
   ValidationPipe,
   Query,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { ObjectId } from 'mongodb';
+import { Repository } from 'typeorm';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { User } from '../users/entities/user.entity';
 import { ConfirmTaskDto } from './dto/confirm-task.dto';
+import { TasksWsGateway } from '../tasks-ws/tasks-ws.gateway';
+import { Task } from './entities/task.entity';
+import { WsTasksEvents } from '../common/types/wsTasksEvents';
 
 @Controller('tasks')
 export class TasksController {
-  constructor(private readonly tasksService: TasksService) {}
+  constructor(
+    private readonly tasksService: TasksService,
+    private readonly tasksGateway: TasksWsGateway
+  ) {}
 
   @Post()
-  create(@Body(new ValidationPipe()) createTaskDto: CreateTaskDto) {
-    return this.tasksService.create(createTaskDto, 1);
+  async create(@Body(new ValidationPipe()) createTaskDto: CreateTaskDto) {
+    const newTask = await this.tasksService.create(createTaskDto, 1);
+    this.tasksGateway.server.emit('onMessage', {
+      event: WsTasksEvents.CREATED,
+      body: newTask,
+    });
+    return newTask;
   }
 
   @Get('find')
@@ -63,13 +77,27 @@ export class TasksController {
     @Body(new ValidationPipe()) updateTaskDto: UpdateTaskDto
   ) {
     const { volunteerId } = updateTaskDto;
-    return this.tasksService.acceptTask(taskId, volunteerId);
+    const acceptedTask = await this.tasksService.acceptTask(taskId, volunteerId);
+
+    this.tasksGateway.server.emit('onMessage', {
+      event: WsTasksEvents.ACCEPTED,
+      body: acceptedTask,
+    });
+
+    return acceptedTask;
   }
 
   @Patch('refuse/:id')
   async refuseTask(@Param('id') id: string) {
     const isAdmin = true; // заменить на данные авторизованного пользователя
-    return this.tasksService.refuseTask(id, isAdmin);
+    const refusedTask = await this.tasksService.refuseTask(id, isAdmin);
+
+    this.tasksGateway.server.emit('onMessage', {
+      event: WsTasksEvents.ACCEPTED,
+      body: refusedTask,
+    });
+
+    return refusedTask;
   }
 
   @Delete(':id')
