@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax */
 import {
   IsNotEmpty,
   IsUrl,
@@ -6,8 +7,15 @@ import {
   MinLength,
   IsPhoneNumber,
   IsOptional,
+  IsEnum,
+  ValidateNested,
+  IsInt,
+  Min,
 } from 'class-validator';
-import { UserRole, StatusType, PermissionType } from '../../common/types/user-types';
+import { Type } from 'class-transformer';
+import { UserRole, StatusType } from '../entities/user.entity';
+import { PermissionTypeValidator } from './PermissionTypeValidator.dto';
+import { PermissionTypeDto } from './permisionType.dto';
 
 export class UpdateUserDto {
   @IsOptional()
@@ -16,24 +24,25 @@ export class UpdateUserDto {
   @Length(2, 30, { message: 'должен быть не меньше 2 и не больше 30' })
   fullname: string;
 
-  @IsOptional()
+  @IsEnum(UserRole, { message: 'Некорректное значение статуса' })
   role: UserRole | null;
 
-  @IsOptional()
-  status: StatusType | null;
+  @IsEnum(StatusType, { message: 'Некорректное значение статуса' })
+  status: StatusType = StatusType.Unconfirmed;
 
   @IsOptional()
   @IsUrl({ require_protocol: true }, { message: 'Не корректный URL' })
-  @IsNotEmpty({ message: 'Адрес не должен быть пустым' })
+  @IsNotEmpty({ message: 'Поле vk не должно быть пустым' })
   vk: string;
 
   @IsOptional()
   @IsUrl({ require_protocol: true }, { message: 'Не корректный URL' })
-  @IsNotEmpty({ message: 'Адрес не должен быть пустым' })
+  @IsNotEmpty({ message: 'Поле avatar не должно быть пустым' })
   avatar: string;
 
   @IsOptional()
   @IsPhoneNumber('RU', { message: 'Некорректный номер телефона' })
+  @IsNotEmpty({ message: 'Поле phone не должно быть пустым' })
   phone: string;
 
   @IsOptional()
@@ -42,15 +51,21 @@ export class UpdateUserDto {
   @MinLength(6, { message: 'должен быть больше 6' })
   address: string;
 
-  @IsOptional()
+  @IsNotEmpty({ message: 'Заполните поле для координат' })
   coordinates: number[];
 
   @IsOptional()
+  @IsInt({ message: 'Поле scores должно быть целым числом' })
+  @Min(0, { message: 'Поле scores не должно быть меньше 0' })
   keys?: number | null;
 
   @IsOptional()
-  scores?: number;
+  @IsInt({ message: 'Поле scores должно быть целым числом' })
+  @Min(0, { message: 'Поле scores не должно быть меньше 0' })
+  scores?: number = 0;
 
   @IsOptional()
-  permissions?: Array<PermissionType> | null;
+  @ValidateNested({ each: true })
+  @Type(() => PermissionTypeValidator)
+  permissions?: PermissionTypeDto[] | null;
 }
