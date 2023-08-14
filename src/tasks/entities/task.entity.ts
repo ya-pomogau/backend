@@ -1,10 +1,12 @@
+/* eslint-disable import/no-cycle */
 import { Column, CreateDateColumn, Entity, ObjectIdColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { IsDate, IsString, Length } from 'class-validator';
+import { User } from '../../users/entities/user.entity';
 
 @Entity()
 export class Task {
   @ObjectIdColumn()
-  id: number;
+  _id: number;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -39,12 +41,14 @@ export class Task {
   @IsString()
   recipient: string; // заменить на OneToMane
 
-  @Column()
-  userId: number;
+  @ManyToOne(() => User, (user) => user.tasks) // eager: true позволяет загрузить пользователя автоматически
+  owner: User; // Свойство для хранения связанного пользователя
 
   @Column()
   completed: {
     recipient?: boolean;
     volunteer?: boolean;
   };
+
+  id: string;
 }

@@ -15,4 +15,6 @@ export class CreateTaskDto {
 
   @Length(1, 50)
   address: string;
+
+  id: string;
 }

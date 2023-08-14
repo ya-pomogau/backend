@@ -10,6 +10,9 @@ import { UserModule } from './users/user.module';
 import { ChatsService } from './chats/chats.service';
 import { ChatsController } from './chats/chats.controller';
 import { ChatsModule } from './chats/chats.module';
+import { MessagesService } from './messages/messages.service';
+import { MessagesController } from './messages/messages.controller';
+import { MessagesModule } from './messages/messages.module';
 
 @Module({
   imports: [
@@ -21,8 +24,9 @@ import { ChatsModule } from './chats/chats.module';
     TasksModule,
     UserModule,
     ChatsModule,
+    MessagesModule,
   ],
-  controllers: [AppController, ChatsController],
-  providers: [AppService, ChatsService],
+  controllers: [AppController, ChatsController, MessagesController],
+  providers: [AppService, ChatsService, MessagesService],
 })
 export class AppModule {}

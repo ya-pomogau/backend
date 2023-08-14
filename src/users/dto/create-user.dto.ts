@@ -6,6 +6,8 @@ import {
   MinLength,
   IsPhoneNumber,
   IsOptional,
+  IsEnum,
+  IsNumber,
 } from 'class-validator';
 import { UserRole, StatusType, PermissionType } from '../../common/types/user-types';
 
@@ -15,9 +17,11 @@ export class CreateUserDto {
   @Length(2, 30, { message: 'должен быть не меньше 2 и не больше 30' })
   fullname: string;
 
+  @IsEnum(UserRole, { message: 'Некорректное значение статуса' })
   role: UserRole | null;
 
-  status: StatusType | null;
+  @IsEnum(StatusType, { message: 'Некорректное значение статуса' })
+  status: StatusType = StatusType.Unconfirmed;
 
   @IsUrl({ require_protocol: true }, { message: 'Не корректный URL' })
   @IsNotEmpty({ message: 'Адрес не должен быть пустым' })
@@ -39,10 +43,12 @@ export class CreateUserDto {
   coordinates: number[];
 
   @IsOptional()
+  @IsNumber()
   keys?: number | null;
 
   @IsOptional()
-  scores?: number;
+  @IsNumber()
+  scores?: number = 0;
 
   @IsOptional()
   permissions?: Array<PermissionType> | null;

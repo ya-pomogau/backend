@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 import { Length, IsString, IsUrl, IsDate } from 'class-validator';
 import {
   Entity,
@@ -6,10 +7,13 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  ManyToMany,
 } from 'typeorm';
 import { ObjectId } from 'mongodb';
 import { Task } from '../../tasks/entities/task.entity';
 import { UserRole, StatusType, PermissionType } from '../../common/types/user-types';
+import { Message } from '../../messages/entities/message.entity';
+import { Chat } from '../../chats/entities/chat.entity';
 
 @Entity()
 export class User {
@@ -65,6 +69,12 @@ export class User {
   @Column({ nullable: true })
   permissions?: Array<PermissionType> | null;
 
-  @OneToMany(() => Task, (task) => task.userId) // Указываем обратное поле в Task сущности
+  @OneToMany(() => Task, (task) => task.owner) // Указываем обратное поле в Task сущности
   tasks: Task[];
+
+  @OneToMany(() => Message, (message) => message.sender)
+  messages: Message[];
+
+  @ManyToMany(() => Chat, (chat) => chat.participants) // Многие ко многим с чатами
+  chats: Chat[];
 }

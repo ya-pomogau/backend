@@ -1,5 +1,3 @@
-export type UserRole = 'master' | 'admin' | 'recipient' | 'volunteer';
-export type StatusType = 'uncomfirmed' | 'confirmed' | 'activated' | 'verified';
 export type PermissionType = {
   id: number;
   name:
@@ -11,3 +9,19 @@ export type PermissionType = {
     | 'blog'
     | 'increase score';
 };
+
+// eslint-disable-next-line no-shadow
+export enum StatusType {
+  Unconfirmed = 'unconfirmed',
+  Confirmed = 'confirmed',
+  Activated = 'activated',
+  Verified = 'verified',
+}
+
+// eslint-disable-next-line no-shadow
+export enum UserRole {
+  Master = 'master',
+  Admin = 'admin',
+  Recipient = 'recipient',
+  Volunteer = 'volunteer',
+}
