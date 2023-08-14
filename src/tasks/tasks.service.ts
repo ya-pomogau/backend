@@ -3,6 +3,7 @@ import { DataSource, MongoRepository, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ObjectId } from 'mongodb';
 import { NotFoundException } from '@nestjs/common/exceptions';
+import { filter } from 'rxjs';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { Status, Task } from './entities/task.entity';
 import { User } from '../users/entities/user.entity';
@@ -19,7 +20,7 @@ export class TasksService {
     @InjectRepository(Task)
     private readonly taskRepository: MongoRepository<Task>,
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    private readonly userRepository: MongoRepository<User>,
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>,
     private readonly dataSource: DataSource
@@ -127,13 +128,15 @@ export class TasksService {
       throw new ForbiddenException(exceptions.users.onlyForVolunteers);
     }
 
-    return this.taskRepository.update(
+    await this.taskRepository.update(
       { _id: objectTaskId },
       {
         volunteer,
         status: Status.ACCEPTED,
       }
     );
+
+    return this.taskRepository.findOneBy({ _id: objectTaskId });
   }
 
   // добавить проверку на пользователя, когда будет аутентификация
@@ -149,10 +152,12 @@ export class TasksService {
       throw new ForbiddenException(exceptions.tasks.noTimeForRefusal);
     }
 
-    return this.taskRepository.update(
+    await this.taskRepository.update(
       { _id: objectTaskId },
       { volunteer: null, status: Status.CREATED }
     );
+
+    return this.taskRepository.findOneBy({ _id: objectTaskId });
   }
 
   async removeTask(taskId: string, isAdmin: boolean) {
