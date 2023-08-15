@@ -41,9 +41,6 @@ export class Task {
   @IsString()
   recipient: string; // заменить на OneToMane
 
-  @ManyToOne(() => User, (user) => user.tasks) // eager: true позволяет загрузить пользователя автоматически
-  owner: User; // Свойство для хранения связанного пользователя
-
   @Column()
   completed: {
     recipient?: boolean;

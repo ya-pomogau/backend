@@ -23,7 +23,7 @@ export class TasksService {
     newTask.description = createTaskDto.description;
     newTask.date = createTaskDto.date;
     newTask.address = createTaskDto.address;
-    newTask.owner = user; // Устанавливаем связь с пользователем
+    // newTask.owner = user; // Устанавливаем связь с пользователем
     const savedTask = await this.taskRepository.save(newTask);
     return savedTask;
   }

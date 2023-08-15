@@ -1,8 +1,6 @@
 /* eslint-disable import/no-cycle */
-import { Entity, ObjectIdColumn, OneToMany, Column, CreateDateColumn, ManyToMany } from 'typeorm';
+import { Entity, ObjectIdColumn, Column, CreateDateColumn } from 'typeorm';
 import { ObjectId } from 'mongodb';
-import { User } from '../../users/entities/user.entity';
-import { Message } from '../../messages/entities/message.entity';
 
 @Entity()
 export class Chat {
@@ -12,11 +10,11 @@ export class Chat {
   @CreateDateColumn()
   createdAt: Date;
 
-  @ManyToMany(() => User, (user) => user.chats) // Указываем также, как в User сущности
-  participants: User[];
+  @Column()
+  user: string;
 
-  @OneToMany(() => Message, (message) => message.chat) // Один ко многим с сообщениями
-  messages: Message[];
+  @Column()
+  text: string;
 
   @Column()
   status: string; // Например, "active", "closed", "archived" и т.д.

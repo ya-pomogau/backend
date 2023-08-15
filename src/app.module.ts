@@ -8,11 +8,10 @@ import { TypeOrmConfigService } from './config/database-config.factory';
 import { TasksModule } from './tasks/tasks.module';
 import { UserModule } from './users/user.module';
 import { ChatsService } from './chats/chats.service';
-import { ChatsController } from './chats/chats.controller';
+// import { ChatsController } from './chats/chats.controller';
 import { ChatsModule } from './chats/chats.module';
-import { MessagesService } from './messages/messages.service';
-import { MessagesController } from './messages/messages.controller';
-import { MessagesModule } from './messages/messages.module';
+// import { AppGateway } from './gateway/gateway';
+// import { GatewayModule } from './gateway/gateway.module';
 
 @Module({
   imports: [
@@ -24,9 +23,9 @@ import { MessagesModule } from './messages/messages.module';
     TasksModule,
     UserModule,
     ChatsModule,
-    MessagesModule,
+    // GatewayModule,
   ],
-  controllers: [AppController, ChatsController, MessagesController],
-  providers: [AppService, ChatsService, MessagesService],
+  controllers: [AppController],
+  providers: [AppService, ChatsService],
 })
 export class AppModule {}
