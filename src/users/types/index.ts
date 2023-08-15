@@ -3,7 +3,6 @@ export enum UserStatus {
   CONFIRMED = 'confirmed',
   VERIFIED = 'verified',
   ACTIVATED = 'activated',
-  BLOCKED = 'blocked',
 }
 
 export enum UserRole {

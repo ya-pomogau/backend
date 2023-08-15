@@ -15,6 +15,8 @@ import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ChangeStatusDto } from './dto/changeStatus.dto';
+import { ChangeAdminPermissionsDto } from './dto/changeAdminPermissions.dto';
 
 @Controller('users')
 export class UserController {
@@ -48,12 +50,29 @@ export class UserController {
   @Patch(':id')
   async updateUser(
     @Param('id') id: string,
-    @Body(new ValidationPipe()) updateUserDto: UpdateUserDto
+    @Body(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
+    updateUserDto: UpdateUserDto
   ): Promise<User> {
     try {
       return this.userService.updateOne(id, updateUserDto);
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
+  }
+
+  @Patch(':id/status')
+  async changeStatus(
+    @Param('id') id: string,
+    @Body(new ValidationPipe()) changeStatusDto: ChangeStatusDto
+  ) {
+    return this.userService.changeStatus(id, changeStatusDto.status);
+  }
+
+  @Patch(':id/admin-permissions')
+  async changeAdminPermissions(
+    @Param('id') id: string,
+    @Body(new ValidationPipe()) changeAdminPermissionsDto: ChangeAdminPermissionsDto
+  ) {
+    return this.userService.changeAdminPermissions(id, changeAdminPermissionsDto.permissions);
   }
 }

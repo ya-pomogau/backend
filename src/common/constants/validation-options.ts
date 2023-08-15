@@ -11,6 +11,8 @@ export default {
     incorrectUrl: 'В поле $property введен некорректный формат url-адреса',
     incorrectPhoneNumber: 'В поле $property введен некорректный формат телефонного номера',
     incorrectCoordinates: 'В поле $property введен некорректный формат географических координат',
+    incorrectAdminPermissions:
+      'Права доступа администратора должны быть в формате массива от 1 до 6 элементов',
   },
   limits: {
     categoryTitle: {
@@ -24,6 +26,10 @@ export default {
     address: {
       min: 7,
       max: 70,
+    },
+    adminPermissions: {
+      min: 1,
+      max: 6,
     },
   },
 };

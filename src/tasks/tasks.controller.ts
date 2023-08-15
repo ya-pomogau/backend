@@ -30,7 +30,7 @@ export class TasksController {
   ) {}
 
   @Post()
-  async create(@Body(new ValidationPipe()) createTaskDto: CreateTaskDto) {
+  async create(@Body(new ValidationPipe({ whitelist: true })) createTaskDto: CreateTaskDto) {
     const newTask = await this.tasksService.create(createTaskDto, 1);
     this.tasksGateway.server.emit('onMessage', {
       event: WsTasksEvents.CREATED,
@@ -116,7 +116,7 @@ export class TasksController {
   @Patch('confirm/:taskId')
   async confirmTask(
     @Param('taskId') taskId: string,
-    @Body(new ValidationPipe()) confirmTaskDto: ConfirmTaskDto
+    @Body(new ValidationPipe({ whitelist: true })) confirmTaskDto: ConfirmTaskDto
   ) {
     return this.tasksService.confirmTask(
       taskId,
@@ -126,7 +126,10 @@ export class TasksController {
   }
 
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto) {
+  async update(
+    @Param('id') id: string,
+    @Body(new ValidationPipe({ whitelist: true })) updateTaskDto: UpdateTaskDto
+  ) {
     return this.tasksService.update(id, updateTaskDto);
   }
 }

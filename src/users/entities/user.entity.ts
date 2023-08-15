@@ -1,7 +1,7 @@
-import { IsArray, IsDate, IsString, IsUrl, Length } from 'class-validator';
-import { Column, CreateDateColumn, Entity, ObjectIdColumn, UpdateDateColumn } from 'typeorm';
-import { ObjectId } from 'mongodb';
-import { AdminPermission, UserRole, UserStatus } from '../types';
+import {IsArray, IsDate, IsString, IsUrl, Length} from 'class-validator';
+import {Column, CreateDateColumn, Entity, ObjectIdColumn, UpdateDateColumn} from 'typeorm';
+import {ObjectId} from 'mongodb';
+import {AdminPermission, UserRole, UserStatus} from '../types';
 
 @Entity()
 export class User {
@@ -15,10 +15,14 @@ export class User {
 
   @Column()
   @IsString()
-  role: UserRole | null;
+  role: UserRole;
 
   @Column()
+  @IsString()
   status: UserStatus = UserStatus.UNCONFIRMED;
+
+  @Column()
+  isBlocked = false;
 
   @Column()
   @IsUrl()

@@ -1,4 +1,11 @@
-import {Column, CreateDateColumn, Entity, JoinColumn, ObjectIdColumn, UpdateDateColumn} from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ObjectIdColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { IsDate, IsInt, IsString, Length } from 'class-validator';
 import { ObjectId } from 'mongodb';
 import { User } from '../../users/entities/user.entity';

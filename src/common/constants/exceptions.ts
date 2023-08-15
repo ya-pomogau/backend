@@ -6,6 +6,7 @@ export default {
     notFound: 'Пользователь не найден',
     onlyForVolunteers: 'Действие разрешено только для волонтеров',
     onlyForRecipients: 'Действие разрешено только для реципиентов',
+    onlyForAdmins: 'Действие разрешено только для администраторов',
   },
   tasks: {
     notFound: 'Заявка не найдена',

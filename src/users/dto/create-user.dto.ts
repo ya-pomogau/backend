@@ -7,6 +7,10 @@ import {
   IsOptional,
   IsEnum,
   MaxLength,
+  IsArray,
+  ArrayMinSize,
+  ArrayMaxSize,
+  IsNumber,
 } from 'class-validator';
 import { AdminPermission, UserRole } from '../types';
 import validationOptions from '../../common/constants/validation-options';
@@ -45,13 +49,24 @@ export class CreateUserDto {
   @MaxLength(validationOptions.limits.address.max, { message: validationOptions.messages.tooLong })
   address: string;
 
-  @IsNotEmpty({ message: validationOptions.messages.incorrectCoordinates })
+  @IsArray({ message: validationOptions.messages.incorrectCoordinates })
+  @IsNumber({}, { each: true, message: validationOptions.messages.incorrectCoordinates })
+  @ArrayMinSize(2, { message: validationOptions.messages.incorrectCoordinates })
+  @ArrayMaxSize(2, { message: validationOptions.messages.incorrectCoordinates })
+  @IsNotEmpty({ message: validationOptions.messages.isEmpty })
   coordinates: number[];
 
-  @IsOptional()
+  @IsArray({ message: validationOptions.messages.incorrectAdminPermissions })
   @IsEnum(AdminPermission, {
     each: true,
     message: validationOptions.messages.strictValues + Object.values(AdminPermission).join(', '),
   })
-  permissions?: AdminPermission[];
+  @ArrayMinSize(validationOptions.limits.adminPermissions.min, {
+    message: validationOptions.messages.incorrectAdminPermissions,
+  })
+  @ArrayMaxSize(validationOptions.limits.adminPermissions.min, {
+    message: validationOptions.messages.incorrectAdminPermissions,
+  })
+  @IsOptional()
+  permissions: AdminPermission[];
 }
