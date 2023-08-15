@@ -12,12 +12,12 @@ export class VkontakteStrategy extends PassportStrategy(Strategy, 'vkontakte') {
     });
   }
 
-  async validate(accessToken: string, refreshToken: string, profile: any) {
-    return {
-      vkId: profile.id,
-      accessToken,
-      name: profile.displayName,
-      // добавить сохранение данных в монго
-    };
-  }
+  // async validate(accessToken: string, refreshToken: string, profile: any) {
+  //   return {
+  //     vkId: profile.id,
+  //     accessToken,
+  //     name: profile.displayName,
+  //     // добавить сохранение данных в монго
+  //   };
+  // }
 }
