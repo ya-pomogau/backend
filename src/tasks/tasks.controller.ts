@@ -20,7 +20,7 @@ import { User } from '../users/entities/user.entity';
 import { ConfirmTaskDto } from './dto/confirm-task.dto';
 import { TasksWsGateway } from '../tasks-ws/tasks-ws.gateway';
 import { Task } from './entities/task.entity';
-import { WsTasksEvents } from '../common/types/wsTasksEvents';
+import { WsTasksEvents } from '../tasks-ws/types';
 
 @Controller('tasks')
 export class TasksController {

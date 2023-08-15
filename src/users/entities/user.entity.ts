@@ -1,24 +1,7 @@
-/* eslint-disable no-shadow */
-import { Length, IsString, IsUrl, IsDate, ValidateNested } from 'class-validator';
-import { Entity, ObjectIdColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { IsArray, IsDate, IsString, IsUrl, Length } from 'class-validator';
+import { Column, CreateDateColumn, Entity, ObjectIdColumn, UpdateDateColumn } from 'typeorm';
 import { ObjectId } from 'mongodb';
-import { Type } from 'class-transformer';
-import { PermissionTypeDto } from '../dto/permisionType.dto';
-import { PermissionTypeValidator } from '../dto/PermissionTypeValidator.dto';
-
-export enum StatusType {
-  Unconfirmed = 'unconfirmed',
-  Confirmed = 'confirmed',
-  Activated = 'activated',
-  Verified = 'verified',
-}
-
-export enum UserRole {
-  Master = 'master',
-  Admin = 'admin',
-  Recipient = 'recipient',
-  Volunteer = 'volunteer',
-}
+import { AdminPermission, UserRole, UserStatus } from '../types';
 
 @Entity()
 export class User {
@@ -27,15 +10,15 @@ export class User {
 
   @Column()
   @IsString()
-  @Length(2, 20)
+  @Length(2, 30)
   fullname: string;
 
-  @Column({ nullable: true })
+  @Column()
   @IsString()
   role: UserRole | null;
 
-  @Column({ nullable: true })
-  status: StatusType = StatusType.Unconfirmed;
+  @Column()
+  status: UserStatus = UserStatus.UNCONFIRMED;
 
   @Column()
   @IsUrl()
@@ -65,14 +48,10 @@ export class User {
   @IsDate()
   updatedAt: Date;
 
-  @Column({ nullable: true })
-  keys?: number | null;
-
   @Column()
   scores = 0;
 
   @Column()
-  @ValidateNested({ each: true })
-  @Type(() => PermissionTypeValidator)
-  permissions?: PermissionTypeDto[] | null;
+  @IsArray()
+  permissions?: AdminPermission[];
 }

@@ -1,65 +1,57 @@
 import {
   IsNotEmpty,
   IsUrl,
-  Length,
   IsString,
   MinLength,
   IsPhoneNumber,
   IsOptional,
   IsEnum,
-  IsNumber,
-  ValidateNested,
-  IsInt,
-  Min,
+  MaxLength,
 } from 'class-validator';
-import { Type } from 'class-transformer';
-import { UserRole, StatusType } from '../entities/user.entity';
-import { PermissionTypeDto } from './permisionType.dto';
-import { PermissionTypeValidator } from './PermissionTypeValidator.dto';
+import { AdminPermission, UserRole } from '../types';
+import validationOptions from '../../common/constants/validation-options';
 
 export class CreateUserDto {
-  @IsString({ message: 'Должно быть строкой' })
-  @IsNotEmpty({ message: 'Не должен быть пустым' })
-  @Length(2, 30, { message: 'должен быть не меньше 2 и не больше 30' })
+  @IsString({ message: validationOptions.messages.shouldBeString })
+  @IsNotEmpty({ message: validationOptions.messages.isEmpty })
+  @MinLength(validationOptions.limits.userName.min, {
+    message: validationOptions.messages.tooShort,
+  })
+  @MaxLength(validationOptions.limits.userName.max, {
+    message: validationOptions.messages.tooLong,
+  })
   fullname: string;
 
-  @IsEnum(UserRole, { message: 'Некорректное значение статуса' })
-  role: UserRole | null;
+  @IsEnum(UserRole, {
+    message: validationOptions.messages.strictValues + Object.values(UserRole).join(', '),
+  })
+  role: UserRole;
 
-  @IsEnum(StatusType, { message: 'Некорректное значение статуса' })
-  status: StatusType = StatusType.Unconfirmed;
-
-  @IsUrl({ require_protocol: true }, { message: 'Не корректный URL' })
-  @IsNotEmpty({ message: 'Поле vk не должно быть пустым' })
+  @IsUrl({ require_protocol: true }, { message: validationOptions.messages.incorrectUrl })
+  @IsNotEmpty({ message: validationOptions.messages.isEmpty })
   vk: string;
 
-  @IsUrl({ require_protocol: true }, { message: 'Не корректный URL' })
-  @IsNotEmpty({ message: 'Поле avatar не должно быть пустым' })
+  @IsUrl({ require_protocol: true }, { message: validationOptions.messages.incorrectUrl })
+  @IsNotEmpty({ message: validationOptions.messages.isEmpty })
   avatar: string;
 
-  @IsPhoneNumber('RU', { message: 'Некорректный номер телефона' })
-  @IsNotEmpty({ message: 'Поле phone не должно быть пустым' })
+  @IsPhoneNumber('RU', { message: validationOptions.messages.incorrectPhoneNumber })
+  @IsNotEmpty({ message: validationOptions.messages.isEmpty })
   phone: string;
 
-  @IsString({ message: 'Должно быть строкой' })
-  @IsNotEmpty({ message: 'Адрес не должен быть пустым' })
-  @MinLength(6, { message: 'должен быть больше 6' })
+  @IsString({ message: validationOptions.messages.shouldBeString })
+  @IsNotEmpty({ message: validationOptions.messages.isEmpty })
+  @MinLength(validationOptions.limits.address.min, { message: validationOptions.messages.tooShort })
+  @MaxLength(validationOptions.limits.address.max, { message: validationOptions.messages.tooLong })
   address: string;
 
-  @IsNotEmpty({ message: 'Заполните поле для координат' })
+  @IsNotEmpty({ message: validationOptions.messages.incorrectCoordinates })
   coordinates: number[];
 
   @IsOptional()
-  @IsNumber()
-  keys?: number | null;
-
-  @IsOptional()
-  @IsInt({ message: 'Поле scores должно быть целым числом' })
-  @Min(0, { message: 'Поле scores не должно быть меньше 0' })
-  scores?: number = 0;
-
-  @IsOptional()
-  @ValidateNested({ each: true })
-  @Type(() => PermissionTypeValidator)
-  permissions?: PermissionTypeDto[] | null;
+  @IsEnum(AdminPermission, {
+    each: true,
+    message: validationOptions.messages.strictValues + Object.values(AdminPermission).join(', '),
+  })
+  permissions?: AdminPermission[];
 }
