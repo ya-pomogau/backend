@@ -2,41 +2,32 @@ version: '3'
 
 services:
   backend:
-    container_name: backend
+    container_name: backendIHelp
     build: 
-      context: backend
-      dockerfile: Dockerfile.dev
+      context: ./
+      dockerfile: Dockerfile.pub
     env_file: .env
     ports:
-      - '4000:3001'
+      - git4000:3001
     depends_on:
       - mongodb
     restart: always
     networks:
-      - backend  
+      - backendSwitch  
 
   mongodb:
     container_name: mongo
-    image: mongo:6-jammy
-    ports:
-      - '27017:27017'
-
+    image: mongo:latest
     restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${DATABASE_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${DATABASE_PASSWORD}
     volumes:
       - mongodb_data:/data/db
     networks:
-      - backend  
-
-  adminer:
-    image: adminer
-    restart: always
-    ports:
-      - 8008:8080
-    depends_on:
-      - postgres
-    networks:
-      - backend    
+      - backendSwitch
+ 
 volumes:
   mongodb_data:
 networks:
-  backend:
+  backendSwitch:
