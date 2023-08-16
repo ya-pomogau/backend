@@ -5,6 +5,7 @@ import {
   Get,
   HttpException,
   HttpStatus,
+  InternalServerErrorException,
   Param,
   Patch,
   Post,
@@ -42,7 +43,12 @@ export class UserController {
   })
   @Get()
   async findAll(): Promise<User[]> {
-    return this.userService.findAll();
+    try {
+      return await this.userService.findAll();
+    } catch (error) {
+      console.error('Ошибка при получении данных пользователей:', error);
+      throw new InternalServerErrorException('Произошла ошибка при получении данных пользователей');
+    }
   }
 
   @ApiOkResponse({
@@ -78,8 +84,15 @@ export class UserController {
     type: User,
   })
   @Get(':own')
-  async getOwnUser(@AuthUser() user: User): Promise<User> {
-    return this.userService.findUserById(user._id.toString());
+  async getOwnUser(@AuthUser() user: User): Promise<User | undefined> {
+    try {
+      return await this.userService.findUserById(user._id.toString());
+    } catch (error) {
+      console.error('Ошибка при получении информации о пользователе:', error);
+      throw new InternalServerErrorException(
+        'Произошла ошибка при получении информации о пользователе'
+      );
+    }
   }
 
   @ApiOkResponse({
