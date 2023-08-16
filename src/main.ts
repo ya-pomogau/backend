@@ -10,5 +10,6 @@ async function bootstrap() {
   );
   app.enableCors({ origin: configuration().server.cors_origins.split(',') });
   await app.listen(configuration().server.port);
+  console.log(`running on: ${await app.getUrl()}`);
 }
 bootstrap();
