@@ -1,69 +1,52 @@
-import {Column, CreateDateColumn, Entity, ObjectIdColumn, UpdateDateColumn} from 'typeorm';
-import {IsDate, IsInt, IsString, Length} from 'class-validator';
-import {ObjectId} from 'mongodb';
-import {ITaskConfirmation, TaskStatus} from '../types';
-import validationOptions from '../../common/constants/validation-options';
-import {UserStatus} from "../../users/types";
+import { Column, CreateDateColumn, Entity, ObjectIdColumn } from 'typeorm';
+import { IsDate, IsString, Length } from 'class-validator';
+import { ObjectId } from 'mongodb';
 
 @Entity()
 export class Task {
   @ObjectIdColumn()
-  _id: ObjectId;
+  id: ObjectId;
 
   @CreateDateColumn()
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @CreateDateColumn()
   updatedAt: Date;
 
   @Column()
   @IsString()
-  @Length(validationOptions.limits.task.title.min, validationOptions.limits.task.title.max)
+  @Length(3, 30)
   title: string;
 
   @Column()
   @IsString()
-  @Length(
-    validationOptions.limits.task.description.min,
-    validationOptions.limits.task.description.max
-  )
+  @Length(20, 200)
   description: string;
 
   @Column()
   @IsDate()
-  completionDate: Date;
+  date: Date;
 
   @Column()
   @IsString()
-  categoryId: string;
+  category: string; // заменить на ManyToOne
 
   @Column()
   @IsString()
-  @Length(validationOptions.limits.address.min, validationOptions.limits.address.max)
-  address: string;
+  @Length(1, 50)
+  address: string; // формат адреса?
 
   @Column()
-  coordinates: [number, number];
+  @IsString()
+  recipient: string; // заменить на OneToMane
 
   @Column()
-  recipientId: string;
+  @IsString()
+  volunteer?: string; // заменить на OneToMane
 
   @Column()
-  volunteerId?: string;
-
-  @Column()
-  @IsInt()
-  points: number;
-
-  @Column()
-  accessStatus: UserStatus;
-
-  @Column()
-  status: TaskStatus = TaskStatus.CREATED;
-
-  @Column()
-  completed = false;
-
-  @Column()
-  confirmation: ITaskConfirmation = { recipient: null, volunteer: null };
+  completed: {
+    recipient?: boolean;
+    volunteer?: boolean;
+  };
 }

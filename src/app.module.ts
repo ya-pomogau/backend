@@ -7,10 +7,6 @@ import configuration from './config/configuration';
 import { TypeOrmConfigService } from './config/database-config.factory';
 import { TasksModule } from './tasks/tasks.module';
 import { CategoriesModule } from './categories/categories.module';
-import { UserModule } from './users/user.module';
-import { TasksWsModule } from './tasks-ws/tasks-ws.module';
-import { HashModule } from './hash/hash.module';
-import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -21,10 +17,6 @@ import { AuthModule } from './auth/auth.module';
     }),
     TasksModule,
     CategoriesModule,
-    UserModule,
-    TasksWsModule,
-    HashModule,
-    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

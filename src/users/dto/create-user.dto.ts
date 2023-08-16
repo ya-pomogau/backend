@@ -1,74 +1,49 @@
 import {
   IsNotEmpty,
   IsUrl,
+  Length,
   IsString,
   MinLength,
   IsPhoneNumber,
   IsOptional,
-  IsEnum,
-  MaxLength,
-  IsArray,
-  ArrayMinSize,
-  ArrayMaxSize,
-  IsNumber,
 } from 'class-validator';
-import { AdminPermission, UserRole } from '../types';
-import validationOptions from '../../common/constants/validation-options';
+import { UserRole, StatusType, PermissionType } from '../../common/types/user-types';
 
 export class CreateUserDto {
-  @IsString({ message: validationOptions.messages.shouldBeString })
-  @IsNotEmpty({ message: validationOptions.messages.isEmpty })
-  @MinLength(validationOptions.limits.userName.min, {
-    message: validationOptions.messages.tooShort,
-  })
-  @MaxLength(validationOptions.limits.userName.max, {
-    message: validationOptions.messages.tooLong,
-  })
+  @IsString({ message: 'Должно быть строкой' })
+  @IsNotEmpty({ message: 'Не должен быть пустым' })
+  @Length(2, 30, { message: 'должен быть не меньше 2 и не больше 30' })
   fullname: string;
 
-  @IsEnum(UserRole, {
-    message: validationOptions.messages.strictValues + Object.values(UserRole).join(', '),
-  })
-  @IsNotEmpty({ message: validationOptions.messages.isEmpty })
-  role: UserRole;
+  role: UserRole | null;
 
-  @IsUrl({ require_protocol: true }, { message: validationOptions.messages.incorrectUrl })
-  @IsNotEmpty({ message: validationOptions.messages.isEmpty })
+  status: StatusType | null;
+
+  @IsUrl({ require_protocol: true }, { message: 'Не корректный URL' })
+  @IsNotEmpty({ message: 'Адрес не должен быть пустым' })
   vk: string;
 
-  @IsUrl({ require_protocol: true }, { message: validationOptions.messages.incorrectUrl })
-  @IsNotEmpty({ message: validationOptions.messages.isEmpty })
+  @IsUrl({ require_protocol: true }, { message: 'Не корректный URL' })
+  @IsNotEmpty({ message: 'Адрес не должен быть пустым' })
   avatar: string;
 
-  @IsPhoneNumber('RU', { message: validationOptions.messages.incorrectPhoneNumber })
-  @IsNotEmpty({ message: validationOptions.messages.isEmpty })
+  @IsPhoneNumber('RU', { message: 'Некорректный номер телефона' })
   phone: string;
 
-  @IsString({ message: validationOptions.messages.shouldBeString })
-  @IsNotEmpty({ message: validationOptions.messages.isEmpty })
-  @MinLength(validationOptions.limits.address.min, { message: validationOptions.messages.tooShort })
-  @MaxLength(validationOptions.limits.address.max, { message: validationOptions.messages.tooLong })
+  @IsString({ message: 'Должно быть строкой' })
+  @IsNotEmpty({ message: 'Адрес не должен быть пустым' })
+  @MinLength(6, { message: 'должен быть больше 6' })
   address: string;
 
-  @IsArray({ message: validationOptions.messages.incorrectCoordinates })
-  @IsNumber({}, { each: true, message: validationOptions.messages.incorrectCoordinates })
-  @ArrayMinSize(2, { message: validationOptions.messages.incorrectCoordinates })
-  @ArrayMaxSize(2, { message: validationOptions.messages.incorrectCoordinates })
-  @IsNotEmpty({ message: validationOptions.messages.isEmpty })
+  @IsNotEmpty({ message: 'Заполните поле для координат' })
   coordinates: number[];
 
-  // только для тестирования!!!
-  @IsString({ message: validationOptions.messages.shouldBeString })
-  @IsNotEmpty({ message: validationOptions.messages.isEmpty })
-  @MinLength(validationOptions.limits.login.min, {
-    message: validationOptions.messages.tooShort,
-  })
-  @MaxLength(validationOptions.limits.login.max, {
-    message: validationOptions.messages.tooLong,
-  })
-  login: string;
+  @IsOptional()
+  keys?: number | null;
 
-  @IsString({ message: validationOptions.messages.shouldBeString })
-  @IsNotEmpty({ message: validationOptions.messages.isEmpty })
-  password: string;
+  @IsOptional()
+  scores?: number;
+
+  @IsOptional()
+  permissions?: Array<PermissionType> | null;
 }

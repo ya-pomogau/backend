@@ -1,50 +1,56 @@
 import {
-  ArrayMaxSize,
-  ArrayMinSize,
-  IsArray,
-  IsNumber,
-  IsOptional,
-  IsPhoneNumber,
-  IsString,
+  IsNotEmpty,
   IsUrl,
-  MaxLength,
+  Length,
+  IsString,
   MinLength,
+  IsPhoneNumber,
+  IsOptional,
 } from 'class-validator';
-import validationOptions from '../../common/constants/validation-options';
+import { UserRole, StatusType, PermissionType } from '../../common/types/user-types';
 
 export class UpdateUserDto {
-  @IsString({ message: validationOptions.messages.shouldBeString })
-  @MinLength(validationOptions.limits.userName.min, {
-    message: validationOptions.messages.tooShort,
-  })
-  @MaxLength(validationOptions.limits.userName.max, {
-    message: validationOptions.messages.tooLong,
-  })
   @IsOptional()
+  @IsString({ message: 'Должно быть строкой' })
+  @IsNotEmpty({ message: 'Не должен быть пустым' })
+  @Length(2, 30, { message: 'должен быть не меньше 2 и не больше 30' })
   fullname: string;
 
-  @IsUrl({ require_protocol: true }, { message: validationOptions.messages.incorrectUrl })
   @IsOptional()
+  role: UserRole | null;
+
+  @IsOptional()
+  status: StatusType | null;
+
+  @IsOptional()
+  @IsUrl({ require_protocol: true }, { message: 'Не корректный URL' })
+  @IsNotEmpty({ message: 'Адрес не должен быть пустым' })
   vk: string;
 
-  @IsUrl({ require_protocol: true }, { message: validationOptions.messages.incorrectUrl })
   @IsOptional()
+  @IsUrl({ require_protocol: true }, { message: 'Не корректный URL' })
+  @IsNotEmpty({ message: 'Адрес не должен быть пустым' })
   avatar: string;
 
-  @IsPhoneNumber('RU', { message: validationOptions.messages.incorrectPhoneNumber })
   @IsOptional()
+  @IsPhoneNumber('RU', { message: 'Некорректный номер телефона' })
   phone: string;
 
-  @IsString({ message: validationOptions.messages.shouldBeString })
-  @MinLength(validationOptions.limits.address.min, { message: validationOptions.messages.tooShort })
-  @MaxLength(validationOptions.limits.address.max, { message: validationOptions.messages.tooLong })
   @IsOptional()
+  @IsString({ message: 'Должно быть строкой' })
+  @IsNotEmpty({ message: 'Адрес не должен быть пустым' })
+  @MinLength(6, { message: 'должен быть больше 6' })
   address: string;
 
-  @IsArray({ message: validationOptions.messages.incorrectCoordinates })
-  @IsNumber({}, { each: true, message: validationOptions.messages.incorrectCoordinates })
-  @ArrayMinSize(2, { message: validationOptions.messages.incorrectCoordinates })
-  @ArrayMaxSize(2, { message: validationOptions.messages.incorrectCoordinates })
   @IsOptional()
   coordinates: number[];
+
+  @IsOptional()
+  keys?: number | null;
+
+  @IsOptional()
+  scores?: number;
+
+  @IsOptional()
+  permissions?: Array<PermissionType> | null;
 }

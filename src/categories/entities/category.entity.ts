@@ -1,8 +1,7 @@
-import { Column, CreateDateColumn, Entity, ObjectIdColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, ObjectIdColumn } from "typeorm";
 import { ObjectId } from 'mongodb';
-import { IsArray, IsInt, IsPositive, IsString, Length } from 'class-validator';
+import { IsInt, IsPositive, IsString, Length } from "class-validator";
 import validationOptions from '../../common/constants/validation-options';
-import { UserStatus } from '../../users/types';
 
 @Entity()
 export class Category {
@@ -12,7 +11,7 @@ export class Category {
   @CreateDateColumn()
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @CreateDateColumn()
   updatedAt: Date;
 
   @Column()
@@ -24,8 +23,4 @@ export class Category {
   @IsInt()
   @IsPositive()
   points: number;
-
-  @Column()
-  @IsArray()
-  accessStatus: UserStatus;
 }
