@@ -83,7 +83,7 @@ export class UserController {
     status: 200,
     type: User,
   })
-  @Get(':own')
+  @Get('own')
   async getOwnUser(@AuthUser() user: User): Promise<User | undefined> {
     try {
       return await this.userService.findUserById(user._id.toString());
