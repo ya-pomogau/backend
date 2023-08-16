@@ -1,52 +1,87 @@
-import { Column, CreateDateColumn, Entity, ObjectIdColumn } from 'typeorm';
-import { IsDate, IsString, Length } from 'class-validator';
+import { Column, CreateDateColumn, Entity, ObjectIdColumn, UpdateDateColumn } from 'typeorm';
+import { IsDate, IsInt, IsString, Length } from 'class-validator';
 import { ObjectId } from 'mongodb';
+import { ApiProperty, ApiResponseProperty } from '@nestjs/swagger';
+import { TaskConfirmation, TaskStatus } from '../types';
+import validationOptions from '../../common/constants/validation-options';
+import { UserStatus } from '../../users/types';
 
 @Entity()
 export class Task {
+  @ApiResponseProperty({ type: 'string' })
   @ObjectIdColumn()
-  id: ObjectId;
+  _id: ObjectId;
 
+  @ApiResponseProperty()
   @CreateDateColumn()
   createdAt: Date;
 
-  @CreateDateColumn()
+  @ApiResponseProperty()
+  @UpdateDateColumn()
   updatedAt: Date;
 
+  @ApiResponseProperty()
   @Column()
   @IsString()
-  @Length(3, 30)
+  @Length(validationOptions.limits.task.title.min, validationOptions.limits.task.title.max)
+  @ApiProperty()
   title: string;
 
+  @ApiResponseProperty()
   @Column()
   @IsString()
-  @Length(20, 200)
+  @Length(
+    validationOptions.limits.task.description.min,
+    validationOptions.limits.task.description.max
+  )
   description: string;
 
+  @ApiResponseProperty()
   @Column()
   @IsDate()
-  date: Date;
+  completionDate: Date;
 
+  @ApiResponseProperty()
   @Column()
   @IsString()
-  category: string; // заменить на ManyToOne
+  categoryId: string;
 
+  @ApiResponseProperty()
   @Column()
   @IsString()
-  @Length(1, 50)
-  address: string; // формат адреса?
+  @Length(validationOptions.limits.address.min, validationOptions.limits.address.max)
+  address: string;
 
+  @ApiResponseProperty()
   @Column()
-  @IsString()
-  recipient: string; // заменить на OneToMane
+  coordinates: [number, number];
 
+  @ApiResponseProperty()
   @Column()
-  @IsString()
-  volunteer?: string; // заменить на OneToMane
+  recipientId: string;
 
+  @ApiResponseProperty()
   @Column()
-  completed: {
-    recipient?: boolean;
-    volunteer?: boolean;
-  };
+  volunteerId?: string;
+
+  @ApiResponseProperty()
+  @Column()
+  @IsInt()
+  points: number;
+
+  @ApiResponseProperty()
+  @Column()
+  accessStatus: UserStatus;
+
+  @ApiResponseProperty()
+  @Column()
+  status: TaskStatus = TaskStatus.CREATED;
+
+  @ApiResponseProperty()
+  @Column()
+  completed: boolean = false;
+
+  @ApiResponseProperty()
+  @Column()
+  confirmation: TaskConfirmation = { recipient: null, volunteer: null };
 }
