@@ -12,7 +12,6 @@ export class VkontakteStrategy extends PassportStrategy(Strategy, 'vkontakte') {
     });
   }
 
-
   // async validate(accessToken: string, refreshToken: string, profile: any) {
   //   return {
   //     vkId: profile.id,

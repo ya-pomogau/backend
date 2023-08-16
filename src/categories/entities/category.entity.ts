@@ -1,7 +1,8 @@
 import { Column, CreateDateColumn, Entity, ObjectIdColumn, UpdateDateColumn } from 'typeorm';
 import { ObjectId } from 'mongodb';
-import { IsInt, IsPositive, IsString, Length } from 'class-validator';
+import { IsArray, IsInt, IsPositive, IsString, Length } from 'class-validator';
 import validationOptions from '../../common/constants/validation-options';
+import { UserStatus } from '../../users/types';
 
 @Entity()
 export class Category {
@@ -23,4 +24,8 @@ export class Category {
   @IsInt()
   @IsPositive()
   points: number;
+
+  @Column()
+  @IsArray()
+  accessStatus: UserStatus;
 }

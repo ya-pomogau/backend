@@ -1,21 +1,21 @@
 import {
-  IsNotEmpty,
-  IsUrl,
-  IsString,
-  MinLength,
-  IsPhoneNumber,
-  IsOptional,
-  IsEnum,
-  MaxLength,
-  IsArray,
-  ArrayMinSize,
   ArrayMaxSize,
+  ArrayMinSize,
+  IsArray,
+  IsEnum,
+  IsNotEmpty,
   IsNumber,
+  IsOptional,
+  IsPhoneNumber,
+  IsString,
+  IsUrl,
+  MaxLength,
+  MinLength,
 } from 'class-validator';
-import { AdminPermission, UserRole } from '../types';
 import validationOptions from '../../common/constants/validation-options';
+import { AdminPermission, UserRole } from '../types';
 
-export class CreateUserDto {
+export class CreateAdminDto {
   @IsString({ message: validationOptions.messages.shouldBeString })
   @IsNotEmpty({ message: validationOptions.messages.isEmpty })
   @MinLength(validationOptions.limits.userName.min, {
@@ -26,6 +26,20 @@ export class CreateUserDto {
   })
   fullname: string;
 
+  @IsString({ message: validationOptions.messages.shouldBeString })
+  @IsNotEmpty({ message: validationOptions.messages.isEmpty })
+  @MinLength(validationOptions.limits.login.min, {
+    message: validationOptions.messages.tooShort,
+  })
+  @MaxLength(validationOptions.limits.login.max, {
+    message: validationOptions.messages.tooLong,
+  })
+  login: string;
+
+  @IsString({ message: validationOptions.messages.shouldBeString })
+  @IsNotEmpty({ message: validationOptions.messages.isEmpty })
+  password: string;
+
   @IsEnum(UserRole, {
     message: validationOptions.messages.strictValues + Object.values(UserRole).join(', '),
   })
@@ -33,11 +47,7 @@ export class CreateUserDto {
   role: UserRole;
 
   @IsUrl({ require_protocol: true }, { message: validationOptions.messages.incorrectUrl })
-  @IsNotEmpty({ message: validationOptions.messages.isEmpty })
-  vk: string;
-
-  @IsUrl({ require_protocol: true }, { message: validationOptions.messages.incorrectUrl })
-  @IsNotEmpty({ message: validationOptions.messages.isEmpty })
+  @IsOptional()
   avatar: string;
 
   @IsPhoneNumber('RU', { message: validationOptions.messages.incorrectPhoneNumber })
@@ -57,18 +67,17 @@ export class CreateUserDto {
   @IsNotEmpty({ message: validationOptions.messages.isEmpty })
   coordinates: number[];
 
-  // только для тестирования!!!
-  @IsString({ message: validationOptions.messages.shouldBeString })
-  @IsNotEmpty({ message: validationOptions.messages.isEmpty })
-  @MinLength(validationOptions.limits.login.min, {
-    message: validationOptions.messages.tooShort,
+  @IsArray({ message: validationOptions.messages.incorrectAdminPermissions })
+  @IsEnum(AdminPermission, {
+    each: true,
+    message: validationOptions.messages.strictValues + Object.values(AdminPermission).join(', '),
   })
-  @MaxLength(validationOptions.limits.login.max, {
-    message: validationOptions.messages.tooLong,
+  @ArrayMinSize(validationOptions.limits.adminPermissions.min, {
+    message: validationOptions.messages.incorrectAdminPermissions,
   })
-  login: string;
-
-  @IsString({ message: validationOptions.messages.shouldBeString })
+  @ArrayMaxSize(validationOptions.limits.adminPermissions.max, {
+    message: validationOptions.messages.incorrectAdminPermissions,
+  })
   @IsNotEmpty({ message: validationOptions.messages.isEmpty })
-  password: string;
+  permissions: AdminPermission[];
 }

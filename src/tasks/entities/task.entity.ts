@@ -1,25 +1,9 @@
-import {Column, CreateDateColumn, Entity, JoinColumn, ObjectIdColumn, UpdateDateColumn} from 'typeorm';
-import { IsDate, IsInt, IsString, Length } from 'class-validator';
-import { ObjectId } from 'mongodb';
-import { User } from '../../users/entities/user.entity';
-
-interface ITaskConfirmation {
-  recipient: boolean | null;
-  volunteer: boolean | null;
-}
-
-export enum Status {
-  CREATED = 'created',
-  ACCEPTED = 'accepted',
-  CLOSED = 'closed',
-}
-
-interface IStatusHistory {
-  date: Date;
-  status: Status;
-  completed: boolean;
-  volunteer: User | null;
-}
+import {Column, CreateDateColumn, Entity, ObjectIdColumn, UpdateDateColumn} from 'typeorm';
+import {IsDate, IsInt, IsString, Length} from 'class-validator';
+import {ObjectId} from 'mongodb';
+import {ITaskConfirmation, TaskStatus} from '../types';
+import validationOptions from '../../common/constants/validation-options';
+import {UserStatus} from "../../users/types";
 
 @Entity()
 export class Task {
@@ -34,12 +18,15 @@ export class Task {
 
   @Column()
   @IsString()
-  @Length(3, 30)
+  @Length(validationOptions.limits.task.title.min, validationOptions.limits.task.title.max)
   title: string;
 
   @Column()
   @IsString()
-  @Length(20, 200)
+  @Length(
+    validationOptions.limits.task.description.min,
+    validationOptions.limits.task.description.max
+  )
   description: string;
 
   @Column()
@@ -52,29 +39,27 @@ export class Task {
 
   @Column()
   @IsString()
-  @Length(1, 100)
+  @Length(validationOptions.limits.address.min, validationOptions.limits.address.max)
   address: string;
 
   @Column()
   coordinates: [number, number];
 
-  @Column(() => User)
-  recipient: User;
+  @Column()
+  recipientId: string;
 
-  @Column(() => User)
-  volunteer?: User;
+  @Column()
+  volunteerId?: string;
 
   @Column()
   @IsInt()
   points: number;
 
   @Column()
-  status: Status = Status.CREATED;
+  accessStatus: UserStatus;
 
   @Column()
-  taskHistory: IStatusHistory[] = [
-    { date: new Date(), status: Status.CREATED, completed: false, volunteer: null },
-  ];
+  status: TaskStatus = TaskStatus.CREATED;
 
   @Column()
   completed = false;

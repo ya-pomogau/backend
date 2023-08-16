@@ -1,24 +1,9 @@
-/* eslint-disable no-shadow */
-import { Length, IsString, IsUrl, IsDate, ValidateNested } from 'class-validator';
-import { Entity, ObjectIdColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { IsArray, IsDate, IsString, IsUrl, Length } from 'class-validator';
+import {Column, CreateDateColumn, Entity, Index, ObjectIdColumn, UpdateDateColumn} from 'typeorm';
 import { ObjectId } from 'mongodb';
-import { Type } from 'class-transformer';
-import { PermissionTypeDto } from '../dto/permisionType.dto';
-import { PermissionTypeValidator } from '../dto/PermissionTypeValidator.dto';
-
-export enum StatusType {
-  Unconfirmed = 'unconfirmed',
-  Confirmed = 'confirmed',
-  Activated = 'activated',
-  Verified = 'verified',
-}
-
-export enum UserRole {
-  Master = 'master',
-  Admin = 'admin',
-  Recipient = 'recipient',
-  Volunteer = 'volunteer',
-}
+import { Exclude } from 'class-transformer';
+import { AdminPermission, UserRole, UserStatus } from '../types';
+import validationOptions from '../../common/constants/validation-options';
 
 @Entity()
 export class User {
@@ -27,18 +12,34 @@ export class User {
 
   @Column()
   @IsString()
-  @Length(2, 20)
+  @Length(validationOptions.limits.userName.min, validationOptions.limits.userName.max)
   fullname: string;
 
-  @Column({ nullable: true })
+  @Column()
   @IsString()
-  role: UserRole | null;
+  role: UserRole;
 
-  @Column({ nullable: true })
-  status: StatusType = StatusType.Unconfirmed;
+  @Column()
+  @IsString()
+  @Exclude()
+  @Index({ unique: true })
+  login?: string;
+
+  @Column({ select: false })
+  @IsString()
+  @Exclude()
+  password?: string;
+
+  @Column()
+  @IsString()
+  status: UserStatus = UserStatus.UNCONFIRMED;
+
+  @Column()
+  isBlocked = false;
 
   @Column()
   @IsUrl()
+  @Index({ unique: true })
   vk: string;
 
   @Column()
@@ -65,14 +66,10 @@ export class User {
   @IsDate()
   updatedAt: Date;
 
-  @Column({ nullable: true })
-  keys?: number | null;
-
   @Column()
   scores = 0;
 
   @Column()
-  @ValidateNested({ each: true })
-  @Type(() => PermissionTypeValidator)
-  permissions?: PermissionTypeDto[] | null;
+  @IsArray()
+  permissions?: AdminPermission[];
 }

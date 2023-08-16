@@ -1,13 +1,16 @@
 import {
+  IsEnum,
   IsInt,
   IsNotEmpty,
+  IsNumber,
   IsPositive,
-  IsString,
-  Length,
+  IsString, Max,
   MaxLength,
+  Min,
   MinLength,
 } from 'class-validator';
 import validationOptions from '../../common/constants/validation-options';
+import { UserStatus } from '../../users/types';
 
 export class CreateCategoryDto {
   @IsNotEmpty({ message: validationOptions.messages.isEmpty })
@@ -28,4 +31,12 @@ export class CreateCategoryDto {
     message: validationOptions.messages.shouldBePositiveNumber,
   })
   points: number;
+
+  @IsInt({
+    message: validationOptions.messages.shouldBeIntegerNumber,
+  })
+  @Min(validationOptions.limits.categoryAccess.min, { message: validationOptions.messages.min })
+  @Max(validationOptions.limits.categoryAccess.max, { message: validationOptions.messages.max })
+  @IsNotEmpty({ message: validationOptions.messages.isEmpty })
+  accessStatus: number;
 }

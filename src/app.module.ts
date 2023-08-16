@@ -9,7 +9,8 @@ import { TasksModule } from './tasks/tasks.module';
 import { CategoriesModule } from './categories/categories.module';
 import { UserModule } from './users/user.module';
 import { TasksWsModule } from './tasks-ws/tasks-ws.module';
-import { TestModule } from './test/test.module';
+import { HashModule } from './hash/hash.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -22,7 +23,8 @@ import { TestModule } from './test/test.module';
     CategoriesModule,
     UserModule,
     TasksWsModule,
-    TestModule,
+    HashModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
