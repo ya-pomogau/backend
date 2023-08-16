@@ -3,13 +3,14 @@ import { DataSource, MongoRepository, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ObjectId } from 'mongodb';
 import { NotFoundException } from '@nestjs/common/exceptions';
-import { filter } from 'rxjs';
 import { CreateTaskDto } from './dto/create-task.dto';
-import { Status, Task } from './entities/task.entity';
+import { Task } from './entities/task.entity';
 import { User } from '../users/entities/user.entity';
 import exceptions from '../common/constants/exceptions';
 import { Category } from '../categories/entities/category.entity';
 import timeDifference from '../common/utils/timeDifference';
+import { UserRole, UserStatus } from '../users/types';
+import { TaskStatus } from './types';
 import { dayInMs } from '../common/constants';
 import queryRunner from '../common/helpers/queryRunner';
 import { UpdateTaskDto } from './dto/update-task.dto';
@@ -26,36 +27,46 @@ export class TasksService {
     private readonly dataSource: DataSource
   ) {}
 
-  async create(createTaskDto: CreateTaskDto, ownUser: any): Promise<Task> {
+  async create(createTaskDto: CreateTaskDto, ownUser: User): Promise<Task> {
     const { recipientId, ...taskInfo } = createTaskDto;
 
     if (timeDifference(new Date(), taskInfo.completionDate) <= 0) {
       throw new ForbiddenException(exceptions.tasks.wrongCompletionDate);
     }
 
-    let recipient;
-    if (recipientId) {
+    let recipient: User;
+    if (ownUser.role === UserRole.RECIPIENT) {
+      recipient = ownUser;
+    } else {
       const recipientObjectId = new ObjectId(recipientId);
       recipient = await this.userRepository.findOneBy({ _id: recipientObjectId });
       if (!recipient) {
         throw new NotFoundException(exceptions.users.notFound);
       }
-    } else {
-      recipient = ownUser;
     }
 
     if (recipient.role !== 'recipient') {
       throw new ForbiddenException(exceptions.users.onlyForRecipients);
     }
 
-    const categoryObjectId = new ObjectId(taskInfo.categoryId);
-    const category = await this.categoryRepository.findOneBy({ _id: categoryObjectId });
+    if (recipient.status < UserStatus.CONFIRMED) {
+      throw new ForbiddenException(exceptions.tasks.wrongStatus);
+    }
+
+    const category = await this.categoryRepository.findOneBy({
+      _id: new ObjectId(taskInfo.categoryId),
+    });
 
     if (!category) {
       throw new NotFoundException(exceptions.categories.notFound);
     }
 
-    const dto = { ...taskInfo, recipient, points: category.points };
+    const dto = {
+      ...taskInfo,
+      recipientId: recipient._id.toString(),
+      points: category.points,
+      accessStatus: category.accessStatus,
+    };
 
     const newTask = await this.taskRepository.create(dto);
 
@@ -66,7 +77,7 @@ export class TasksService {
     return this.taskRepository.find();
   }
 
-  async findById(id: string) {
+  async findById(id: string, user: User) {
     const objectId = new ObjectId(id);
     const task = await this.taskRepository.findOneBy({ _id: objectId });
 
@@ -74,27 +85,23 @@ export class TasksService {
       throw new NotFoundException(exceptions.tasks.notFound);
     }
 
+    if (
+      (user.role === UserRole.RECIPIENT && task.recipientId !== user._id.toString()) ||
+      (user.role === UserRole.VOLUNTEER &&
+        task.volunteerId !== user._id.toString() &&
+        task.status !== TaskStatus.CREATED)
+    ) {
+      throw new ForbiddenException(exceptions.tasks.wrongUser);
+    }
+
     return task;
   }
 
-  // выделить логику поиска собственных заявок после добавления авторизации
-  async findBy(
-    query: object,
-    recipientId: string | null = null,
-    volunteerId: string | null = null
-  ) {
+  async findBy(query: object) {
     const taskQuery: object = {};
 
     for (const property in query) {
       taskQuery[property] = { $in: query[property].split(',') };
-    }
-
-    if (recipientId) {
-      taskQuery['recipient._id'] = new ObjectId(recipientId);
-    }
-
-    if (volunteerId) {
-      taskQuery['volunteer._id'] = new ObjectId(volunteerId);
     }
 
     const tasks = await this.taskRepository.find({
@@ -104,8 +111,22 @@ export class TasksService {
     return tasks;
   }
 
-  // добавить принятие заявки из авторизованного пользователя
-  async acceptTask(taskId: string, volunteerId: string) {
+  async findOwn(statuses: string, user: User) {
+    const statusArray = statuses
+      ? statuses.split(',')
+      : [TaskStatus.CREATED, TaskStatus.ACCEPTED, TaskStatus.CLOSED];
+
+    if (user.role === UserRole.RECIPIENT) {
+      return this.taskRepository.find({
+        where: { status: { $in: statusArray }, recipientId: user._id.toString() },
+      });
+    }
+    return this.taskRepository.find({
+      where: { status: { $in: statusArray }, volunteerId: user._id.toString() },
+    });
+  }
+
+  async acceptTask(taskId: string, user: User) {
     const objectTaskId = new ObjectId(taskId);
     const task: Task = await this.taskRepository.findOneBy({ _id: objectTaskId });
 
@@ -113,34 +134,34 @@ export class TasksService {
       throw new NotFoundException(exceptions.tasks.notFound);
     }
 
-    if (task.status !== Status.CREATED) {
+    if (task.status !== TaskStatus.CREATED) {
       throw new ForbiddenException(exceptions.tasks.onlyForCreated);
     }
 
-    const objectVolunteerId = new ObjectId(volunteerId);
-    const volunteer: User = await this.userRepository.findOneBy({ _id: objectVolunteerId });
-
-    if (!volunteer) {
-      throw new NotFoundException(exceptions.users.notFound);
+    if (user.role !== UserRole.VOLUNTEER) {
+      throw new ForbiddenException(exceptions.users.onlyForVolunteers);
     }
 
-    if (volunteer.role !== 'volunteer') {
-      throw new ForbiddenException(exceptions.users.onlyForVolunteers);
+    const category = await this.categoryRepository.findOneBy({
+      _id: new ObjectId(task.categoryId),
+    });
+
+    if (user.status < category.accessStatus) {
+      throw new ForbiddenException(exceptions.tasks.wrongStatus);
     }
 
     await this.taskRepository.update(
       { _id: objectTaskId },
       {
-        volunteer,
-        status: Status.ACCEPTED,
+        volunteerId: user._id.toString(),
+        status: TaskStatus.ACCEPTED,
       }
     );
 
     return this.taskRepository.findOneBy({ _id: objectTaskId });
   }
 
-  // добавить проверку на пользователя, когда будет аутентификация
-  async refuseTask(taskId: string, isAdmin: boolean) {
+  async refuseTask(taskId: string, user: User) {
     const objectTaskId = new ObjectId(taskId);
     const task: Task = await this.taskRepository.findOneBy({ _id: objectTaskId });
 
@@ -148,19 +169,26 @@ export class TasksService {
       throw new NotFoundException(exceptions.tasks.notFound);
     }
 
-    if (timeDifference(new Date(), task.completionDate) < dayInMs && !isAdmin) {
+    if (
+      timeDifference(new Date(), task.completionDate) < dayInMs &&
+      user.role === UserRole.VOLUNTEER
+    ) {
       throw new ForbiddenException(exceptions.tasks.noTimeForRefusal);
+    }
+
+    if (task.volunteerId !== user._id.toString() && user.role === UserRole.VOLUNTEER) {
+      throw new ForbiddenException(exceptions.tasks.wrongUser);
     }
 
     await this.taskRepository.update(
       { _id: objectTaskId },
-      { volunteer: null, status: Status.CREATED }
+      { volunteerId: null, status: TaskStatus.CREATED }
     );
 
     return this.taskRepository.findOneBy({ _id: objectTaskId });
   }
 
-  async removeTask(taskId: string, isAdmin: boolean) {
+  async removeTask(taskId: string, user: User) {
     const objectTaskId = new ObjectId(taskId);
     const task: Task = await this.taskRepository.findOneBy({ _id: objectTaskId });
 
@@ -168,19 +196,25 @@ export class TasksService {
       throw new NotFoundException(exceptions.tasks.notFound);
     }
 
-    if (task.volunteer && !isAdmin) {
+    if (task.recipientId !== user._id.toString() && user.role === UserRole.RECIPIENT) {
+      throw new ForbiddenException(exceptions.tasks.wrongUser);
+    }
+
+    if (task.volunteerId && user.role === UserRole.RECIPIENT) {
       throw new ForbiddenException(exceptions.tasks.cancelForbidden);
     }
 
-    return this.taskRepository.delete(objectTaskId);
+    await this.taskRepository.delete(objectTaskId);
+
+    return task;
   }
 
   async completeTask(task: Task) {
-    if (task.status !== Status.ACCEPTED) {
+    if (task.status !== TaskStatus.ACCEPTED) {
       throw new ForbiddenException(exceptions.tasks.onlyForAccepted);
     }
 
-    const objectVolunteerId = new ObjectId(task.volunteer._id);
+    const objectVolunteerId = new ObjectId(task.volunteerId);
     const volunteer: User = await this.userRepository.findOneBy({ _id: objectVolunteerId });
 
     if (!volunteer) {
@@ -190,7 +224,7 @@ export class TasksService {
     await queryRunner(this.dataSource, [
       this.taskRepository.update(
         { _id: new ObjectId(task._id) },
-        { status: Status.CLOSED, completed: true }
+        { status: TaskStatus.CLOSED, completed: true }
       ),
       this.userRepository.update(
         { _id: objectVolunteerId },
@@ -212,14 +246,14 @@ export class TasksService {
     } else {
       await this.taskRepository.update(
         { _id: objectTaskId },
-        { status: Status.CLOSED, completed: false }
+        { status: TaskStatus.CLOSED, completed: false }
       );
     }
 
     return this.taskRepository.findOneBy({ _id: objectTaskId });
   }
 
-  async confirmTask(taskId: string, userId: string, isTaskCompleted: boolean) {
+  async confirmTask(taskId: string, user: User, isTaskCompleted: boolean) {
     const objectTaskId = new ObjectId(taskId);
     const task: Task = await this.taskRepository.findOneBy({ _id: objectTaskId });
 
@@ -227,16 +261,16 @@ export class TasksService {
       throw new NotFoundException(exceptions.tasks.notFound);
     }
 
-    if (task.status !== Status.ACCEPTED) {
+    if (task.status !== TaskStatus.ACCEPTED) {
       throw new ForbiddenException(exceptions.tasks.onlyForAccepted);
     }
 
-    if (task.recipient._id.toString() === userId) {
+    if (task.recipientId === user._id.toString()) {
       await this.taskRepository.update(
         { _id: objectTaskId },
         { confirmation: { ...task.confirmation, recipient: isTaskCompleted } }
       );
-    } else if (task.volunteer._id.toString() === userId) {
+    } else if (task.volunteerId === user._id.toString()) {
       await this.taskRepository.update(
         { _id: objectTaskId },
         { confirmation: { ...task.confirmation, volunteer: isTaskCompleted } }
@@ -245,24 +279,34 @@ export class TasksService {
       throw new ForbiddenException(exceptions.tasks.wrongUser);
     }
 
-    if (task.confirmation.recipient !== null && task.confirmation.volunteer !== null) {
-      if (task.confirmation.recipient === true && task.confirmation.volunteer === true) {
-        await this.completeTask(task);
-      } else if (task.confirmation.recipient === false && task.confirmation.volunteer === false) {
+    const updatedTask = await this.taskRepository.findOneBy({ _id: objectTaskId });
+
+    if (
+      updatedTask.confirmation.recipient !== null &&
+      updatedTask.confirmation.volunteer !== null
+    ) {
+      if (
+        updatedTask.confirmation.recipient === true &&
+        updatedTask.confirmation.volunteer === true
+      ) {
+        await this.completeTask(updatedTask);
+      } else if (
+        updatedTask.confirmation.recipient === false &&
+        updatedTask.confirmation.volunteer === false
+      ) {
         await this.taskRepository.update(
           { _id: objectTaskId },
-          { status: Status.CLOSED, completed: false }
+          { status: TaskStatus.CLOSED, completed: false }
         );
       } else {
-        console.log('Вызывайте админа!!!');
+        console.log('Вызывайте админа!!!'); // отбивка в чат админу
       }
     }
 
     return this.taskRepository.findOneBy({ _id: objectTaskId });
   }
 
-  // разрешить редактирование только создателю заявки или админу
-  async update(id: string, updateTaskDto: UpdateTaskDto) {
+  async update(id: string, user: User, updateTaskDto: UpdateTaskDto) {
     const objectTaskId = new ObjectId(id);
     const task: Task = await this.taskRepository.findOneBy({ _id: objectTaskId });
 
@@ -270,8 +314,12 @@ export class TasksService {
       throw new NotFoundException(exceptions.tasks.notFound);
     }
 
-    if (task.status !== Status.CREATED) {
+    if (task.status !== TaskStatus.CREATED) {
       throw new ForbiddenException(exceptions.tasks.onlyForCreated);
+    }
+
+    if (task.recipientId !== user._id.toString() && user.role === UserRole.RECIPIENT) {
+      throw new ForbiddenException(exceptions.tasks.wrongUser);
     }
 
     await this.taskRepository.update({ _id: objectTaskId }, updateTaskDto);

@@ -11,7 +11,7 @@ export class ChangeAdminPermissionsDto {
   @ArrayMinSize(validationOptions.limits.adminPermissions.min, {
     message: validationOptions.messages.incorrectAdminPermissions,
   })
-  @ArrayMaxSize(validationOptions.limits.adminPermissions.min, {
+  @ArrayMaxSize(validationOptions.limits.adminPermissions.max, {
     message: validationOptions.messages.incorrectAdminPermissions,
   })
   @IsNotEmpty({ message: validationOptions.messages.isEmpty })

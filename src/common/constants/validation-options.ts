@@ -11,13 +11,14 @@ export default {
     incorrectUrl: 'В поле $property введен некорректный формат url-адреса',
     incorrectPhoneNumber: 'В поле $property введен некорректный формат телефонного номера',
     incorrectCoordinates: 'В поле $property введен некорректный формат географических координат',
-    incorrectAdminPermissions:
-      'Права доступа администратора должны быть в формате массива от 1 до 6 элементов',
+    incorrectAdminPermissions: 'Поле $property должно быть в формате массива от 1 до 6 элементов',
+    min: 'Минимальное значение в поле $property - $constraint1',
+    max: 'Максимальное значение в поле $property - $constraint1',
   },
   limits: {
     categoryTitle: {
       min: 3,
-      max: 30,
+      max: 50,
     },
     userName: {
       min: 2,
@@ -30,6 +31,32 @@ export default {
     adminPermissions: {
       min: 1,
       max: 6,
+    },
+    userStatuses: {
+      min: 1,
+      max: 3,
+    },
+    login: {
+      min: 5,
+      max: 20,
+    },
+    task: {
+      title: {
+        min: 5,
+        max: 30,
+      },
+      description: {
+        min: 20,
+        max: 200,
+      },
+    },
+    categoryAccess: {
+      min: 1,
+      max: 3,
+    },
+    userStatus: {
+      min: 0,
+      max: 3,
     },
   },
 };

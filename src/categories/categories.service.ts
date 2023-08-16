@@ -7,7 +7,8 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 import { Category } from './entities/category.entity';
 import exeptions from '../common/constants/exceptions';
 import queryRunner from '../common/helpers/queryRunner';
-import { Status, Task } from '../tasks/entities/task.entity';
+import { Task } from '../tasks/entities/task.entity';
+import { TaskStatus } from '../tasks/types';
 
 @Injectable()
 export class CategoriesService {
@@ -46,7 +47,7 @@ export class CategoriesService {
       await queryRunner(this.dataSource, [
         this.categoryRepository.update({ _id: objectId }, updateCategoryDto),
         this.taskRepository.update(
-          { categoryId: id, status: Not(Status.CLOSED) },
+          { categoryId: id, status: Not(TaskStatus.CLOSED) },
           { points: updateCategoryDto.points }
         ),
       ]);

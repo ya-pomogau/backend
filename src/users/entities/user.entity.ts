@@ -1,7 +1,9 @@
-import {IsArray, IsDate, IsString, IsUrl, Length} from 'class-validator';
-import {Column, CreateDateColumn, Entity, ObjectIdColumn, UpdateDateColumn} from 'typeorm';
-import {ObjectId} from 'mongodb';
-import {AdminPermission, UserRole, UserStatus} from '../types';
+import { IsArray, IsDate, IsString, IsUrl, Length } from 'class-validator';
+import {Column, CreateDateColumn, Entity, Index, ObjectIdColumn, UpdateDateColumn} from 'typeorm';
+import { ObjectId } from 'mongodb';
+import { Exclude } from 'class-transformer';
+import { AdminPermission, UserRole, UserStatus } from '../types';
+import validationOptions from '../../common/constants/validation-options';
 
 @Entity()
 export class User {
@@ -10,12 +12,23 @@ export class User {
 
   @Column()
   @IsString()
-  @Length(2, 30)
+  @Length(validationOptions.limits.userName.min, validationOptions.limits.userName.max)
   fullname: string;
 
   @Column()
   @IsString()
   role: UserRole;
+
+  @Column()
+  @IsString()
+  @Exclude()
+  @Index({ unique: true })
+  login?: string;
+
+  @Column({ select: false })
+  @IsString()
+  @Exclude()
+  password?: string;
 
   @Column()
   @IsString()
@@ -26,6 +39,7 @@ export class User {
 
   @Column()
   @IsUrl()
+  @Index({ unique: true })
   vk: string;
 
   @Column()

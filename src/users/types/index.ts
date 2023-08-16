@@ -1,8 +1,8 @@
 export enum UserStatus {
-  UNCONFIRMED = 'unconfirmed',
-  CONFIRMED = 'confirmed',
-  VERIFIED = 'verified',
-  ACTIVATED = 'activated',
+  UNCONFIRMED = 0,
+  CONFIRMED = 1,
+  VERIFIED = 2,
+  ACTIVATED = 3,
 }
 
 export enum UserRole {
