@@ -8,7 +8,7 @@ services:
       dockerfile: Dockerfile.pub
     env_file: .env
     ports:
-      - git4000:3001
+      - 4000:3001
     depends_on:
       - mongodb
     restart: always
