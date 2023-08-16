@@ -1,5 +1,4 @@
 import { Task } from '../../tasks/entities/task.entity';
-import { UserStatus } from '../../users/types';
 
 export enum WsTasksEvents {
   CREATED = 'The new task was created',

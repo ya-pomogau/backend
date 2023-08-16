@@ -159,7 +159,7 @@ export class UserService {
     const user = await this.findUserById(id);
 
     if (user.role !== UserRole.ADMIN) {
-      return new ForbiddenException(exceptions.users.onlyForAdmins);
+      throw new ForbiddenException(exceptions.users.onlyForAdmins);
     }
 
     await this.usersRepository.update({ _id: new ObjectId(id) }, { permissions });

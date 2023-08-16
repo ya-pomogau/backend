@@ -43,6 +43,12 @@ export class CategoriesService {
   async update(id: string, updateCategoryDto: UpdateCategoryDto) {
     const objectId = new ObjectId(id);
 
+    const category = await this.categoryRepository.findOneBy({ _id: objectId });
+
+    if (!category) {
+      throw new NotFoundException(exeptions.categories.notFound);
+    }
+
     if (updateCategoryDto.points) {
       await queryRunner(this.dataSource, [
         this.categoryRepository.update({ _id: objectId }, updateCategoryDto),

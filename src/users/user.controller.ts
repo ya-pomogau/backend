@@ -12,6 +12,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { ObjectId } from 'mongodb';
+import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -27,16 +28,27 @@ import { AdminPermission, UserRole } from './types';
 import { AdminPermissions } from '../auth/decorators/admin-permissions.decorator';
 import { AuthUser } from '../auth/decorators/auth-user.decorator';
 
+@ApiBearerAuth()
+@ApiTags('Users')
 @UseGuards(JwtGuard)
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @ApiOkResponse({
+    status: 200,
+    type: User,
+    isArray: true,
+  })
   @Get()
   async findAll(): Promise<User[]> {
     return this.userService.findAll();
   }
 
+  @ApiOkResponse({
+    status: 200,
+    type: User,
+  })
   @UseGuards(UserRolesGuard)
   @UserRoles(UserRole.MASTER)
   @Post('admin')
@@ -48,6 +60,10 @@ export class UserController {
     }
   }
 
+  @ApiOkResponse({
+    status: 200,
+    type: User,
+  })
   @Post()
   async createUser(@Body() userData: CreateUserDto): Promise<User> {
     try {
@@ -57,13 +73,21 @@ export class UserController {
     }
   }
 
+  @ApiOkResponse({
+    status: 200,
+    type: User,
+  })
   @Get(':own')
-  async getOwnUser(@AuthUser() user: User): Promise<User | undefined> {
+  async getOwnUser(@AuthUser() user: User): Promise<User> {
     return this.userService.findUserById(user._id.toString());
   }
 
+  @ApiOkResponse({
+    status: 200,
+    type: User,
+  })
   @Get(':id')
-  async getUserById(@Param('id') id: string): Promise<User | undefined> {
+  async getUserById(@Param('id') id: string): Promise<User> {
     return this.userService.findUserById(id);
   }
 
@@ -76,6 +100,10 @@ export class UserController {
     await this.userService.deleteUserById(objectId);
   }
 
+  @ApiOkResponse({
+    status: 200,
+    type: User,
+  })
   @Patch(':id')
   async updateUser(
     @Param('id') id: string,
@@ -89,6 +117,10 @@ export class UserController {
     }
   }
 
+  @ApiOkResponse({
+    status: 200,
+    type: User,
+  })
   @UseGuards(UserRolesGuard, AdminPermissionsGuard)
   @UserRoles(UserRole.ADMIN, UserRole.MASTER)
   @AdminPermissions(AdminPermission.CONFIRMATION)
@@ -96,33 +128,45 @@ export class UserController {
   async changeStatus(
     @Param('id') id: string,
     @Body(new ValidationPipe()) changeStatusDto: ChangeStatusDto
-  ) {
+  ): Promise<User> {
     return this.userService.changeStatus(id, changeStatusDto.status);
   }
 
+  @ApiOkResponse({
+    status: 200,
+    type: User,
+  })
   @UseGuards(UserRolesGuard, AdminPermissionsGuard)
   @UserRoles(UserRole.ADMIN, UserRole.MASTER)
   @AdminPermissions(AdminPermission.KEYS)
   @Patch(':id/key')
-  async giveKey(@Param('id') id: string) {
+  async giveKey(@Param('id') id: string): Promise<User> {
     return this.userService.giveKey(id);
   }
 
+  @ApiOkResponse({
+    status: 200,
+    type: User,
+  })
   @UseGuards(UserRolesGuard)
   @UserRoles(UserRole.MASTER)
   @Patch(':id/admin-permissions')
   async changeAdminPermissions(
     @Param('id') id: string,
     @Body(new ValidationPipe()) changeAdminPermissionsDto: ChangeAdminPermissionsDto
-  ) {
+  ): Promise<User> {
     return this.userService.changeAdminPermissions(id, changeAdminPermissionsDto.permissions);
   }
 
+  @ApiOkResponse({
+    status: 200,
+    type: User,
+  })
   @UseGuards(UserRolesGuard, AdminPermissionsGuard)
   @UserRoles(UserRole.ADMIN, UserRole.MASTER)
   @AdminPermissions(AdminPermission.CONFIRMATION)
   @Patch(':id/block')
-  async blockUser(@Param('id') id: string) {
+  async blockUser(@Param('id') id: string): Promise<User> {
     return this.userService.blockUser(id);
   }
 }
