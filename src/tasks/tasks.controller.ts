@@ -115,8 +115,8 @@ export class TasksController {
   })
   @UseGuards(UserRolesGuard)
   @UserRoles(UserRole.VOLUNTEER)
-  @Patch(':taskId/accept')
-  async acceptTask(@Param('taskId') taskId: string, @AuthUser() user: User): Promise<Task> {
+  @Patch(':id/accept')
+  async acceptTask(@Param('id') taskId: string, @AuthUser() user: User): Promise<Task> {
     const acceptedTask = await this.tasksService.acceptTask(taskId, user);
 
     this.tasksGateway.sendMessage(
