@@ -22,6 +22,10 @@ import { ChatsService } from './chats.service';
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(private chatService: ChatsService) {}
 
+  afterInit(server: any) {
+    // console.log('Init', server);
+  }
+
   @WebSocketServer() server: Server<ClientToServerListen, ServerToClientListen>;
 
   @SubscribeMessage('message')
