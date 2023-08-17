@@ -11,12 +11,11 @@ export class Chat {
   createdAt: Date;
 
   @Column()
-  user: string;
+  sender: string;
 
   @Column()
-  text: string;
+  recipient: string;
 
   @Column()
-  status: string; // Например, "active", "closed", "archived" и т.д.
-  // Дополнительные поля и методы для работы с чатом
+  message: string;
 }

@@ -16,7 +16,6 @@ export class ChatsService {
   }
 
   getClientId(id: string): Socket | null {
-    console.log(this.#clients);
     return this.#clients.find((client) => client.id === id);
   }
 }
