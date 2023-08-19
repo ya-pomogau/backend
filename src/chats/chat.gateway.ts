@@ -2,6 +2,7 @@
 import { WebSocketGateway, SubscribeMessage, WebSocketServer } from '@nestjs/websockets';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { v4 as uuidv4 } from 'uuid';
 import { Server } from 'socket.io';
 import { ObjectId } from 'mongodb';
 import { Chat } from './entities/chat.entity';
@@ -22,10 +23,7 @@ export class ChatGateway {
   server: Server;
 
   @SubscribeMessage('message')
-  async handleMessage(
-    client: any,
-    data: { chatId: string; sender: string; recipient: string; text: string }
-  ) {
+  async handleMessage(client: any, data: { chatId: string; sender: string; text: string }) {
     const { chatId } = data;
     const chat = await this.chatRepository.findOne({
       where: {
@@ -35,8 +33,8 @@ export class ChatGateway {
 
     if (chat) {
       const newMessage = {
+        id: uuidv4(),
         sender: data.sender,
-        recipient: data.recipient,
         text: data.text,
         timestamp: new Date(),
       };
@@ -53,8 +51,8 @@ export class ChatGateway {
   }
 
   @SubscribeMessage('createChat')
-  async createChat(client: any, name: string) {
-    const chat = this.chatRepository.create({ name, messages: [] });
+  async createChat() {
+    const chat = this.chatRepository.create({ messages: [] });
     await this.chatRepository.save(chat);
     this.server.emit('chatCreated', chat);
   }

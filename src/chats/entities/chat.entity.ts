@@ -2,9 +2,9 @@
 import { Entity, ObjectIdColumn, Column } from 'typeorm';
 import { ObjectId } from 'mongodb';
 
-interface Message {
+export interface Message {
+  id: string;
   sender: string;
-  recipient: string;
   text: string;
   timestamp: Date;
 }
@@ -13,9 +13,6 @@ interface Message {
 export class Chat {
   @ObjectIdColumn()
   _id: ObjectId;
-
-  @Column()
-  name: string;
 
   @Column('simple-json')
   messages: Message[];

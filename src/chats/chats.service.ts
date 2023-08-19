@@ -12,7 +12,7 @@ export class ChatsService {
   ) {}
 
   async createChat(name: string): Promise<Chat> {
-    const chat = this.chatRepository.create({ name, messages: [] });
+    const chat = this.chatRepository.create({ messages: [] });
     return this.chatRepository.save(chat);
   }
 
