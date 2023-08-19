@@ -1,21 +1,22 @@
 /* eslint-disable import/no-cycle */
-import { Entity, ObjectIdColumn, Column, CreateDateColumn } from 'typeorm';
+import { Entity, ObjectIdColumn, Column } from 'typeorm';
 import { ObjectId } from 'mongodb';
+
+interface Message {
+  sender: string;
+  recipient: string;
+  text: string;
+  timestamp: Date;
+}
 
 @Entity()
 export class Chat {
   @ObjectIdColumn()
   _id: ObjectId;
 
-  @CreateDateColumn()
-  createdAt: Date;
-
   @Column()
-  sender: string;
+  name: string;
 
-  @Column()
-  recipient: string;
-
-  @Column()
-  message: string;
+  @Column('simple-json')
+  messages: Message[];
 }

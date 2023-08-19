@@ -1,17 +1,10 @@
 /* eslint-disable class-methods-use-this */
-import {
-  WebSocketGateway,
-  SubscribeMessage,
-  WebSocketServer,
-  MessageBody,
-  OnGatewayConnection,
-  OnGatewayDisconnect,
-  ConnectedSocket,
-} from '@nestjs/websockets';
+import { WebSocketGateway, SubscribeMessage, WebSocketServer } from '@nestjs/websockets';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Server, Socket } from 'socket.io';
-import { ClientToServerListen, ServerToClientListen } from '../common/types/chat-types';
-import { Message } from '../common/types/messages-type';
-import { ChatsService } from './chats.service';
+import { ObjectId } from 'mongodb';
+import { Chat } from './entities/chat.entity';
 
 @WebSocketGateway({
   namespace: 'chat',
@@ -19,22 +12,50 @@ import { ChatsService } from './chats.service';
     origin: '*',
   },
 })
-export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  constructor(private chatService: ChatsService) {}
+export class ChatGateway {
+  constructor(
+    @InjectRepository(Chat)
+    private chatRepository: Repository<Chat>
+  ) {}
 
-  @WebSocketServer() server: Server<ClientToServerListen, ServerToClientListen>;
+  @WebSocketServer()
+  server: Server;
 
   @SubscribeMessage('message')
-  handleMessage(@MessageBody() message: Message): void {
-    this.server.emit('message', message);
+  async handleMessage(
+    client: any,
+    data: { chatId: string; sender: string; recipient: string; text: string }
+  ) {
+    const { chatId } = data;
+    const chat = await this.chatRepository.findOne({
+      where: {
+        _id: new ObjectId(chatId),
+      },
+    });
+
+    if (chat) {
+      const newMessage = {
+        sender: data.sender,
+        recipient: data.recipient,
+        text: data.text,
+        timestamp: new Date(),
+      };
+
+      if (!chat.messages) {
+        chat.messages = [];
+      }
+
+      chat.messages.push(newMessage);
+
+      await this.chatRepository.save(chat);
+      this.server.emit(`chat.${chat._id}.message`, newMessage);
+    }
   }
 
-  handleConnection(@ConnectedSocket() client: Socket) {
-    if (!this.chatService.getClientId(client.id)) this.chatService.addClient(client);
-  }
-
-  handleDisconnect(@ConnectedSocket() client: Socket) {
-    this.chatService.removeClient(client.id);
-    client.disconnect(true);
+  @SubscribeMessage('createChat')
+  async createChat(client: any, name: string) {
+    const chat = this.chatRepository.create({ name, messages: [] });
+    await this.chatRepository.save(chat);
+    this.server.emit('chatCreated', chat);
   }
 }

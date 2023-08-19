@@ -1,21 +1,29 @@
-import { Injectable } from '@nestjs/common';
-import { Socket } from 'socket.io';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { ObjectId } from 'mongodb';
+import { Chat } from './entities/chat.entity';
 
 @Injectable()
 export class ChatsService {
-  #clients: Socket[] = [];
+  constructor(
+    @InjectRepository(Chat)
+    private chatRepository: Repository<Chat>
+  ) {}
 
-  addClient(client: Socket): void {
-    this.#clients.push(client);
-    console.log(this.#clients.length);
+  async createChat(name: string): Promise<Chat> {
+    const chat = this.chatRepository.create({ name, messages: [] });
+    return this.chatRepository.save(chat);
   }
 
-  removeClient(id: string) {
-    this.#clients = this.#clients.filter((client) => client.id !== id);
-    console.log(this.#clients.length);
-  }
-
-  getClientId(id: string): Socket | null {
-    return this.#clients.find((client) => client.id === id);
+  async getChatById(id: string): Promise<Chat | undefined> {
+    const _id = new ObjectId(id);
+    const chat = await this.chatRepository.findOne({
+      where: { _id },
+    });
+    if (!chat) {
+      throw new NotFoundException('Chat not found');
+    }
+    return chat;
   }
 }
