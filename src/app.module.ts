@@ -9,6 +9,7 @@ import { UserModule } from './users/user.module';
 import { TasksWsModule } from './tasks-ws/tasks-ws.module';
 import { HashModule } from './hash/hash.module';
 import { AuthModule } from './auth/auth.module';
+import { ChatsModule } from './chats/chats.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { AuthModule } from './auth/auth.module';
     TasksWsModule,
     HashModule,
     AuthModule,
+    ChatsModule,
   ],
 })
 export class AppModule {}
