@@ -2,7 +2,7 @@
 import { WebSocketGateway, SubscribeMessage, WebSocketServer } from '@nestjs/websockets';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Server, Socket } from 'socket.io';
+import { Server } from 'socket.io';
 import { ObjectId } from 'mongodb';
 import { Chat } from './entities/chat.entity';
 

@@ -52,10 +52,10 @@ export class CategoriesService {
     if (updateCategoryDto.points) {
       await queryRunner(this.dataSource, [
         this.categoryRepository.update({ _id: objectId }, updateCategoryDto),
-        this.taskRepository.update(
-          { categoryId: id, status: Not(TaskStatus.CLOSED) },
-          { points: updateCategoryDto.points }
-        ),
+        // this.taskRepository.update(
+        //   // { categoryId: id, status: Not(TaskStatus.CLOSED) },
+        //   // { points: updateCategoryDto.points }
+        // ),
       ]);
     } else {
       await this.categoryRepository.update({ _id: objectId }, updateCategoryDto);
