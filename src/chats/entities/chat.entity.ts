@@ -1,24 +1,31 @@
-/* eslint-disable import/no-cycle */
-import { Entity, ObjectIdColumn, OneToMany, Column, CreateDateColumn, ManyToMany } from 'typeorm';
-import { ObjectId } from 'mongodb';
-import { User } from '../../users/entities/user.entity';
-import { Message } from '../../messages/entities/message.entity';
+import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Chat {
-  @ObjectIdColumn()
-  _id: ObjectId;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-  @CreateDateColumn()
-  createdAt: Date;
+  @Column({
+    nullable: false,
+    comment: 'Message is required',
+  })
+  message: string;
 
-  @ManyToMany(() => User, (user) => user.chats) // Указываем также, как в User сущности
-  participants: User[];
+  @Column({
+    nullable: false,
+    comment: 'Sender is required',
+  })
+  sender: string;
 
-  @OneToMany(() => Message, (message) => message.chat) // Один ко многим с сообщениями
-  messages: Message[];
+  @Column({
+    nullable: false,
+    comment: 'Recipient is required',
+  })
+  recipient: string;
 
-  @Column()
-  status: string; // Например, "active", "closed", "archived" и т.д.
-  // Дополнительные поля и методы для работы с чатом
+  @Column({
+    nullable: false,
+    comment: 'Time is required',
+  })
+  time: string;
 }
