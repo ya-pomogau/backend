@@ -55,6 +55,7 @@ API [https://api.kraev.nomoredomains.xyz/api](https://api.kraev.nomoredomains.xy
    docker compose build
    docker compose up -d
    ```
+   сервер будет доступен на 3001 порту
 
 
 ## Ограничения реализации
