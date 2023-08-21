@@ -9,4 +9,12 @@ export default () => ({
     password: process.env.DATABASE_PASSWORD,
     name: process.env.DATABASE_NAME || 'iHelp',
   },
+  vk: {
+    appId: process.env.VK_APP_ID || '51729194',
+    appSecret: process.env.VK_APP_SECRET || 'lyxbTQRoOzpKBX4PqjWm',
+    redirectUri: process.env.VK_APP_REDIRECT_URI || 'http://api.kraev.nomoredomains.xyz',
+  },
+  jwt: {
+    secret: process.env.JWT_SECRET || 'jwt-secret-key',
+  },
 });

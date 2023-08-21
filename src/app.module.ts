@@ -7,6 +7,7 @@ import configuration from './config/configuration';
 import { TypeOrmConfigService } from './config/database-config.factory';
 import { TasksModule } from './tasks/tasks.module';
 import { CategoriesModule } from './categories/categories.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { CategoriesModule } from './categories/categories.module';
       imports: [],
       useClass: TypeOrmConfigService,
     }),
+    AuthModule,
     TasksModule,
     CategoriesModule,
   ],

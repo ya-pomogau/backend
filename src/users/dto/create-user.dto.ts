@@ -19,6 +19,9 @@ export class CreateUserDto {
 
   status: StatusType | null;
 
+  @IsNotEmpty({ message: 'VK ID не должен быть пустым' })
+  vkId: number;
+
   @IsUrl({ require_protocol: true }, { message: 'Не корректный URL' })
   @IsNotEmpty({ message: 'Адрес не должен быть пустым' })
   vk: string;

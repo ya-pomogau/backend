@@ -21,6 +21,9 @@ export class User {
   status: StatusType | null;
 
   @Column()
+  vkId: number;
+
+  @Column()
   @IsUrl()
   vk: string;
 

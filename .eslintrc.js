@@ -29,6 +29,7 @@ module.exports = {
         ts: 'never',
       },
     ],
+    'class-methods-use-this': 'off',
     'import/prefer-default-export': 'off', // Отключаем правило
     'no-useless-constructor': 'off',
     'no-underscore-dangle': 'off',

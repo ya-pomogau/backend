@@ -28,6 +28,10 @@ export class UserService {
     return user;
   }
 
+  async getUserByVkId(vkId: number) {
+    return this.usersRepository.findOneBy({ vkId });
+  }
+
   async deleteUserById(id: ObjectId): Promise<void> {
     await this.usersRepository.delete(id);
   }
