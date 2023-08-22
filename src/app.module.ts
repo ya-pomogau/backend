@@ -7,6 +7,8 @@ import configuration from './config/configuration';
 import { TypeOrmConfigService } from './config/database-config.factory';
 import { TasksModule } from './tasks/tasks.module';
 import { CategoriesModule } from './categories/categories.module';
+import { AppGateway } from './app/app.gateway';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -17,8 +19,9 @@ import { CategoriesModule } from './categories/categories.module';
     }),
     TasksModule,
     CategoriesModule,
+    ChatModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, AppGateway],
 })
 export class AppModule {}
