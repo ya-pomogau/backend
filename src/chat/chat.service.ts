@@ -1,26 +1,21 @@
 import { Injectable } from '@nestjs/common';
-import { CreateChatDto } from './dto/create-chat.dto';
-import { UpdateChatDto } from './dto/update-chat.dto';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { Socket } from 'socket.io';
 
 @Injectable()
 export class ChatService {
-  create(createChatDto: CreateChatDto) {
-    return 'This action adds a new chat';
+  #clients: Socket[];
+
+  addClient(client: Socket): void {
+    this.#clients.push(client);
   }
 
-  findAll() {
-    return `This action returns all chat`;
+  remoteClient(id: string) {
+    this.#clients = this.#clients.filter((client) => client.id !== id);
+    console.log(this.#clients.length);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} chat`;
-  }
-
-  update(id: number, updateChatDto: UpdateChatDto) {
-    return `This action updates a #${id} chat`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} chat`;
+  getClientId(id: string): Socket | null {
+    return this.#clients.find((client) => client.id === id);
   }
 }
