@@ -1,4 +1,6 @@
 /* eslint-disable no-shadow */
+import type { JwtPayload } from 'jsonwebtoken';
+import { UserRole } from '../common/types/user-types';
 
 export const enum EDisplay {
   page = 'page',
@@ -41,9 +43,10 @@ export interface ITokenResponse {
   user_id: number;
 }
 
-export interface IJwtUser {
-  sub: string;
+export interface IJwtUser extends JwtPayload {
   vkId: number;
   role: string;
-  accessToken: string;
+  accessToken?: string;
 }
+
+export type TUserRole = Exclude<UserRole, 'admin' | 'master'>;

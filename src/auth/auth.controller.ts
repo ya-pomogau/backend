@@ -1,9 +1,9 @@
-import { Controller, Get, Query, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Query, Res, UseGuards } from '@nestjs/common';
 import type { Response } from 'express';
-import { User } from './decorators/user.decorator';
 import { AuthService } from './auth.service';
-import { EDisplay, EResponseType, EScope, IJwtUser } from './types';
+import { User } from './decorators/user.decorator';
 import { AuthGuard } from './guards/auth.guard';
+import { EDisplay, EResponseType, EScope, IJwtUser, TUserRole } from './types';
 
 @Controller()
 export class AuthController {
@@ -25,15 +25,20 @@ export class AuthController {
    * ```
    */
   @Get('login')
-  login(
+  loginVk(
     @Res() res: Response,
     @Query('display') display: EDisplay = EDisplay.page,
     @Query('scope') scope: EScope = EScope.friends,
-    @Query('response_type') responseType: EResponseType = EResponseType.code
+    @Query('response_type') responseType: EResponseType = EResponseType.code,
+    @Query('role') role: TUserRole = 'recipient'
   ) {
+    if (!['recipient', 'volunteer'].includes(role)) {
+      return res.status(HttpStatus.BAD_REQUEST).send('Роль должна быть recipient или volunteer');
+    }
+
     return res
-      .status(302)
-      .redirect(this.authService.getRedirectUrl({ display, scope, responseType }));
+      .status(HttpStatus.MOVED_PERMANENTLY)
+      .redirect(this.authService.getRedirectUrl({ display, scope, responseType, role }));
   }
 
   /**
@@ -46,7 +51,7 @@ export class AuthController {
   async callback(
     @Query('code') code?: string,
     @Query('error') error?: string,
-    @Query('role') role?: string,
+    @Query('role') role?: TUserRole,
     @Query('error_description') errorDescription?: string
   ): Promise<{ access_token: string } | string> {
     if (code) {
@@ -65,6 +70,10 @@ export class AuthController {
   @Get('me')
   @UseGuards(AuthGuard)
   async me(@User() user: IJwtUser) {
-    return this.authService.getUserVK(user.accessToken);
+    if ('accessToken' in user) {
+      return this.authService.getUserVK(user.accessToken);
+    }
+
+    return this.authService.getUserMongo(user.sub);
   }
 }
