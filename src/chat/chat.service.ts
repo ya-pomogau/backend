@@ -3,8 +3,8 @@ import { Injectable } from '@nestjs/common';
 import { Socket } from 'socket.io';
 
 @Injectable()
-export class ChatService {
-  #clients: Socket[];
+export class ChatsService {
+  #clients: Socket[] = [];
 
   addClient(client: Socket): void {
     this.#clients.push(client);

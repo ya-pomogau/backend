@@ -1,4 +1,4 @@
-import { 
+import {
   ConnectedSocket,
   MessageBody,
   OnGatewayConnection,
@@ -9,7 +9,7 @@ import {
 } from '@nestjs/websockets';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Server, Socket } from 'socket.io';
-import { ChatService } from './chat.service';
+import { ChatsService } from './chat.service';
 
 export interface Message {
   id: number;
@@ -26,13 +26,13 @@ export interface ServerToClientListen {
 }
 
 @WebSocketGateway({
-  namespace: 'chat',
+  namespace: 'chatZ',
   cors: {
     origin: '*',
   },
 })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  constructor(private charService: ChatService) {}
+  constructor(private chatService: ChatsService) {}
 
   @WebSocketServer() server: Server<ClientToServerListen, ServerToClientListen>;
 
@@ -42,11 +42,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   handleConnection(@ConnectedSocket() client: Socket) {
-    if (this.charService.getClientId(client.id)) this.charService.addClient(client);
+    this.chatService.addClient(client);
   }
 
   handleDisconnect(@ConnectedSocket() client: Socket) {
-    this.charService.remoteClient(client.id);
+    this.chatService.remoteClient(client.id);
     client.disconnect(true);
   }
 }
