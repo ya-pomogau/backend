@@ -1,10 +1,28 @@
-import { Controller, Get, HttpStatus, Query, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Post, Query, Res, UseGuards } from '@nestjs/common';
+import {
+  ApiBadRequestResponse,
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 import type { Response } from 'express';
+import exceptions from '../common/constants/exceptions';
+import type { User as TUser } from '../users/entities/user.entity';
 import { AuthService } from './auth.service';
+import { AuthUser } from './decorators/auth-user.decorator';
 import { User } from './decorators/user.decorator';
-import { AuthGuard } from './guards/auth.guard';
-import { EDisplay, EResponseType, EScope, IJwtUser, TUserRole } from './types';
+import { CallbackQueryDto } from './dto/callback.query.dto';
+import { ILoginVkQueryDto, LoginVkQueryDto } from './dto/login-vk.query.dto';
+import { SigninResponseDto } from './dto/signin-response.dto';
+import { JwtGuard } from './guards/jwt.guard';
+import { LocalGuard } from './guards/local.guard';
+import type { IJwtUser } from './types';
+import { ApiUnauthorized } from './types/unauthorized';
 
+@ApiTags('Auth')
 @Controller()
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -24,21 +42,30 @@ export class AuthController {
    * &force_hash=
    * ```
    */
-  @Get('login')
-  loginVk(
-    @Res() res: Response,
-    @Query('display') display: EDisplay = EDisplay.page,
-    @Query('scope') scope: EScope = EScope.friends,
-    @Query('response_type') responseType: EResponseType = EResponseType.code,
-    @Query('role') role: TUserRole = 'recipient'
-  ) {
-    if (!['recipient', 'volunteer'].includes(role)) {
-      return res.status(HttpStatus.BAD_REQUEST).send('Роль должна быть recipient или volunteer');
+  @ApiQuery({
+    type: LoginVkQueryDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.MOVED_PERMANENTLY,
+  })
+  @ApiUnauthorizedResponse({
+    type: ApiUnauthorized,
+  })
+  @ApiBadRequestResponse({
+    schema: {
+      type: 'string',
+      example: exceptions.auth.roleRequired,
+    },
+  })
+  @Get('login-vk')
+  loginVk(@Res() res: Response, @Query() query: ILoginVkQueryDto) {
+    if (!['recipient', 'volunteer'].includes(query.role)) {
+      return res.status(HttpStatus.BAD_REQUEST).send(exceptions.auth.roleRequired);
     }
 
     return res
       .status(HttpStatus.MOVED_PERMANENTLY)
-      .redirect(this.authService.getRedirectUrl({ display, scope, responseType, role }));
+      .redirect(this.authService.getRedirectUrl(query));
   }
 
   /**
@@ -47,33 +74,55 @@ export class AuthController {
    * { "access_token": "XXXXXX" }
    *```
    */
+  @ApiOkResponse({
+    status: 200,
+    type: SigninResponseDto,
+  })
+  @ApiUnauthorizedResponse({
+    type: ApiUnauthorized,
+  })
+  @ApiBadRequestResponse({
+    schema: {
+      type: 'string',
+      example: 'Ошибка авторизации',
+    },
+  })
   @Get('callback')
-  async callback(
-    @Query('code') code?: string,
-    @Query('error') error?: string,
-    @Query('role') role?: TUserRole,
-    @Query('error_description') errorDescription?: string
-  ): Promise<{ access_token: string } | string> {
-    if (code) {
+  async callback(@Query() query: CallbackQueryDto): Promise<SigninResponseDto | string> {
+    if (query.code) {
       try {
-        return await this.authService.getAccessToken(code, role);
+        return await this.authService.getAccessToken(query.code, query.role);
       } catch (err) {
         return `Произошла ошибка при получении access_token: ${err.message}`;
       }
-    } else if (error && errorDescription) {
-      return `Ошибка авторизации: ${error}, ${errorDescription}`;
+    } else if (query.error && query.error_description) {
+      return `Ошибка авторизации: ${query.error}, ${query.error_description}`;
     } else {
       return 'Неправильный код авторизации';
     }
   }
 
+  @ApiBearerAuth()
+  @ApiUnauthorizedResponse({
+    type: ApiUnauthorized,
+  })
   @Get('me')
-  @UseGuards(AuthGuard)
+  @UseGuards(JwtGuard)
   async me(@User() user: IJwtUser) {
     if ('accessToken' in user) {
       return this.authService.getUserVK(user.accessToken);
     }
 
-    return this.authService.getUserMongo(user.sub);
+    return this.authService.getUserMongo(user._id.toString());
+  }
+
+  @ApiOkResponse({
+    status: 200,
+    type: SigninResponseDto,
+  })
+  @UseGuards(LocalGuard)
+  @Post('signin')
+  async signin(@AuthUser() user: TUser): Promise<SigninResponseDto> {
+    return this.authService.auth(user);
   }
 }

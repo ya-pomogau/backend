@@ -1,14 +1,11 @@
 /* eslint-disable no-shadow */
-import type { JwtPayload } from 'jsonwebtoken';
-import { UserRole } from '../common/types/user-types';
-
-export const enum EDisplay {
+export enum EDisplay {
   page = 'page',
   popup = 'popup',
   mobile = 'mobile',
 }
 
-export const enum EScope {
+export enum EScope {
   notify = 'notify',
   friends = 'friends',
   photos = 'photos',
@@ -32,21 +29,7 @@ export const enum EScope {
   phone_number = 'phone_number',
 }
 
-export const enum EResponseType {
+export enum EResponseType {
   code = 'code',
   token = 'token',
 }
-
-export interface ITokenResponse {
-  access_token: string;
-  expires_in: string;
-  user_id: number;
-}
-
-export interface IJwtUser extends JwtPayload {
-  vkId: number;
-  role: string;
-  accessToken?: string;
-}
-
-export type TUserRole = Exclude<UserRole, 'admin' | 'master'>;

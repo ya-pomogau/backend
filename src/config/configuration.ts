@@ -1,6 +1,7 @@
 export default () => ({
   server: {
     port: process.env.SERVER_PORT || 3001,
+    cors_origins: process.env.CORS_ORIGINS,
   },
   database: {
     host: process.env.DATABASE_HOST || '127.0.0.1',
@@ -15,6 +16,11 @@ export default () => ({
     redirectUri: process.env.VK_APP_REDIRECT_URI || 'http://api.kraev.nomoredomains.xyz',
   },
   jwt: {
+    key: process.env.JWT_KEY || 'e776c17dcf7b8de11a1647faa49b89c2',
     secret: process.env.JWT_SECRET || 'jwt-secret-key',
+    ttl: process.env.JWT_TTL || '7d',
+  },
+  hash: {
+    salt: Number(process.env.SALT) || 10,
   },
 });

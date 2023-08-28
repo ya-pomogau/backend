@@ -1,6 +1,6 @@
 import { HttpService } from '@nestjs/axios';
 import { AxiosResponse } from 'axios';
-import { EVkNameCase, EVkUser, IRequestUser, IVkUser } from './users.types';
+import { EVkNameCase, EVkUser, IRequestUser, IVkUser } from './types';
 
 export class VkApiUsers {
   private readonly v = '5.131';

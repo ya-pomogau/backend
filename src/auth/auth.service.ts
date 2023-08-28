@@ -1,15 +1,21 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { VK_API_HOST } from '../common/constants';
+import exceptions from '../common/constants/exceptions';
+import type { UserRole } from '../common/types/user-types';
+import { HashService } from '../hash/hash.service';
+import { User } from '../users/entities/user.entity';
+import { EUserRole } from '../users/types';
 import { UserService } from '../users/user.service';
 import { VkApiUsers } from '../vk/users';
-import { EVkUser } from '../vk/users.types';
-import { VK_API_HOST } from './constants';
+import { EVkUser } from '../vk/types';
+import { LoginVkQueryDto } from './dto/login-vk.query.dto';
 import { Token } from './entities/token.entity';
-import type { ITokenResponse, TUserRole } from './types';
+import type { ITokenResponse } from './types';
 
 @Injectable()
 export class AuthService {
@@ -18,11 +24,12 @@ export class AuthService {
     private readonly httpService: HttpService,
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
+    private readonly hashService: HashService,
     @InjectRepository(Token)
     private readonly tokenRepository: Repository<Token>
   ) {}
 
-  _getRedirectUri(redirectUri: string, role: TUserRole) {
+  _getRedirectUri(redirectUri: string, role: UserRole) {
     const uri = new URL(redirectUri);
     uri.searchParams.set('role', role);
 
@@ -32,7 +39,7 @@ export class AuthService {
   /**
    * Get Redirect VK Login Page
    */
-  getRedirectUrl({ display, scope, responseType, role }): string {
+  getRedirectUrl({ display, scope, responseType, role }: LoginVkQueryDto): string {
     const { appId, redirectUri } = this.config.get('vk');
     const url = new URL(`${VK_API_HOST}/authorize`);
 
@@ -59,7 +66,7 @@ export class AuthService {
    * {"access_token":"vk1.a.XXXXXXX","expires_in":86389,"user_id":817575562}
    * ```
    */
-  async getAccessToken(code: string, role: TUserRole): Promise<{ access_token: string }> {
+  async getAccessToken(code: string, role: EUserRole): Promise<{ access_token: string }> {
     const { appId, appSecret, redirectUri } = this.config.get('vk');
     const url = new URL(`${VK_API_HOST}/access_token`);
 
@@ -88,9 +95,10 @@ export class AuthService {
           vk: `https://vk.com/${vkUser.domain}`,
           coordinates: [],
           fullname: `${vkUser.first_name} ${vkUser.last_name}`,
-          phone: '',
           role,
-          status: 'activated',
+          login: vkUser.domain,
+          phone: '',
+          password: '', // @todo set or not password for user vk?
         });
       } else {
         throw new Error('Пользователь не может быть создан');
@@ -109,14 +117,10 @@ export class AuthService {
     return {
       access_token: await this.jwtService.signAsync(
         {
-          // @todo which information will be needed
           sub: user._id,
-          vkId: user.vkId,
-          role: user.role,
           accessToken,
         },
         {
-          secret: this.config.get('jwt.secret'),
           expiresIn,
         }
       ),
@@ -147,5 +151,33 @@ export class AuthService {
    */
   getUserMongo(userId: string) {
     return this.userService.findUserById(userId);
+  }
+
+  /**
+   * @todo Auth user by login and password
+   */
+  auth(user: User) {
+    const payload = { sub: user._id };
+
+    return { access_token: this.jwtService.sign(payload) };
+  }
+
+  /**
+   * Validate password
+   */
+  async validatePassword(login: string, password: string): Promise<User | null> {
+    const user = await this.userService.getUserByLogin(login);
+
+    if (!user) {
+      throw new UnauthorizedException(exceptions.auth.unauthorized);
+    }
+
+    const isAuthorized = await this.hashService.compareHash(password, user.password);
+
+    if (!isAuthorized) {
+      throw new UnauthorizedException(exceptions.auth.unauthorized);
+    }
+
+    return isAuthorized ? user : null;
   }
 }
