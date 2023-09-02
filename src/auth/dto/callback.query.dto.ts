@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {IsEnum, IsNotEmpty, IsOptional, IsPhoneNumber, IsString, MaxLength, MinLength} from 'class-validator';
+import { IsOptional } from 'class-validator';
 import { EUserRole } from '../../users/types';
-import validationOptions from "../../common/constants/validation-options";
 
 export interface ICallbackQueryDto {
   role?: EUserRole;

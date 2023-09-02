@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional } from 'class-validator';
+
 import { TaskStatus } from '../types';
 
 export class TaskQueryDto {

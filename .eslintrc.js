@@ -41,5 +41,6 @@ module.exports = {
     'no-useless-constructor': 'off',
     'no-underscore-dangle': 'off',
     'no-console': ['warn', { 'allow': ['info'] }],
+
   },
 };

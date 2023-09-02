@@ -1,4 +1,5 @@
 /* eslint-disable no-shadow */
+
 export enum UserStatus {
   UNCONFIRMED = 0,
   CONFIRMED = 1,

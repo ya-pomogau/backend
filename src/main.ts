@@ -9,7 +9,7 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({ transform: true, whitelist: true, forbidNonWhitelisted: true })
   );
-  app.enableCors({ origin: '*' });
+  app.enableCors({ origin: configuration().server.cors_origins.split(',') });
 
   const config = new DocumentBuilder()
     .setTitle('ЯПомогаю')
@@ -21,6 +21,7 @@ async function bootstrap() {
   SwaggerModule.setup('/api', app, document);
 
   await app.listen(configuration().server.port);
+
   console.info(`running on: ${await app.getUrl()}`);
 }
 bootstrap();

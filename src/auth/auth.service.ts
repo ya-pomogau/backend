@@ -172,6 +172,7 @@ export class AuthService {
   /**
    * @todo Auth user by login and password
    */
+
   auth(user: User) {
     const payload = { sub: user._id };
 

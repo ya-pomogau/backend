@@ -7,7 +7,9 @@ import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import exceptions from '../common/constants/exceptions';
+
 import { AdminPermission, EUserRole, UserStatus } from './types';
+
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { HashService } from '../hash/hash.service';
 
@@ -23,6 +25,7 @@ export class UserService {
     const users = await this.usersRepository.find();
     return users.map((user) => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
       const { login, password, ...rest } = user;
 
       return rest;
@@ -83,6 +86,7 @@ export class UserService {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
     const { login, password, ...rest } = user;
 
     return rest;
@@ -96,6 +100,7 @@ export class UserService {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
     const { login, password, ...rest } = user;
 
     return rest;
@@ -129,7 +134,9 @@ export class UserService {
     if (!user) {
       throw new NotFoundException(exceptions.users.notFound);
     }
+
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
     const { login, password, ...rest } = user;
 
     return rest;
@@ -161,6 +168,7 @@ export class UserService {
 
   async giveKey(id: string) {
     const user = await this.findUserById(id);
+
     if (user.role !== EUserRole.VOLUNTEER) {
       throw new ForbiddenException(exceptions.users.onlyForVolunteers);
     }

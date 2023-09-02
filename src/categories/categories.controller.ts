@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, UseGuards } from '@nestjs/common';
+
 import {
   ApiBearerAuth,
   ApiForbiddenResponse,
@@ -6,6 +7,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
@@ -13,6 +15,7 @@ import { JwtGuard } from '../auth/guards/jwt.guard';
 import { UserRolesGuard } from '../auth/guards/user-roles.guard';
 import { AdminPermissionsGuard } from '../auth/guards/admin-permissions.guard';
 import { UserRoles } from '../auth/decorators/user-roles.decorator';
+
 import { AdminPermission, EUserRole } from '../users/types';
 import { AdminPermissions } from '../auth/decorators/admin-permissions.decorator';
 import { Category } from './entities/category.entity';

@@ -1,6 +1,7 @@
 import { IsInt, IsNotEmpty, Max, Min } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import validationOptions from '../../common/constants/validation-options';
+
 import { UserStatus } from '../types';
 
 export class ChangeStatusDto {

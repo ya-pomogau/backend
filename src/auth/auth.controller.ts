@@ -3,7 +3,6 @@ import {
   Controller,
   Get,
   HttpStatus,
-  InternalServerErrorException,
   Post,
   Query,
   Res,

@@ -12,7 +12,9 @@ import {
   IsNumber,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+
 import { EUserRole } from '../types';
+
 import validationOptions from '../../common/constants/validation-options';
 
 export class CreateUserDto {

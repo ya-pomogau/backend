@@ -1,9 +1,12 @@
 import { IsArray, IsDate, IsNumber, IsString, IsUrl, Length } from 'class-validator';
+
 import { Column, CreateDateColumn, Entity, Index, ObjectIdColumn, UpdateDateColumn } from 'typeorm';
 import { ObjectId } from 'mongodb';
 import { Exclude } from 'class-transformer';
 import { ApiResponseProperty } from '@nestjs/swagger';
+
 import { AdminPermission, EUserRole, UserStatus } from '../types';
+
 import validationOptions from '../../common/constants/validation-options';
 
 @Entity()
@@ -87,7 +90,7 @@ export class User {
 
   @ApiResponseProperty()
   @Column()
-  scores = 0;
+  scores: number = 0;
 
   @ApiResponseProperty()
   @Column()

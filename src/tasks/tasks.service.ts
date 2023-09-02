@@ -1,5 +1,6 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { DataSource, MongoRepository, Not, Repository } from 'typeorm';
+import { DataSource, MongoRepository, Repository } from 'typeorm';
+
 import { InjectRepository } from '@nestjs/typeorm';
 import { ObjectId } from 'mongodb';
 import { NotFoundException } from '@nestjs/common/exceptions';
@@ -9,7 +10,9 @@ import { User } from '../users/entities/user.entity';
 import exceptions from '../common/constants/exceptions';
 import { Category } from '../categories/entities/category.entity';
 import timeDifference from '../common/utils/timeDifference';
+
 import { EUserRole, UserStatus } from '../users/types';
+
 import { TaskStatus } from './types';
 import { dayInMs } from '../common/constants';
 import queryRunner from '../common/helpers/queryRunner';

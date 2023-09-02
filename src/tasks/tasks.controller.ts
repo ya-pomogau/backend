@@ -10,6 +10,7 @@ import {
   UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
+
 import {
   ApiBearerAuth,
   ApiForbiddenResponse,
@@ -18,6 +19,7 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
+
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { User } from '../users/entities/user.entity';
@@ -25,7 +27,9 @@ import { TasksWsGateway } from '../tasks-ws/tasks-ws.gateway';
 import { WsTasksEvents } from '../tasks-ws/types';
 import { AuthUser } from '../auth/decorators/auth-user.decorator';
 import { JwtGuard } from '../auth/guards/jwt.guard';
+
 import { AdminPermission, EUserRole } from '../users/types';
+
 import { UserRoles } from '../auth/decorators/user-roles.decorator';
 import { UserRolesGuard } from '../auth/guards/user-roles.guard';
 import { AdminPermissionsGuard } from '../auth/guards/admin-permissions.guard';
@@ -34,6 +38,7 @@ import { ConfirmTaskDto } from './dto/confirm-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { Task } from './entities/task.entity';
 import { TaskQueryDto } from './dto/task-query.dto';
+
 import exceptions from '../common/constants/exceptions';
 
 @ApiBearerAuth()

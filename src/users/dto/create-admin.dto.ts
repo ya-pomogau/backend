@@ -14,6 +14,7 @@ import {
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import validationOptions from '../../common/constants/validation-options';
+
 import { AdminPermission, EUserRole } from '../types';
 
 export class CreateAdminDto {

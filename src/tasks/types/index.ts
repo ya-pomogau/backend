@@ -1,4 +1,5 @@
 /* eslint-disable no-shadow */
+
 import { ApiProperty } from '@nestjs/swagger';
 
 export class TaskConfirmation {

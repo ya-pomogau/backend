@@ -5,10 +5,6 @@ import {
   IsPhoneNumber,
   IsEnum,
   MaxLength,
-  IsArray,
-  IsNumber,
-  ArrayMinSize,
-  ArrayMaxSize,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
