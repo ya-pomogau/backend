@@ -9,7 +9,8 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({ transform: true, whitelist: true, forbidNonWhitelisted: true })
   );
-  app.enableCors({ origin: configuration().server.cors_origins.split(',') });
+  // app.enableCors({ origin: configuration().server.cors_origins.split(',') });
+  app.enableCors({ origin: '*' });
 
   const config = new DocumentBuilder()
     .setTitle('ЯПомогаю')
