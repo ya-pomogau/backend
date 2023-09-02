@@ -7,15 +7,9 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { Server, Socket } from 'socket.io';
 import { ChatsService } from './chat.service';
-
-export interface Message {
-  id: number;
-  socketId: string;
-  isFrom: boolean;
-}
+import { Message } from './entities/chat.entity';
 
 export interface ClientToServerListen {
   message: (message: Message) => void;
@@ -26,7 +20,7 @@ export interface ServerToClientListen {
 }
 
 @WebSocketGateway({
-  namespace: 'chatZ',
+  namespace: 'chat',
   cors: {
     origin: '*',
   },
@@ -38,11 +32,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('message')
   handleMessage(@MessageBody() message: Message): void {
+    console.log('message', message);
     this.server.emit('message', message);
+
+    this.chatService.saveChat(message);
   }
 
-  handleConnection(@ConnectedSocket() client: Socket) {
-    this.chatService.addClient(client);
+  async handleConnection(@ConnectedSocket() client: Socket) {
+    if (!this.chatService.getClientId(client.id)) this.chatService.addClient(client);
+    const chat = await this.chatService.getChat();
+    console.log('chat', chat);
   }
 
   handleDisconnect(@ConnectedSocket() client: Socket) {

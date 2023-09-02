@@ -1,13 +1,30 @@
 import { Injectable } from '@nestjs/common';
-// eslint-disable-next-line import/no-extraneous-dependencies
+import { InjectRepository } from '@nestjs/typeorm';
 import { Socket } from 'socket.io';
+import { Repository } from 'typeorm';
+import { Chat } from './entities/chat.entity';
 
 @Injectable()
 export class ChatsService {
+  constructor(
+    @InjectRepository(Chat)
+    private readonly chatsRepository: Repository<Chat>
+  ) {}
+
   #clients: Socket[] = [];
 
   addClient(client: Socket): void {
     this.#clients.push(client);
+  }
+
+  async saveChat(message) {
+    const chat = await this.chatsRepository.save(message);
+    return chat;
+  }
+
+  async getChat() {
+    const chat = await this.chatsRepository.find();
+    return chat;
   }
 
   remoteClient(id: string) {

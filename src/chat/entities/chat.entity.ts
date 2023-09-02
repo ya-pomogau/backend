@@ -3,14 +3,21 @@ import { Column, Entity, ObjectIdColumn } from 'typeorm';
 
 export interface Message {
   id: string;
-  sender: string;
+  socketId: string;
   text: string;
+  sender: string;
+  recipient: string;
+  file: string;
+  isFrom: boolean;
+  date: Date;
 }
 
 @Entity()
 export class Chat {
   @ObjectIdColumn()
   id: ObjectId;
+
+  // нужно сделать связь с конкретным пользователем
 
   @Column()
   messages: Message[];
