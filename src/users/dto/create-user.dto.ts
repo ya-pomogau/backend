@@ -36,13 +36,18 @@ export class CreateUserDto {
   @ApiProperty({ example: 'recipient' })
   role: EUserRole;
 
-  @IsNumber()
+  @IsNumber({}, { message: validationOptions.messages.shouldBePositiveNumber })
+  @IsNotEmpty({ message: validationOptions.messages.isEmpty })
   vkId: number;
 
   @IsUrl({ require_protocol: true }, { message: validationOptions.messages.incorrectUrl })
   @IsNotEmpty({ message: validationOptions.messages.isEmpty })
   @ApiProperty({ example: 'https://vk.com/gosha-recipient' })
   vkLink: string;
+
+  @IsString({ message: validationOptions.messages.shouldBeString })
+  @IsNotEmpty({ message: validationOptions.messages.isEmpty })
+  login: string;
 
   @IsUrl({ require_protocol: true }, { message: validationOptions.messages.incorrectUrl })
   @IsNotEmpty({ message: validationOptions.messages.isEmpty })

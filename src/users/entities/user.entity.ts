@@ -29,13 +29,13 @@ export class User {
   @ApiResponseProperty()
   @IsNumber()
   @Column()
-  @Index({ unique: true })
+  @Index()
   vkId?: number;
 
   @ApiResponseProperty()
   @Column()
   @IsUrl()
-  @Index({ unique: true })
+  @Index()
   vkLink?: string;
 
   @Column()
@@ -96,4 +96,8 @@ export class User {
   @Column()
   @IsArray()
   permissions?: AdminPermission[];
+
+  @ApiResponseProperty()
+  @Column()
+  completedTasks: number = 0;
 }

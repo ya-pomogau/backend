@@ -14,7 +14,7 @@ import timeDifference from '../common/utils/timeDifference';
 import { EUserRole, UserStatus } from '../users/types';
 
 import { TaskStatus } from './types';
-import { dayInMs } from '../common/constants';
+import {dayInMs, pointsTo2Status} from '../common/constants';
 import queryRunner from '../common/helpers/queryRunner';
 import { UpdateTaskDto } from './dto/update-task.dto';
 
@@ -244,9 +244,17 @@ export class TasksService {
       ),
       this.userRepository.update(
         { _id: objectVolunteerId },
-        { scores: volunteer.scores + task.points }
+        { scores: volunteer.scores + task.points, completedTasks: volunteer.completedTasks + 1 }
       ),
     ]);
+
+    if (volunteer.completedTasks + 1 === pointsTo2Status) {
+      console.log('Отбивка в чат админу');
+    }
+
+    if (volunteer.completedTasks + 1 === pointsTo2Status) {
+      console.log('Отбивка в чат админу');
+    }
   }
 
   async closeTask(taskId: string, completed: boolean) {

@@ -82,6 +82,7 @@ export class AuthService {
       vkId: vkUser.id,
       avatar: vkUser.photo_max,
       vkLink: `https://vk.com/${vkUser.domain}`,
+      login: String(vkUser.id),
       ...signupVkDto,
       coordinates: signupVkDto.coordinates.split(',').map((str) => +str),
     });

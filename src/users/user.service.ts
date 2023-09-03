@@ -53,6 +53,7 @@ export class UserService {
 
     const newUser = this.usersRepository.create(createUserDto);
     return this.usersRepository.save(newUser).catch((e) => {
+      console.log(e);
       if (e.code === exceptions.dbCodes.notUnique) {
         throw new BadRequestException(exceptions.users.notUniqueVk);
       }
@@ -79,6 +80,8 @@ export class UserService {
 
     const user = await this.usersRepository.save(newUser).catch((e) => {
       if (e.code === exceptions.dbCodes.notUnique) {
+        console.log(e);
+
         throw new BadRequestException(exceptions.users.notUniqueLogin);
       }
 

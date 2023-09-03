@@ -1,11 +1,4 @@
-import {
-  IsNotEmpty,
-  IsString,
-  MinLength,
-  IsPhoneNumber,
-  IsEnum,
-  MaxLength,
-} from 'class-validator';
+import { IsNotEmpty, IsString, MinLength, IsPhoneNumber, IsEnum, MaxLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 import validationOptions from '../../common/constants/validation-options';
