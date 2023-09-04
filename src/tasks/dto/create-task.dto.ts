@@ -45,8 +45,9 @@ export class CreateTaskDto {
   @IsDate()
   @IsNotEmpty({ message: validationOptions.messages.isEmpty })
   @Type(() => Date)
-  @ApiProperty({ example: new Date('2024-01-01') })
-  completionDate: Date;
+  @ApiProperty({ example: new Date('2024-01-01'), required: false })
+  @IsOptional()
+  completionDate?: Date;
 
   @IsString({ message: validationOptions.messages.shouldBeString })
   @IsNotEmpty({ message: validationOptions.messages.isEmpty })

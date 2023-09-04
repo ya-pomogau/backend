@@ -2,6 +2,10 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-vkontakte';
 import { Injectable } from '@nestjs/common';
 
+/**
+ * @deprecated use JwtStrategy
+ */
+
 @Injectable()
 export class VkontakteStrategy extends PassportStrategy(Strategy, 'vkontakte') {
   constructor() {

@@ -12,7 +12,9 @@ import {
   IsNumber,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { UserRole } from '../types';
+
+import { EUserRole } from '../types';
+
 import validationOptions from '../../common/constants/validation-options';
 
 export class CreateUserDto {
@@ -27,17 +29,25 @@ export class CreateUserDto {
   @ApiProperty({ example: 'Георгий' })
   fullname: string;
 
-  @IsEnum(UserRole, {
-    message: validationOptions.messages.strictValues + Object.values(UserRole).join(', '),
+  @IsEnum(EUserRole, {
+    message: validationOptions.messages.strictValues + Object.values(EUserRole).join(', '),
   })
   @IsNotEmpty({ message: validationOptions.messages.isEmpty })
   @ApiProperty({ example: 'recipient' })
-  role: UserRole;
+  role: EUserRole;
+
+  @IsNumber({}, { message: validationOptions.messages.shouldBePositiveNumber })
+  @IsNotEmpty({ message: validationOptions.messages.isEmpty })
+  vkId: number;
 
   @IsUrl({ require_protocol: true }, { message: validationOptions.messages.incorrectUrl })
   @IsNotEmpty({ message: validationOptions.messages.isEmpty })
   @ApiProperty({ example: 'https://vk.com/gosha-recipient' })
-  vk: string;
+  vkLink: string;
+
+  @IsString({ message: validationOptions.messages.shouldBeString })
+  @IsNotEmpty({ message: validationOptions.messages.isEmpty })
+  login: string;
 
   @IsUrl({ require_protocol: true }, { message: validationOptions.messages.incorrectUrl })
   @IsNotEmpty({ message: validationOptions.messages.isEmpty })
@@ -66,21 +76,4 @@ export class CreateUserDto {
   @IsNotEmpty({ message: validationOptions.messages.isEmpty })
   @ApiProperty({ example: [59.932031, 30.355628] })
   coordinates: number[];
-
-  // только для тестирования!!!
-  @IsString({ message: validationOptions.messages.shouldBeString })
-  @IsNotEmpty({ message: validationOptions.messages.isEmpty })
-  @MinLength(validationOptions.limits.login.min, {
-    message: validationOptions.messages.tooShort,
-  })
-  @MaxLength(validationOptions.limits.login.max, {
-    message: validationOptions.messages.tooLong,
-  })
-  @ApiProperty({ example: 'gosha' })
-  login: string;
-
-  @IsString({ message: validationOptions.messages.shouldBeString })
-  @IsNotEmpty({ message: validationOptions.messages.isEmpty })
-  @ApiProperty({ example: 'gosha123' })
-  password: string;
 }

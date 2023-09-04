@@ -14,7 +14,8 @@ import {
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import validationOptions from '../../common/constants/validation-options';
-import { AdminPermission, UserRole } from '../types';
+
+import { AdminPermission, EUserRole } from '../types';
 
 export class CreateAdminDto {
   @IsString({ message: validationOptions.messages.shouldBeString })
@@ -44,12 +45,12 @@ export class CreateAdminDto {
   @ApiProperty({ example: 'vasya123' })
   password: string;
 
-  @IsEnum(UserRole, {
-    message: validationOptions.messages.strictValues + Object.values(UserRole).join(', '),
+  @IsEnum(EUserRole, {
+    message: validationOptions.messages.strictValues + Object.values(EUserRole).join(', '),
   })
   @IsNotEmpty({ message: validationOptions.messages.isEmpty })
   @ApiProperty({ example: 'admin' })
-  role: UserRole;
+  role: EUserRole;
 
   @IsUrl({ require_protocol: true }, { message: validationOptions.messages.incorrectUrl })
   @IsOptional()

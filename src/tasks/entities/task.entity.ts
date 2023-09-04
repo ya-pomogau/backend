@@ -1,5 +1,7 @@
 import { Column, CreateDateColumn, Entity, ObjectIdColumn, UpdateDateColumn } from 'typeorm';
-import { IsDate, IsInt, IsString, Length } from 'class-validator';
+
+import { IsInt, IsString, Length } from 'class-validator';
+
 import { ObjectId } from 'mongodb';
 import { ApiProperty, ApiResponseProperty } from '@nestjs/swagger';
 import { TaskConfirmation, TaskStatus } from '../types';
@@ -38,8 +40,7 @@ export class Task {
 
   @ApiResponseProperty()
   @Column()
-  @IsDate()
-  completionDate: Date;
+  completionDate: Date | null;
 
   @ApiResponseProperty()
   @Column()
@@ -79,7 +80,7 @@ export class Task {
 
   @ApiResponseProperty()
   @Column()
-  completed: boolean = false;
+  completed = false;
 
   @ApiResponseProperty()
   @Column()

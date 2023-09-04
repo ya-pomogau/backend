@@ -1,5 +1,5 @@
 import { SetMetadata } from '@nestjs/common';
-import { AdminPermission, UserRole } from '../../users/types';
+import { AdminPermission } from '../../users/types';
 
 export const PERMISSIONS_KEY = 'permissions';
 export const AdminPermissions = (...adminPermissions: AdminPermission[]) =>

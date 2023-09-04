@@ -7,7 +7,9 @@ import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import exceptions from '../common/constants/exceptions';
-import { AdminPermission, UserRole, UserStatus } from './types';
+
+import { AdminPermission, EUserRole, UserStatus } from './types';
+
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { HashService } from '../hash/hash.service';
 
@@ -19,52 +21,52 @@ export class UserService {
     private readonly hashService: HashService
   ) {}
 
-  async findAll(): Promise<User[]> {
+  async findAll(): Promise<Omit<User, 'login' | 'password'>[]> {
     const users = await this.usersRepository.find();
     return users.map((user) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
       const { login, password, ...rest } = user;
 
       return rest;
     });
   }
 
+  async findBy(query: object): Promise<User[]> {
+    const taskQuery: object = {};
+
+    for (const property in query) {
+      taskQuery[property] = { $in: query[property].split(',') };
+    }
+
+    const tasks = await this.usersRepository.find({
+      where: taskQuery,
+    });
+
+    return tasks;
+  }
+
   async createUser(createUserDto: CreateUserDto): Promise<User> {
-    if (createUserDto.role === UserRole.ADMIN || createUserDto.role === UserRole.MASTER) {
+    if (createUserDto.role === EUserRole.ADMIN || createUserDto.role === EUserRole.MASTER) {
       throw new ForbiddenException(exceptions.users.userCreating);
     }
 
-    // const newUser = this.usersRepository.create(createUserDto);
-    // return this.usersRepository.save(newUser).catch((e) => {
-    //   if (e.code === exceptions.dbCodes.notUnique) {
-    //     throw new BadRequestException(exceptions.users.notUniqueVk);
-    //   }
-    //
-    //   return e;
-    // });
-
-    // только для тестирования!!! выше вариант в прод
-    const hash = await this.hashService.generateHash(createUserDto.password);
-
-    const newUser = await this.usersRepository.create({
-      ...createUserDto,
-      password: hash,
-    });
-
-    const user = await this.usersRepository.save(newUser).catch((e) => {
+    const newUser = this.usersRepository.create(createUserDto);
+    return this.usersRepository.save(newUser).catch((e) => {
+      console.log(e);
       if (e.code === exceptions.dbCodes.notUnique) {
-        throw new BadRequestException(exceptions.users.notUniqueLogin);
+        throw new BadRequestException(exceptions.users.notUniqueVk);
       }
 
       return e;
     });
-
-    const { login, password, ...rest } = user;
-
-    return rest;
   }
 
   async createAdmin(createAdminDto: CreateAdminDto): Promise<User> {
-    if (createAdminDto.role === UserRole.RECIPIENT || createAdminDto.role === UserRole.VOLUNTEER) {
+    if (
+      createAdminDto.role === EUserRole.RECIPIENT ||
+      createAdminDto.role === EUserRole.VOLUNTEER
+    ) {
       throw new ForbiddenException(exceptions.users.adminCreating);
     }
 
@@ -78,11 +80,15 @@ export class UserService {
 
     const user = await this.usersRepository.save(newUser).catch((e) => {
       if (e.code === exceptions.dbCodes.notUnique) {
+        console.log(e);
+
         throw new BadRequestException(exceptions.users.notUniqueLogin);
       }
 
       return e;
     });
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
 
     const { login, password, ...rest } = user;
 
@@ -96,6 +102,8 @@ export class UserService {
       throw new NotFoundException(exceptions.users.notFound);
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
     const { login, password, ...rest } = user;
 
     return rest;
@@ -107,11 +115,21 @@ export class UserService {
     return user;
   }
 
+  async getUserByVkId(vkId: number) {
+    const user = await this.usersRepository.findOneBy({ vkId });
+
+    if (!user) {
+      throw new NotFoundException(exceptions.users.notFound);
+    }
+
+    return user;
+  }
+
   async deleteUserById(id: ObjectId): Promise<void> {
     await this.usersRepository.delete(id);
   }
 
-  async findUserById(id: string): Promise<User | undefined> {
+  async findUserById(id: string): Promise<Omit<User, 'login'> | undefined> {
     const _id = new ObjectId(id);
     const user = await this.usersRepository.findOne({
       where: { _id },
@@ -119,6 +137,9 @@ export class UserService {
     if (!user) {
       throw new NotFoundException(exceptions.users.notFound);
     }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
     const { login, password, ...rest } = user;
 
     return rest;
@@ -132,11 +153,15 @@ export class UserService {
   async changeStatus(id: string, status: UserStatus) {
     const user = await this.findUserById(id);
     if (
-      user.role !== UserRole.VOLUNTEER &&
+      user.role !== EUserRole.VOLUNTEER &&
       status !== UserStatus.CONFIRMED &&
       status !== UserStatus.UNCONFIRMED
     ) {
       throw new ForbiddenException(exceptions.users.onlyForVolunteers);
+    }
+
+    if (status > 2) {
+      throw new BadRequestException(exceptions.users.notForKeys);
     }
 
     await this.usersRepository.update({ _id: new ObjectId(id) }, { status });
@@ -146,7 +171,8 @@ export class UserService {
 
   async giveKey(id: string) {
     const user = await this.findUserById(id);
-    if (user.role !== UserRole.VOLUNTEER) {
+
+    if (user.role !== EUserRole.VOLUNTEER) {
       throw new ForbiddenException(exceptions.users.onlyForVolunteers);
     }
 
@@ -158,7 +184,7 @@ export class UserService {
   async changeAdminPermissions(id: string, permissions: AdminPermission[]) {
     const user = await this.findUserById(id);
 
-    if (user.role !== UserRole.ADMIN) {
+    if (user.role !== EUserRole.ADMIN) {
       throw new ForbiddenException(exceptions.users.onlyForAdmins);
     }
 

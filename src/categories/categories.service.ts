@@ -61,6 +61,18 @@ export class CategoriesService {
       await this.categoryRepository.update({ _id: objectId }, updateCategoryDto);
     }
 
+    if (updateCategoryDto.accessStatus) {
+      await queryRunner(this.dataSource, [
+        this.categoryRepository.update({ _id: objectId }, updateCategoryDto),
+        this.taskRepository.update(
+          { categoryId: id, status: Not(TaskStatus.CLOSED) },
+          { points: updateCategoryDto.accessStatus }
+        ),
+      ]);
+    } else {
+      await this.categoryRepository.update({ _id: objectId }, updateCategoryDto);
+    }
+
     return this.categoryRepository.findOneBy({ _id: objectId });
   }
 }

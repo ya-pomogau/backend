@@ -1,3 +1,5 @@
+/* eslint-disable no-shadow */
+
 export enum UserStatus {
   UNCONFIRMED = 0,
   CONFIRMED = 1,
@@ -5,7 +7,7 @@ export enum UserStatus {
   ACTIVATED = 3,
 }
 
-export enum UserRole {
+export enum EUserRole {
   MASTER = 'master',
   ADMIN = 'admin',
   RECIPIENT = 'recipient',

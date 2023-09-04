@@ -1,8 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional } from 'class-validator';
 
+import { TaskStatus } from '../types';
+
 export class TaskQueryDto {
-  @ApiProperty({ example: 'created,accepted,closed', required: false })
+  @ApiProperty({ example: TaskStatus.ACCEPTED, required: false, enum: TaskStatus })
   @IsOptional()
   status?: string;
 
