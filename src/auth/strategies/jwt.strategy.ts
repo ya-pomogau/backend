@@ -17,7 +17,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(jwtPayload: IJwtUser) {
+    console.log(`jwt.strategy.ts - 1) Извлечен jwtPayload из токена: ${jwtPayload}`);
+
     const user = await this.usersService.findUserById(jwtPayload.sub);
+
+    console.log(`jwt.strategy.ts - 2) Найден пользователь по id из jwtPayload: ${user}`);
 
     if (!user) {
       throw new UnauthorizedException(exceptions.auth.unauthorized);
