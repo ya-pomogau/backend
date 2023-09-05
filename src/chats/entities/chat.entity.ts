@@ -1,6 +1,8 @@
 /* eslint-disable import/no-cycle */
-import { Entity, ObjectIdColumn, Column } from 'typeorm';
+import { Entity, ObjectIdColumn, Column, UpdateDateColumn, CreateDateColumn } from 'typeorm';
 import { ObjectId } from 'mongodb';
+import { ApiResponseProperty } from '@nestjs/swagger';
+import { IsDate } from 'class-validator';
 
 export interface Message {
   id: string;
@@ -16,4 +18,14 @@ export class Chat {
 
   @Column('simple-json')
   messages: Message[];
+
+  @ApiResponseProperty()
+  @CreateDateColumn()
+  @IsDate()
+  createdAt: Date;
+
+  @ApiResponseProperty()
+  @UpdateDateColumn()
+  @IsDate()
+  updatedAt: Date;
 }

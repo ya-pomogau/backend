@@ -10,6 +10,7 @@ import { TasksWsModule } from './tasks-ws/tasks-ws.module';
 import { HashModule } from './hash/hash.module';
 import { AuthModule } from './auth/auth.module';
 import { ChatsModule } from './chats/chats.module';
+import { CronService } from './chats/cronService';
 
 @Module({
   imports: [
@@ -26,5 +27,6 @@ import { ChatsModule } from './chats/chats.module';
     AuthModule,
     ChatsModule,
   ],
+  // providers: [CronService],
 })
 export class AppModule {}
