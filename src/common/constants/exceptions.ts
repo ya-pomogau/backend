@@ -29,12 +29,15 @@ export default {
     wrongStatus: 'Статус пользователя не соответствует категории заявки',
   },
   auth: {
-    unauthorized: 'Пользователь не найден или неверный пароль',
+    wrongLoginOrPassword: 'Пользователь с таким логином не найден или неверный пароль',
+    unauthorized: 'Пользователь не авторизован',
     blocked: 'Пользователь заблокирован',
-
     roleRequired: 'Роль должна быть recipient или volunteer',
   },
   dbCodes: {
     notUnique: 11000,
+  },
+  objectId: {
+    wrongId: 'Id должен быть строкой из 24 шестнадцатеричных символов',
   },
 };

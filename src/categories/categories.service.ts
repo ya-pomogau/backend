@@ -9,6 +9,7 @@ import exeptions from '../common/constants/exceptions';
 import queryRunner from '../common/helpers/queryRunner';
 import { Task } from '../tasks/entities/task.entity';
 import { TaskStatus } from '../tasks/types';
+import checkValidId from '../common/helpers/checkValidId';
 
 @Injectable()
 export class CategoriesService {
@@ -30,6 +31,7 @@ export class CategoriesService {
   }
 
   async findById(id: string): Promise<Category> {
+    checkValidId(id);
     const objectId = new ObjectId(id);
     const category = await this.categoryRepository.findOneBy({ _id: objectId });
 
@@ -41,6 +43,7 @@ export class CategoriesService {
   }
 
   async update(id: string, updateCategoryDto: UpdateCategoryDto) {
+    checkValidId(id);
     const objectId = new ObjectId(id);
 
     const category = await this.categoryRepository.findOneBy({ _id: objectId });

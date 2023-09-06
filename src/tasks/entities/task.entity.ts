@@ -40,7 +40,7 @@ export class Task {
 
   @ApiResponseProperty()
   @Column()
-  completionDate: Date | null;
+  completionDate: Date | null = null;
 
   @ApiResponseProperty()
   @Column()
@@ -80,9 +80,21 @@ export class Task {
 
   @ApiResponseProperty()
   @Column()
-  completed = false;
+  completed: boolean = false;
 
   @ApiResponseProperty()
   @Column()
   confirmation: TaskConfirmation = { recipient: null, volunteer: null };
+
+  @ApiResponseProperty()
+  @Column()
+  acceptedAt: Date | null = null;
+
+  @ApiResponseProperty()
+  @Column()
+  closedAt: Date | null = null;
+
+  @ApiResponseProperty()
+  @Column()
+  isConflict: boolean = false;
 }

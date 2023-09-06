@@ -90,7 +90,7 @@ export class User {
 
   @ApiResponseProperty()
   @Column()
-  scores: number = 0;
+  scores = 0;
 
   @ApiResponseProperty()
   @Column()
@@ -100,4 +100,8 @@ export class User {
   @ApiResponseProperty()
   @Column()
   completedTasks: number = 0;
+
+  @ApiResponseProperty()
+  @Column()
+  lastActivityDate: Date | null = null;
 }

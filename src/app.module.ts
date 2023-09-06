@@ -12,6 +12,7 @@ import { HashModule } from './hash/hash.module';
 import { TasksWsModule } from './tasks-ws/tasks-ws.module';
 import { TasksModule } from './tasks/tasks.module';
 import { UserModule } from './users/user.module';
+import { BlogArticlesModule } from './blog-articles/blog-articles.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { UserModule } from './users/user.module';
     TasksWsModule,
     HashModule,
     AuthModule,
+    BlogArticlesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -14,7 +14,6 @@ import type { Response } from 'express';
 import type { User as TUser } from '../users/entities/user.entity';
 import { AuthService } from './auth.service';
 import { AuthUser } from './decorators/auth-user.decorator';
-import { User } from './decorators/user.decorator';
 import { CallbackQueryDto } from './dto/callback.query.dto';
 import { ILoginVkQueryDto, LoginVkQueryDto } from './dto/login-vk.query.dto';
 import { SigninResponseDto } from './dto/signin-response.dto';
@@ -151,7 +150,7 @@ export class AuthController {
   })
   @Get('me')
   @UseGuards(JwtGuard)
-  async me(@User() user: IJwtUser) {
+  async me(@AuthUser() user: IJwtUser) {
     if ('accessToken' in user) {
       return this.authService.getUserVK(user.accessToken);
     }

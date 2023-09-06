@@ -1,6 +1,6 @@
 import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { MongoRepository } from 'typeorm';
 import { ObjectId } from 'mongodb';
 import { NotFoundException } from '@nestjs/common/exceptions';
 import { User } from './entities/user.entity';
@@ -8,16 +8,19 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import exceptions from '../common/constants/exceptions';
 
-import { AdminPermission, EUserRole, UserStatus } from './types';
+import { AdminPermission, EUserRole, ReportStatus, UserStatus } from './types';
 
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { HashService } from '../hash/hash.service';
+import { GenerateReportDto } from './dto/generate-report.dto';
+import { daysOfActivityMS } from '../common/constants';
+import checkValidId from '../common/helpers/checkValidId';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
-    private readonly usersRepository: Repository<User>,
+    private readonly usersRepository: MongoRepository<User>,
     private readonly hashService: HashService
   ) {}
 
@@ -125,11 +128,14 @@ export class UserService {
     return user;
   }
 
-  async deleteUserById(id: ObjectId): Promise<void> {
-    await this.usersRepository.delete(id);
+  async deleteUserById(id: string): Promise<void> {
+    checkValidId(id);
+    const objectId = new ObjectId(id);
+    await this.usersRepository.delete(objectId);
   }
 
   async findUserById(id: string): Promise<Omit<User, 'login'> | undefined> {
+    checkValidId(id);
     const _id = new ObjectId(id);
     const user = await this.usersRepository.findOne({
       where: { _id },
@@ -199,5 +205,48 @@ export class UserService {
     await this.usersRepository.update({ _id: new ObjectId(id) }, { isBlocked: !user.isBlocked });
 
     return this.findUserById(id);
+  }
+
+  async generateReport({ reportStatus, reportRole }: GenerateReportDto) {
+    const activityDate = new Date().getTime() - daysOfActivityMS;
+    if (reportStatus === ReportStatus.NEW) {
+      return this.usersRepository.find({
+        where: {
+          status: UserStatus.CONFIRMED,
+          lastActivityDate: null,
+          role: reportRole,
+        },
+      });
+    }
+    if (reportStatus === ReportStatus.ACTIVE) {
+      return this.usersRepository.find({
+        where: {
+          lastActivityDate: {
+            $gte: new Date(activityDate),
+          },
+          role: reportRole,
+        },
+      });
+    }
+    if (reportStatus === ReportStatus.INACTIVE) {
+      return this.usersRepository.find({
+        where: {
+          lastActivityDate: {
+            $lt: new Date(activityDate),
+          },
+          role: reportRole,
+        },
+      });
+    }
+    if (reportStatus === ReportStatus.BLOCKED) {
+      return this.usersRepository.find({
+        where: {
+          isBlocked: true,
+          role: reportRole,
+        },
+      });
+    }
+
+    return [];
   }
 }

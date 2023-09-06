@@ -22,3 +22,14 @@ export enum AdminPermission {
   BLOG = 'write the blog',
   CATEGORIES = 'change categories',
 }
+
+export enum ReportStatus {
+  NEW = 'new',
+  INACTIVE = 'inactive',
+  ACTIVE = 'active',
+  BLOCKED = 'blocked',
+}
+export enum ReportRole {
+  RECIPIENT = 'recipient',
+  VOLUNTEER = 'volunteer',
+}
