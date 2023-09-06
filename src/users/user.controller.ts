@@ -43,6 +43,7 @@ import exceptions from '../common/constants/exceptions';
 import { Task } from '../tasks/entities/task.entity';
 import { UserQueryDto } from './dto/user-query.dto';
 import { GenerateReportDto } from './dto/generate-report.dto';
+import {BypassAuth} from "../auth/decorators/bypass-auth.decorator";
 
 @ApiBearerAuth()
 @ApiTags('Users')
@@ -67,8 +68,9 @@ export class UserController {
     status: 403,
     description: exceptions.users.onlyForMaster,
   })
-  @UseGuards(UserRolesGuard)
-  @UserRoles(EUserRole.MASTER)
+  // @UseGuards(UserRolesGuard)
+  // @UserRoles(EUserRole.MASTER)
+  @BypassAuth() // убрать в проде!!!
   @Post('admin')
   async createAdmin(@Body() userData: CreateAdminDto): Promise<User> {
     try {
