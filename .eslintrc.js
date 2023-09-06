@@ -29,8 +29,18 @@ module.exports = {
         ts: 'never',
       },
     ],
+    "import/no-extraneous-dependencies": [
+      'error',
+      {
+        'devDependencies':
+          ['**/*.test.ts', '**/*.spec.ts', '**/*e2e-spec.ts']
+      }
+    ],
+    'class-methods-use-this': 'off',
     'import/prefer-default-export': 'off', // Отключаем правило
     'no-useless-constructor': 'off',
     'no-underscore-dangle': 'off',
+    'no-console': ['warn', { 'allow': ['info'] }],
+
   },
 };

@@ -1,0 +1,18 @@
+{
+  "info": {
+    "_postman_id": "164c263c-279f-4b61-a6cf-3f0e7465a811",
+    "name": "GET Request",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get API",
+      "request": {
+        "method": "GET",
+        "url": "https://api.kraev.nomoredomains.xyz/",
+        "headers": []
+      },
+      "response": []
+    }
+  ]
+}

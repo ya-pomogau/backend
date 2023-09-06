@@ -1,69 +1,107 @@
-import { Length, IsString, IsUrl, IsDate } from 'class-validator';
-import { Entity, ObjectIdColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { IsArray, IsDate, IsNumber, IsString, IsUrl, Length } from 'class-validator';
+
+import { Column, CreateDateColumn, Entity, Index, ObjectIdColumn, UpdateDateColumn } from 'typeorm';
 import { ObjectId } from 'mongodb';
-import { UserRole, StatusType, PermissionType } from '../../common/types/user-types';
+import { Exclude } from 'class-transformer';
+import { ApiResponseProperty } from '@nestjs/swagger';
+
+import { AdminPermission, EUserRole, UserStatus } from '../types';
+
+import validationOptions from '../../common/constants/validation-options';
 
 @Entity()
 export class User {
+  @ApiResponseProperty({ type: 'string' })
   @ObjectIdColumn()
   _id: ObjectId;
 
+  @ApiResponseProperty()
   @Column()
   @IsString()
-  @Length(2, 20)
+  @Length(validationOptions.limits.userName.min, validationOptions.limits.userName.max)
   fullname: string;
 
-  @Column({ nullable: true })
+  @ApiResponseProperty()
+  @Column()
   @IsString()
-  role: UserRole | null;
+  role: EUserRole;
 
-  @Column({ nullable: true })
-  status: StatusType | null;
+  @ApiResponseProperty()
+  @IsNumber()
+  @Column()
+  @Index()
+  vkId?: number;
 
+  @ApiResponseProperty()
   @Column()
   @IsUrl()
-  vk: string;
+  @Index()
+  vkLink?: string;
 
+  @Column()
+  @IsString()
+  @Exclude()
+  @Index({ unique: true })
+  login?: string;
+
+  @Column({ select: false })
+  @IsString()
+  @Exclude()
+  password?: string;
+
+  @ApiResponseProperty()
+  @Column()
+  @IsString()
+  status: UserStatus = UserStatus.UNCONFIRMED;
+
+  @ApiResponseProperty()
+  @Column()
+  isBlocked = false;
+
+  @ApiResponseProperty()
   @Column()
   @IsUrl()
   avatar: string;
 
+  @ApiResponseProperty()
   @Column()
   @IsString()
   phone: string;
 
+  @ApiResponseProperty()
   @Column()
   @IsString()
   address: string;
 
+  @ApiResponseProperty()
   @Column()
   @IsString()
   coordinates: number[];
 
+  @ApiResponseProperty()
   @CreateDateColumn()
   @IsDate()
   createdAt: Date;
 
+  @ApiResponseProperty()
   @UpdateDateColumn()
   @IsDate()
   updatedAt: Date;
 
-  @Column({ nullable: true })
-  keys?: number | null;
-
+  @ApiResponseProperty()
   @Column()
-  scores?: number;
+  scores = 0;
 
+  @ApiResponseProperty()
   @Column()
-  permissions?: Array<PermissionType> | null;
+  @IsArray()
+  permissions?: AdminPermission[];
 
-  // Примерная логика связи сообщений
+  @ApiResponseProperty()
+  @Column()
+  completedTasks: number = 0;
 
-  // @OneToMany(() => Message, (message) => task.owner)
-  // messages: message[];
-
-  // У тасок один волонтер(пока, м.б. нужна будет возможность нескольких назначать)
-
-  // @OneToMany(() => Tasks, (task) => task.owner)
-  // tasks: task[];
+  @ApiResponseProperty()
+  @Column()
+  lastActivityDate: Date | null = null;
 }

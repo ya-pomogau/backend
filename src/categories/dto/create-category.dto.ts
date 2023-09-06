@@ -1,4 +1,14 @@
-import { IsInt, IsNotEmpty, IsPositive, IsString, Length, MaxLength, MinLength } from "class-validator";
+import {
+  IsInt,
+  IsNotEmpty,
+  IsPositive,
+  IsString,
+  Max,
+  MaxLength,
+  Min,
+  MinLength,
+} from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 import validationOptions from '../../common/constants/validation-options';
 
 export class CreateCategoryDto {
@@ -10,6 +20,7 @@ export class CreateCategoryDto {
   @MaxLength(validationOptions.limits.categoryTitle.max, {
     message: validationOptions.messages.tooLong,
   })
+  @ApiProperty({ example: 'Покупка продуктов' })
   title: string;
 
   @IsNotEmpty({ message: validationOptions.messages.isEmpty })
@@ -19,5 +30,15 @@ export class CreateCategoryDto {
   @IsPositive({
     message: validationOptions.messages.shouldBePositiveNumber,
   })
+  @ApiProperty({ example: 5 })
   points: number;
+
+  @IsInt({
+    message: validationOptions.messages.shouldBeIntegerNumber,
+  })
+  @Min(validationOptions.limits.categoryAccess.min, { message: validationOptions.messages.min })
+  @Max(validationOptions.limits.categoryAccess.max, { message: validationOptions.messages.max })
+  @IsNotEmpty({ message: validationOptions.messages.isEmpty })
+  @ApiProperty({ example: 1 })
+  accessStatus: number;
 }
