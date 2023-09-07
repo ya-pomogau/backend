@@ -187,13 +187,13 @@ export class AuthService {
     const user = await this.userService.getUserByLogin(login);
 
     if (!user) {
-      throw new UnauthorizedException(exceptions.auth.unauthorized);
+      throw new UnauthorizedException(exceptions.auth.wrongLoginOrPassword);
     }
 
     const isAuthorized = await this.hashService.compareHash(password, user.password);
 
     if (!isAuthorized) {
-      throw new UnauthorizedException(exceptions.auth.unauthorized);
+      throw new UnauthorizedException(exceptions.auth.wrongLoginOrPassword);
     }
 
     return isAuthorized ? user : null;

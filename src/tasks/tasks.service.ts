@@ -1,5 +1,5 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
-import { DataSource, MongoRepository, Repository } from 'typeorm';
+import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
+import { Between, DataSource, MongoRepository, Repository } from 'typeorm';
 
 import { InjectRepository } from '@nestjs/typeorm';
 import { ObjectId } from 'mongodb';
@@ -14,9 +14,11 @@ import timeDifference from '../common/utils/timeDifference';
 import { EUserRole, UserStatus } from '../users/types';
 
 import { TaskStatus } from './types';
-import {dayInMs, pointsTo2Status} from '../common/constants';
+import { dayInMs, pointsTo2Status, pointsTo3Status } from '../common/constants';
 import queryRunner from '../common/helpers/queryRunner';
 import { UpdateTaskDto } from './dto/update-task.dto';
+import { GenerateReportDto } from './dto/generate-report.dto';
+import checkValidId from '../common/helpers/checkValidId';
 
 @Injectable()
 export class TasksService {
@@ -85,6 +87,8 @@ export class TasksService {
 
     const newTask = await this.taskRepository.create(dto);
 
+    await this.userRepository.update({ _id: recipient._id }, { lastActivityDate: new Date() });
+
     return this.taskRepository.save(newTask);
   }
 
@@ -93,7 +97,10 @@ export class TasksService {
   }
 
   async findById(id: string, user: User) {
+    checkValidId(id);
+
     const objectId = new ObjectId(id);
+
     const task = await this.taskRepository.findOneBy({ _id: objectId });
 
     if (!task) {
@@ -142,6 +149,7 @@ export class TasksService {
   }
 
   async acceptTask(taskId: string, user: User) {
+    checkValidId(taskId);
     const objectTaskId = new ObjectId(taskId);
     const task: Task = await this.taskRepository.findOneBy({ _id: objectTaskId });
 
@@ -170,13 +178,17 @@ export class TasksService {
       {
         volunteerId: user._id.toString(),
         status: TaskStatus.ACCEPTED,
+        acceptedAt: new Date(),
       }
     );
+
+    await this.userRepository.update({ _id: user._id }, { lastActivityDate: new Date() });
 
     return this.taskRepository.findOneBy({ _id: objectTaskId });
   }
 
   async refuseTask(taskId: string, user: User) {
+    checkValidId(taskId);
     const objectTaskId = new ObjectId(taskId);
     const task: Task = await this.taskRepository.findOneBy({ _id: objectTaskId });
 
@@ -198,13 +210,14 @@ export class TasksService {
 
     await this.taskRepository.update(
       { _id: objectTaskId },
-      { volunteerId: null, status: TaskStatus.CREATED }
+      { volunteerId: null, status: TaskStatus.CREATED, acceptedAt: null }
     );
 
     return this.taskRepository.findOneBy({ _id: objectTaskId });
   }
 
   async removeTask(taskId: string, user: User) {
+    checkValidId(taskId);
     const objectTaskId = new ObjectId(taskId);
     const task: Task = await this.taskRepository.findOneBy({ _id: objectTaskId });
 
@@ -240,11 +253,15 @@ export class TasksService {
     await queryRunner(this.dataSource, [
       this.taskRepository.update(
         { _id: new ObjectId(task._id) },
-        { status: TaskStatus.CLOSED, completed: true }
+        { status: TaskStatus.CLOSED, completed: true, closedAt: new Date() }
       ),
       this.userRepository.update(
         { _id: objectVolunteerId },
-        { scores: volunteer.scores + task.points, completedTasks: volunteer.completedTasks + 1 }
+        {
+          scores: volunteer.scores + task.points,
+          completedTasks: volunteer.completedTasks + 1,
+          lastActivityDate: new Date(),
+        }
       ),
     ]);
 
@@ -252,12 +269,13 @@ export class TasksService {
       console.log('Отбивка в чат админу');
     }
 
-    if (volunteer.completedTasks + 1 === pointsTo2Status) {
+    if (volunteer.completedTasks + 1 === pointsTo3Status) {
       console.log('Отбивка в чат админу');
     }
   }
 
   async closeTask(taskId: string, completed: boolean) {
+    checkValidId(taskId);
     const objectTaskId = new ObjectId(taskId);
     const task: Task = await this.taskRepository.findOneBy({ _id: objectTaskId });
 
@@ -270,7 +288,7 @@ export class TasksService {
     } else {
       await this.taskRepository.update(
         { _id: objectTaskId },
-        { status: TaskStatus.CLOSED, completed: false }
+        { status: TaskStatus.CLOSED, completed: false, closedAt: new Date() }
       );
     }
 
@@ -278,6 +296,7 @@ export class TasksService {
   }
 
   async confirmTask(taskId: string, user: User, isTaskCompleted: boolean) {
+    checkValidId(taskId);
     const objectTaskId = new ObjectId(taskId);
     const task: Task = await this.taskRepository.findOneBy({ _id: objectTaskId });
 
@@ -323,6 +342,7 @@ export class TasksService {
           { status: TaskStatus.CLOSED, completed: false }
         );
       } else {
+        await this.taskRepository.update({ _id: objectTaskId }, { isConflict: true });
         console.log('Вызывайте админа!!!'); // отбивка в чат админу
       }
     }
@@ -331,6 +351,7 @@ export class TasksService {
   }
 
   async update(id: string, user: User, updateTaskDto: UpdateTaskDto) {
+    checkValidId(id);
     const objectTaskId = new ObjectId(id);
     const task: Task = await this.taskRepository.findOneBy({ _id: objectTaskId });
 
@@ -349,5 +370,22 @@ export class TasksService {
     await this.taskRepository.update({ _id: objectTaskId }, updateTaskDto);
 
     return this.taskRepository.findOneBy({ _id: objectTaskId });
+  }
+
+  async generateReport({ status, startDate, endDate, check }: GenerateReportDto) {
+    const query: { [p: symbol]: { $gte: Date; $lt: Date }; status?: TaskStatus } = {
+      [`${status}At`]: {
+        $gte: startDate,
+        $lt: endDate,
+      },
+    };
+
+    if (check) {
+      query.status = status;
+    }
+
+    return this.taskRepository.find({
+      where: query,
+    });
   }
 }

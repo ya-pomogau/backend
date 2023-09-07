@@ -40,6 +40,7 @@ import { Task } from './entities/task.entity';
 import { TaskQueryDto } from './dto/task-query.dto';
 
 import exceptions from '../common/constants/exceptions';
+import { GenerateReportDto } from './dto/generate-report.dto';
 
 @ApiBearerAuth()
 @ApiTags('Tasks')
@@ -120,6 +121,26 @@ export class TasksController {
   @Get('own')
   async findOwn(@Query('status') status: string, @AuthUser() user: User): Promise<Task[]> {
     return this.tasksService.findOwn(status, user);
+  }
+
+  @ApiOperation({
+    summary: 'Список заявок для отчета',
+    description: 'Доступ только для администраторов',
+  })
+  @ApiOkResponse({
+    status: 200,
+    type: Task,
+    isArray: true,
+  })
+  @ApiForbiddenResponse({
+    status: 403,
+    description: exceptions.users.onlyForAdmins,
+  })
+  @UseGuards(UserRolesGuard)
+  @UserRoles(EUserRole.ADMIN, EUserRole.MASTER)
+  @Get('report')
+  async generateReport(@Query() generateReportDto: GenerateReportDto) {
+    return this.tasksService.generateReport(generateReportDto);
   }
 
   @ApiOperation({
@@ -303,7 +324,7 @@ export class TasksController {
   }
 
   @ApiOperation({
-    summary: 'Редактирование заявки',
+    summary: 'Редактирование заявки по id',
     description:
       'Доступ только для реципиентов и администраторов. Нельзя редактировать поле recipientId. Нельзя редактировать принятую волонтером заявку.',
   })

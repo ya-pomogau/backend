@@ -12,6 +12,7 @@ export default {
     incorrectPhoneNumber: 'В поле $property введен некорректный формат телефонного номера',
     incorrectCoordinates: 'В поле $property введен некорректный формат географических координат',
     incorrectAdminPermissions: 'Поле $property должно быть в формате массива от 1 до 6 элементов',
+    incorrectReportDates: 'Некорректный формат дат для отчета',
     min: 'Минимальное значение в поле $property - $constraint1',
     max: 'Максимальное значение в поле $property - $constraint1',
   },
@@ -57,6 +58,15 @@ export default {
     userStatus: {
       min: 0,
       max: 3,
+    },
+    blogArticle: {
+      title: {
+        min: 5,
+        max: 50,
+      },
+      text: {
+        min: 50,
+      },
     },
   },
 };
