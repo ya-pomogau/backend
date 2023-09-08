@@ -13,7 +13,7 @@ import { TasksWsModule } from './tasks-ws/tasks-ws.module';
 import { TasksModule } from './tasks/tasks.module';
 import { UserModule } from './users/user.module';
 import { BlogArticlesModule } from './blog-articles/blog-articles.module';
-
+import { ChatsModule } from './chats/chats.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, load: [configuration] }),
@@ -31,6 +31,7 @@ import { BlogArticlesModule } from './blog-articles/blog-articles.module';
     HashModule,
     AuthModule,
     BlogArticlesModule,
+    ChatsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
