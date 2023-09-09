@@ -20,6 +20,7 @@ import { BlogArticle } from './entities/blog-article.entity';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import exceptions from '../common/constants/exceptions';
 import { BypassAuth } from '../auth/decorators/bypass-auth.decorator';
+import {HttpStatusCodes} from "../common/constants/httpStatusCodes";
 
 @ApiTags('Blog')
 @ApiBearerAuth()
@@ -33,11 +34,11 @@ export class BlogArticlesController {
     description: 'Доступ только для администраторов',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatusCodes.OK,
     type: BlogArticle,
   })
   @ApiForbiddenResponse({
-    status: 403,
+    status: HttpStatusCodes.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
   @UseGuards(UserRolesGuard, AdminPermissionsGuard)
@@ -52,7 +53,7 @@ export class BlogArticlesController {
     summary: 'Список статей блога',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatusCodes.OK,
     type: BlogArticle,
     isArray: true,
   })
@@ -66,7 +67,7 @@ export class BlogArticlesController {
     summary: 'Поиск статьи по id',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatusCodes.OK,
     type: BlogArticle,
   })
   @BypassAuth()
@@ -80,11 +81,11 @@ export class BlogArticlesController {
     description: 'Доступ только для администраторов',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatusCodes.OK,
     type: BlogArticle,
   })
   @ApiForbiddenResponse({
-    status: 403,
+    status: HttpStatusCodes.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
   @UseGuards(UserRolesGuard, AdminPermissionsGuard)
@@ -100,11 +101,11 @@ export class BlogArticlesController {
     description: 'Доступ только для администраторов',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatusCodes.OK,
     type: BlogArticle,
   })
   @ApiForbiddenResponse({
-    status: 403,
+    status: HttpStatusCodes.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
   @UseGuards(UserRolesGuard, AdminPermissionsGuard)

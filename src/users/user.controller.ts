@@ -13,7 +13,6 @@ import {
   UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
-import { ObjectId } from 'mongodb';
 import {
   ApiBearerAuth,
   ApiForbiddenResponse,
@@ -43,7 +42,8 @@ import exceptions from '../common/constants/exceptions';
 import { Task } from '../tasks/entities/task.entity';
 import { UserQueryDto } from './dto/user-query.dto';
 import { GenerateReportDto } from './dto/generate-report.dto';
-import {BypassAuth} from "../auth/decorators/bypass-auth.decorator";
+import { BypassAuth } from '../auth/decorators/bypass-auth.decorator';
+import {HttpStatusCodes} from "../common/constants/httpStatusCodes";
 
 @ApiBearerAuth()
 @ApiTags('Users')
@@ -65,7 +65,7 @@ export class UserController {
     type: User,
   })
   @ApiForbiddenResponse({
-    status: 403,
+    status: HttpStatusCodes.FORBIDDEN,
     description: exceptions.users.onlyForMaster,
   })
   // @UseGuards(UserRolesGuard)
@@ -84,7 +84,7 @@ export class UserController {
     summary: 'Создание реципиента/волонтера (только для тестов, в проде регистрация через вк!)',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatusCodes.OK,
     type: User,
   })
   @Post()
@@ -102,12 +102,12 @@ export class UserController {
   })
   @ApiQuery({ type: UserQueryDto })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatusCodes.OK,
     type: Task,
     isArray: true,
   })
   @ApiForbiddenResponse({
-    status: 403,
+    status: HttpStatusCodes.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
   @UseGuards(UserRolesGuard)
@@ -121,7 +121,7 @@ export class UserController {
     summary: 'Данные о текущем авторизованном пользователе',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatusCodes.OK,
     type: User,
   })
   @Get('own')
@@ -143,12 +143,12 @@ export class UserController {
       '<br> Отсчет дняй активности ведётся от текущих даты и ВРЕМЕНИ минус 30 суток',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatusCodes.OK,
     type: User,
     isArray: true,
   })
   @ApiForbiddenResponse({
-    status: 403,
+    status: HttpStatusCodes.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
   @UseGuards(UserRolesGuard)
@@ -163,12 +163,12 @@ export class UserController {
     description: 'Доступ только для администраторов',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatusCodes.OK,
     type: User,
     isArray: true,
   })
   @ApiForbiddenResponse({
-    status: 403,
+    status: HttpStatusCodes.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
   @UseGuards(UserRolesGuard)
@@ -187,7 +187,7 @@ export class UserController {
     summary: 'Поиск пользователя по id',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatusCodes.OK,
     type: User,
   })
   @Get(':id')
@@ -200,7 +200,7 @@ export class UserController {
     description: 'Доступ только для администраторов с соответствующими правами',
   })
   @ApiForbiddenResponse({
-    status: 403,
+    status: HttpStatusCodes.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
   @UseGuards(UserRolesGuard, AdminPermissionsGuard)
@@ -216,7 +216,7 @@ export class UserController {
     description: 'Для редактирования доступны только поля, заполняемые при регистрации + аватар',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatusCodes.OK,
     type: User,
   })
   @Patch(':id')
@@ -238,11 +238,11 @@ export class UserController {
       'Доступ только для администраторов с соответствующими правами. Доступные статусы: 0 - не подтвержден, 1 - подтвержден, 2 - подтвержден и проверен. Увеличение статуса до 3 (активирован ключ) доступно только по пути /key.',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatusCodes.OK,
     type: User,
   })
   @ApiForbiddenResponse({
-    status: 403,
+    status: HttpStatusCodes.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
   @UseGuards(UserRolesGuard, AdminPermissionsGuard)
@@ -262,11 +262,11 @@ export class UserController {
       'Доступ только для администраторов с соответствующими правами. Для изменения статусов от 0 до 2 используйте путь /status.',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatusCodes.OK,
     type: User,
   })
   @ApiForbiddenResponse({
-    status: 403,
+    status: HttpStatusCodes.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
   @UseGuards(UserRolesGuard, AdminPermissionsGuard)
@@ -283,11 +283,11 @@ export class UserController {
       'Доступ только для главного администратора. Необходимо передать полный массив обновленных прав.',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatusCodes.OK,
     type: User,
   })
   @ApiForbiddenResponse({
-    status: 403,
+    status: HttpStatusCodes.FORBIDDEN,
     description: exceptions.users.onlyForMaster,
   })
   @UseGuards(UserRolesGuard)
@@ -305,11 +305,11 @@ export class UserController {
     description: 'Доступ только для администраторов с соответствующими правами',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatusCodes.OK,
     type: User,
   })
   @ApiForbiddenResponse({
-    status: 403,
+    status: HttpStatusCodes.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
   @UseGuards(UserRolesGuard, AdminPermissionsGuard)

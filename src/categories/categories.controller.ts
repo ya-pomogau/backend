@@ -20,6 +20,7 @@ import { AdminPermission, EUserRole } from '../users/types';
 import { AdminPermissions } from '../auth/decorators/admin-permissions.decorator';
 import { Category } from './entities/category.entity';
 import exceptions from '../common/constants/exceptions';
+import {HttpStatusCodes} from "../common/constants/httpStatusCodes";
 
 @ApiTags('Categories')
 @ApiBearerAuth()
@@ -52,7 +53,7 @@ export class CategoriesController {
     summary: 'Список всех категорий',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatusCodes.OK,
     type: Category,
     isArray: true,
   })
@@ -79,11 +80,11 @@ export class CategoriesController {
       'Доступ только для администраторов с соответствующим статусом. При обновлении баллов или уровня доступа происходит автоматическое обновление данных полей во всех незакрытых заявках категории.',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatusCodes.OK,
     type: Category,
   })
   @ApiForbiddenResponse({
-    status: 403,
+    status: HttpStatusCodes.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
   @UseGuards(UserRolesGuard, AdminPermissionsGuard)

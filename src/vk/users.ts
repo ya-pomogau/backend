@@ -1,6 +1,7 @@
 import { HttpService } from '@nestjs/axios';
 import { AxiosResponse } from 'axios';
 import { EVkNameCase, EVkUser, IRequestUser, IVkUser } from './types';
+import configuration from '../config/configuration';
 
 export class VkApiUsers {
   private readonly v = '5.131';
@@ -8,7 +9,7 @@ export class VkApiUsers {
   constructor(
     private readonly httpService: HttpService,
     private readonly _token: string,
-    private readonly _url: URL = new URL(`https://api.vk.com`)
+    private readonly _url: URL = new URL(configuration().vk.api)
   ) {}
 
   async get(

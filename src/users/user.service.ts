@@ -27,8 +27,6 @@ export class UserService {
   async findAll(): Promise<Omit<User, 'login' | 'password'>[]> {
     const users = await this.usersRepository.find();
     return users.map((user) => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-
       const { login, password, ...rest } = user;
 
       return rest;
@@ -36,14 +34,14 @@ export class UserService {
   }
 
   async findBy(query: object): Promise<User[]> {
-    const taskQuery: object = {};
+    const userQuery: object = {};
 
-    for (const property in query) {
-      taskQuery[property] = { $in: query[property].split(',') };
-    }
+    Object.keys(query).forEach((property) => {
+      userQuery[property] = { $in: query[property].split(',') };
+    });
 
     const tasks = await this.usersRepository.find({
-      where: taskQuery,
+      where: userQuery,
     });
 
     return tasks;
@@ -75,7 +73,7 @@ export class UserService {
 
     const hash = await this.hashService.generateHash(createAdminDto.password);
 
-    const newUser = await this.usersRepository.create({
+    const newUser = this.usersRepository.create({
       ...createAdminDto,
       password: hash,
       status: UserStatus.ACTIVATED,
@@ -91,8 +89,6 @@ export class UserService {
       return e;
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-
     const { login, password, ...rest } = user;
 
     return rest;
@@ -104,8 +100,6 @@ export class UserService {
     if (!user) {
       throw new NotFoundException(exceptions.users.notFound);
     }
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
 
     const { login, password, ...rest } = user;
 
@@ -143,8 +137,6 @@ export class UserService {
     if (!user) {
       throw new NotFoundException(exceptions.users.notFound);
     }
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
 
     const { login, password, ...rest } = user;
 

@@ -15,7 +15,7 @@ import type { User as TUser } from '../users/entities/user.entity';
 import { AuthService } from './auth.service';
 import { AuthUser } from './decorators/auth-user.decorator';
 import { CallbackQueryDto } from './dto/callback.query.dto';
-import { ILoginVkQueryDto, LoginVkQueryDto } from './dto/login-vk.query.dto';
+import { LoginVkQueryDto } from './dto/login-vk.query.dto';
 import { SigninResponseDto } from './dto/signin-response.dto';
 import { JwtGuard } from './guards/jwt.guard';
 import { LocalGuard } from './guards/local.guard';
@@ -24,6 +24,7 @@ import { ApiUnauthorized } from './types/unauthorized';
 import { SignupVkDto } from './dto/signup-vk-dto';
 import { UserService } from '../users/user.service';
 import { SigninDto } from './dto/signin.dto';
+import { HttpStatusCodes } from "../common/constants/httpStatusCodes";
 
 @ApiTags('Auth')
 @Controller()
@@ -62,7 +63,7 @@ export class AuthController {
     type: ApiUnauthorized,
   })
   @Get('signin-vk')
-  loginVk(@Res() res: Response, @Query() query: ILoginVkQueryDto) {
+  loginVk(@Res() res: Response) {
     return res
       .status(HttpStatus.MOVED_PERMANENTLY)
       .redirect(this.authService.getRedirectUrl(false));
@@ -101,7 +102,7 @@ export class AuthController {
     description: 'Активируется при ответе от вконтаке. Все поля заполняются автоматически.',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatusCodes.OK,
     type: SigninResponseDto,
   })
   @ApiUnauthorizedResponse({
@@ -163,7 +164,7 @@ export class AuthController {
     type: SigninDto,
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatusCodes.OK,
     type: SigninResponseDto,
   })
   @UseGuards(LocalGuard)

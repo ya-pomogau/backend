@@ -9,10 +9,10 @@ export class HashService {
 
   async generateHash(password: string): Promise<string> {
     const { salt } = configuration().hash;
-    return await bcrypt.hash(password, salt);
+    return bcrypt.hash(password, salt);
   }
 
   async compareHash(password: string, hash: string): Promise<boolean> {
-    return await bcrypt.compare(password, hash);
+    return bcrypt.compare(password, hash);
   }
 }

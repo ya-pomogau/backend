@@ -41,6 +41,7 @@ import { TaskQueryDto } from './dto/task-query.dto';
 
 import exceptions from '../common/constants/exceptions';
 import { GenerateReportDto } from './dto/generate-report.dto';
+import { HttpStatusCodes } from '../common/constants/httpStatusCodes';
 
 @ApiBearerAuth()
 @ApiTags('Tasks')
@@ -61,7 +62,7 @@ export class TasksController {
       '<br>Поле accessStatus контролирует видимость и возможность принять заявку до волонтеров с соответствующими статусами. Устанавливается согласно категории заявки.',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatusCodes.OK,
     type: Task,
   })
   @UseGuards(UserRolesGuard, AdminPermissionsGuard)
@@ -88,12 +89,12 @@ export class TasksController {
   })
   @ApiQuery({ type: TaskQueryDto })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatusCodes.OK,
     type: Task,
     isArray: true,
   })
   @ApiForbiddenResponse({
-    status: 403,
+    status: HttpStatusCodes.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
   @UseGuards(UserRolesGuard)
@@ -108,12 +109,12 @@ export class TasksController {
     description: 'Доступ только для волонтеров и реципиентов',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatusCodes.OK,
     type: Task,
     isArray: true,
   })
   @ApiForbiddenResponse({
-    status: 403,
+    status: HttpStatusCodes.FORBIDDEN,
     description: `${exceptions.users.onlyForVolunteers} ${exceptions.users.onlyForRecipients}`,
   })
   @UseGuards(UserRolesGuard)
@@ -128,12 +129,12 @@ export class TasksController {
     description: 'Доступ только для администраторов',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatusCodes.OK,
     type: Task,
     isArray: true,
   })
   @ApiForbiddenResponse({
-    status: 403,
+    status: HttpStatusCodes.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
   @UseGuards(UserRolesGuard)
@@ -148,12 +149,12 @@ export class TasksController {
     description: 'Доступ только для администраторов',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatusCodes.OK,
     type: Task,
     isArray: true,
   })
   @ApiForbiddenResponse({
-    status: 403,
+    status: HttpStatusCodes.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
   @UseGuards(UserRolesGuard)
@@ -167,7 +168,7 @@ export class TasksController {
     summary: 'Поиск заявки по id',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatusCodes.OK,
     type: Task,
   })
   @Get(':id')
@@ -180,11 +181,11 @@ export class TasksController {
     description: 'Доступ только для волонтеров',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatusCodes.OK,
     type: Task,
   })
   @ApiForbiddenResponse({
-    status: 403,
+    status: HttpStatusCodes.FORBIDDEN,
     description: exceptions.users.onlyForVolunteers,
   })
   @UseGuards(UserRolesGuard)
@@ -210,11 +211,11 @@ export class TasksController {
       'Доступ только для волонтеров и администраторов. Волонтер не может отказаться от заявки, до старта которой осталось менее 24 часов. Администратор может отменить отклик в любое время.',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatusCodes.OK,
     type: Task,
   })
   @ApiForbiddenResponse({
-    status: 403,
+    status: HttpStatusCodes.FORBIDDEN,
     description: `${exceptions.users.onlyForVolunteers} ${exceptions.users.onlyForAdmins}`,
   })
   @UseGuards(UserRolesGuard, AdminPermissionsGuard)
@@ -241,11 +242,11 @@ export class TasksController {
       'Доступ только для реципиентов и администраторов. Реципиент может удалить только свою заявку, которую не принял волонтер. Администратор может удалить любую заявку.',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatusCodes.OK,
     type: Task,
   })
   @ApiForbiddenResponse({
-    status: 403,
+    status: HttpStatusCodes.FORBIDDEN,
     description: `${exceptions.users.onlyForRecipients} ${exceptions.users.onlyForAdmins}`,
   })
   @UseGuards(UserRolesGuard, AdminPermissionsGuard)
@@ -272,11 +273,11 @@ export class TasksController {
       'Доступ только для администраторов с соответствующими правами. Если заявка была выполнена, необходимо передать query ?completed=true. Если не была выполнена, query можно не передавать.',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatusCodes.OK,
     type: Task,
   })
   @ApiForbiddenResponse({
-    status: 403,
+    status: HttpStatusCodes.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
   @UseGuards(UserRolesGuard, AdminPermissionsGuard)
@@ -305,11 +306,11 @@ export class TasksController {
       ' Если не совпадают, администратору приходит отбивка в чат о конфликте - необходимо ручное закрытие.',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatusCodes.OK,
     type: Task,
   })
   @ApiForbiddenResponse({
-    status: 403,
+    status: HttpStatusCodes.FORBIDDEN,
     description: `${exceptions.users.onlyForRecipients} ${exceptions.users.onlyForVolunteers}`,
   })
   @UseGuards(UserRolesGuard)
@@ -329,11 +330,11 @@ export class TasksController {
       'Доступ только для реципиентов и администраторов. Нельзя редактировать поле recipientId. Нельзя редактировать принятую волонтером заявку.',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatusCodes.OK,
     type: Task,
   })
   @ApiForbiddenResponse({
-    status: 403,
+    status: HttpStatusCodes.FORBIDDEN,
     description: `${exceptions.users.onlyForRecipients} ${exceptions.users.onlyForAdmins}`,
   })
   @UseGuards(UserRolesGuard, AdminPermissionsGuard)
