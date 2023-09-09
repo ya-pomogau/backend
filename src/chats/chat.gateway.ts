@@ -17,7 +17,7 @@ import { Chat } from './entities/chat.entity';
 export class ChatGateway {
   constructor(
     @InjectRepository(Chat)
-    private chatRepository: Repository<Chat>
+    private chatRepository: Repository<Chat>,
   ) {}
 
   @WebSocketServer()
@@ -26,7 +26,7 @@ export class ChatGateway {
   private clientTimers = new Map<string, NodeJS.Timeout>(); // Добавляем Map для таймеров клиентов
 
   @SubscribeMessage('connection')
-  handleConnection(client: any) {
+  handleConnection(client: { disconnect: () => void; id: string; }) {
     // Когда клиент подключается, создаем таймер для него
     const timer = setTimeout(() => {
       // Если клиент не активен в течение 5 минут, разрываем соединение
@@ -38,7 +38,7 @@ export class ChatGateway {
   }
 
   @SubscribeMessage('message')
-  async handleMessage(client: any, data: { chatId: string; sender: string; text: string }) {
+  async handleMessage(client : { disconnect: () => void; id: string; }, data: { chatId: string; sender: string; text: string }) {
     if (!data.chatId) {
       throw new BadRequestException('Id чата не введено');
     }
