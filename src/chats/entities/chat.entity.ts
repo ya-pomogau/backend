@@ -1,7 +1,6 @@
-/* eslint-disable import/no-cycle */
 import { Entity, ObjectIdColumn, Column, UpdateDateColumn, CreateDateColumn } from 'typeorm';
 import { ObjectId } from 'mongodb';
-import { ApiResponseProperty } from '@nestjs/swagger';
+import { ApiResponseProperty, ApiProperty } from '@nestjs/swagger'; // Импортируйте аннотации Swagger
 import { IsDate } from 'class-validator';
 
 export interface Message {
@@ -22,10 +21,12 @@ export class Chat {
   @ApiResponseProperty()
   @CreateDateColumn()
   @IsDate()
+  @ApiProperty({ description: 'Дата создания чата', type: Date })
   createdAt: Date;
 
   @ApiResponseProperty()
   @UpdateDateColumn()
   @IsDate()
+  @ApiProperty({ description: 'Дата обновления чата', type: Date })
   updatedAt: Date;
 }
