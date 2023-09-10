@@ -7,7 +7,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { Server } from 'socket.io';
 import { ObjectId } from 'mongodb';
 import { Chat } from './entities/chat.entity';
+import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
 
+@ApiTags('Chat') // Тег для группировки операций
 @WebSocketGateway({
   namespace: 'chat',
   cors: {
@@ -20,11 +22,14 @@ export class ChatGateway {
     private chatRepository: Repository<Chat>,
   ) {}
 
+
   @WebSocketServer()
   server: Server;
 
   private clientTimers = new Map<string, NodeJS.Timeout>(); // Добавляем Map для таймеров клиентов
 
+  @ApiOperation({ summary: 'Установить соединение' })
+  @ApiResponse({ status: 200, description: 'Успешное соединение' })
   @SubscribeMessage('connection')
   handleConnection(client: { disconnect: () => void; id: string; }) {
     // Когда клиент подключается, создаем таймер для него
@@ -37,6 +42,9 @@ export class ChatGateway {
     this.clientTimers.set(client.id, timer);
   }
 
+  @ApiOperation({ summary: 'Отправить сообщение' })
+  @ApiResponse({ status: 200, description: 'Сообщение отправлено' })
+  @ApiResponse({ status: 400, description: 'Некорректные данные' })
   @SubscribeMessage('message')
   async handleMessage(client : { disconnect: () => void; id: string; }, data: { chatId: string; sender: string; text: string }) {
     if (!data.chatId) {
@@ -86,7 +94,9 @@ export class ChatGateway {
       this.server.emit(`chat.${chat._id}.message`, newMessage);
     }
   }
-
+  
+  @ApiOperation({ summary: 'Создать чат' })
+  @ApiResponse({ status: 200, description: 'Чат создан' })
   @SubscribeMessage('createChat')
   async createChat() {
     const chat = this.chatRepository.create({ messages: [] });
