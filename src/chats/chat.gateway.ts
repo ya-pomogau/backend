@@ -1,7 +1,7 @@
 /* eslint-disable class-methods-use-this */
 import { WebSocketGateway, SubscribeMessage, WebSocketServer } from '@nestjs/websockets';
 import { Repository } from 'typeorm';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import { Server } from 'socket.io';
@@ -9,11 +9,9 @@ import { ObjectId } from 'mongodb';
 import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
 import { Chat } from './entities/chat.entity';
 import { disconnectionChatTime } from '../common/constants';
-
-import { HttpStatusCodes } from '../common/constants/httpStatusCodes';
 import exceptions from '../common/constants/exceptions';
 
-@ApiTags('Chat') // Тег для группировки операций
+@ApiTags('Chat')
 @WebSocketGateway({
   namespace: 'chat',
   cors: {
@@ -32,7 +30,7 @@ export class ChatGateway {
   private clientTimers = new Map<string, NodeJS.Timeout>(); // Добавляем Map для таймеров клиентов
 
   @ApiOperation({ summary: 'Установка соединения' })
-  @ApiResponse({ status: HttpStatusCodes.OK, description: 'Успешное соединение' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Успешное соединение' })
   @SubscribeMessage('connection')
   handleConnection(client: { disconnect: () => void; id: string }) {
     // Когда клиент подключается, создаем таймер для него
@@ -46,8 +44,8 @@ export class ChatGateway {
   }
 
   @ApiOperation({ summary: 'Отправка сообщения' })
-  @ApiResponse({ status: HttpStatusCodes.OK, description: 'Сообщение отправлено' })
-  @ApiResponse({ status: HttpStatusCodes.BAD_REQUEST, description: 'Некорректные данные' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Сообщение отправлено' })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Некорректные данные' })
   @SubscribeMessage('message')
   async handleMessage(
     client: { disconnect: () => void; id: string },

@@ -2,7 +2,7 @@ import {
   Body,
   Controller,
   Delete,
-  Get,
+  Get, HttpStatus,
   Param,
   Patch,
   Post,
@@ -42,7 +42,6 @@ import { TaskQueryDto } from './dto/task-query.dto';
 
 import exceptions from '../common/constants/exceptions';
 import { GenerateReportDto } from './dto/generate-report.dto';
-import { HttpStatusCodes } from '../common/constants/httpStatusCodes';
 
 @ApiBearerAuth()
 @ApiTags('Tasks')
@@ -63,7 +62,7 @@ export class TasksController {
       '<br>Поле accessStatus контролирует видимость и возможность принять заявку до волонтеров с соответствующими статусами. Устанавливается согласно категории заявки.',
   })
   @ApiOkResponse({
-    status: HttpStatusCodes.OK,
+    status: HttpStatus.OK,
     type: Task,
   })
   @UseGuards(UserRolesGuard, AdminPermissionsGuard)
@@ -90,12 +89,12 @@ export class TasksController {
   })
   @ApiQuery({ type: TaskQueryDto })
   @ApiOkResponse({
-    status: HttpStatusCodes.OK,
+    status: HttpStatus.OK,
     type: Task,
     isArray: true,
   })
   @ApiForbiddenResponse({
-    status: HttpStatusCodes.FORBIDDEN,
+    status: HttpStatus.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
   @UseGuards(UserRolesGuard)
@@ -110,12 +109,12 @@ export class TasksController {
     description: 'Доступ только для волонтеров и реципиентов',
   })
   @ApiOkResponse({
-    status: HttpStatusCodes.OK,
+    status: HttpStatus.OK,
     type: Task,
     isArray: true,
   })
   @ApiForbiddenResponse({
-    status: HttpStatusCodes.FORBIDDEN,
+    status: HttpStatus.FORBIDDEN,
     description: `${exceptions.users.onlyForVolunteers} ${exceptions.users.onlyForRecipients}`,
   })
   @UseGuards(UserRolesGuard)
@@ -130,12 +129,12 @@ export class TasksController {
     description: 'Доступ только для администраторов',
   })
   @ApiOkResponse({
-    status: HttpStatusCodes.OK,
+    status: HttpStatus.OK,
     type: Task,
     isArray: true,
   })
   @ApiForbiddenResponse({
-    status: HttpStatusCodes.FORBIDDEN,
+    status: HttpStatus.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
   @UseGuards(UserRolesGuard)
@@ -150,12 +149,12 @@ export class TasksController {
     description: 'Доступ только для администраторов',
   })
   @ApiOkResponse({
-    status: HttpStatusCodes.OK,
+    status: HttpStatus.OK,
     type: Task,
     isArray: true,
   })
   @ApiForbiddenResponse({
-    status: HttpStatusCodes.FORBIDDEN,
+    status: HttpStatus.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
   @UseGuards(UserRolesGuard)
@@ -169,7 +168,7 @@ export class TasksController {
     summary: 'Поиск заявки по id',
   })
   @ApiOkResponse({
-    status: HttpStatusCodes.OK,
+    status: HttpStatus.OK,
     type: Task,
   })
   @ApiParam({ name: 'id', description: 'строка из 24 шестнадцатеричных символов', type: String })
@@ -183,11 +182,11 @@ export class TasksController {
     description: 'Доступ только для волонтеров',
   })
   @ApiOkResponse({
-    status: HttpStatusCodes.OK,
+    status: HttpStatus.OK,
     type: Task,
   })
   @ApiForbiddenResponse({
-    status: HttpStatusCodes.FORBIDDEN,
+    status: HttpStatus.FORBIDDEN,
     description: exceptions.users.onlyForVolunteers,
   })
   @ApiParam({ name: 'id', description: 'строка из 24 шестнадцатеричных символов', type: String })
@@ -214,11 +213,11 @@ export class TasksController {
       'Доступ только для волонтеров и администраторов. Волонтер не может отказаться от заявки, до старта которой осталось менее 24 часов. Администратор может отменить отклик в любое время.',
   })
   @ApiOkResponse({
-    status: HttpStatusCodes.OK,
+    status: HttpStatus.OK,
     type: Task,
   })
   @ApiForbiddenResponse({
-    status: HttpStatusCodes.FORBIDDEN,
+    status: HttpStatus.FORBIDDEN,
     description: `${exceptions.users.onlyForVolunteers} ${exceptions.users.onlyForAdmins}`,
   })
   @ApiParam({ name: 'id', description: 'строка из 24 шестнадцатеричных символов', type: String })
@@ -246,11 +245,11 @@ export class TasksController {
       'Доступ только для реципиентов и администраторов. Реципиент может удалить только свою заявку, которую не принял волонтер. Администратор может удалить любую заявку.',
   })
   @ApiOkResponse({
-    status: HttpStatusCodes.OK,
+    status: HttpStatus.OK,
     type: Task,
   })
   @ApiForbiddenResponse({
-    status: HttpStatusCodes.FORBIDDEN,
+    status: HttpStatus.FORBIDDEN,
     description: `${exceptions.users.onlyForRecipients} ${exceptions.users.onlyForAdmins}`,
   })
   @ApiParam({ name: 'id', description: 'строка из 24 шестнадцатеричных символов', type: String })
@@ -278,11 +277,11 @@ export class TasksController {
       'Доступ только для администраторов с соответствующими правами. Если заявка была выполнена, необходимо передать query ?completed=true. Если не была выполнена, query можно не передавать.',
   })
   @ApiOkResponse({
-    status: HttpStatusCodes.OK,
+    status: HttpStatus.OK,
     type: Task,
   })
   @ApiForbiddenResponse({
-    status: HttpStatusCodes.FORBIDDEN,
+    status: HttpStatus.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
   @ApiParam({ name: 'id', description: 'строка из 24 шестнадцатеричных символов', type: String })
@@ -312,11 +311,11 @@ export class TasksController {
       ' Если не совпадают, администратору приходит отбивка в чат о конфликте - необходимо ручное закрытие.',
   })
   @ApiOkResponse({
-    status: HttpStatusCodes.OK,
+    status: HttpStatus.OK,
     type: Task,
   })
   @ApiForbiddenResponse({
-    status: HttpStatusCodes.FORBIDDEN,
+    status: HttpStatus.FORBIDDEN,
     description: `${exceptions.users.onlyForRecipients} ${exceptions.users.onlyForVolunteers}`,
   })
   @ApiParam({ name: 'id', description: 'строка из 24 шестнадцатеричных символов', type: String })
@@ -337,11 +336,11 @@ export class TasksController {
       'Доступ только для реципиентов и администраторов. Нельзя редактировать поле recipientId. Нельзя редактировать принятую волонтером заявку.',
   })
   @ApiOkResponse({
-    status: HttpStatusCodes.OK,
+    status: HttpStatus.OK,
     type: Task,
   })
   @ApiForbiddenResponse({
-    status: HttpStatusCodes.FORBIDDEN,
+    status: HttpStatus.FORBIDDEN,
     description: `${exceptions.users.onlyForRecipients} ${exceptions.users.onlyForAdmins}`,
   })
   @ApiParam({ name: 'id', description: 'строка из 24 шестнадцатеричных символов', type: String })

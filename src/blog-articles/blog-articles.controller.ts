@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import {Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, HttpStatus} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiForbiddenResponse,
@@ -21,7 +21,6 @@ import { BlogArticle } from './entities/blog-article.entity';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import exceptions from '../common/constants/exceptions';
 import { BypassAuth } from '../auth/decorators/bypass-auth.decorator';
-import { HttpStatusCodes } from '../common/constants/httpStatusCodes';
 
 @ApiTags('Blog')
 @ApiBearerAuth()
@@ -35,11 +34,11 @@ export class BlogArticlesController {
     description: 'Доступ только для администраторов',
   })
   @ApiOkResponse({
-    status: HttpStatusCodes.OK,
+    status: HttpStatus.OK,
     type: BlogArticle,
   })
   @ApiForbiddenResponse({
-    status: HttpStatusCodes.FORBIDDEN,
+    status: HttpStatus.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
   @UseGuards(UserRolesGuard, AdminPermissionsGuard)
@@ -54,7 +53,7 @@ export class BlogArticlesController {
     summary: 'Список статей блога',
   })
   @ApiOkResponse({
-    status: HttpStatusCodes.OK,
+    status: HttpStatus.OK,
     type: BlogArticle,
     isArray: true,
   })
@@ -69,7 +68,7 @@ export class BlogArticlesController {
   })
   @ApiParam({ name: 'id', description: 'строка из 24 шестнадцатеричных символов', type: String })
   @ApiOkResponse({
-    status: HttpStatusCodes.OK,
+    status: HttpStatus.OK,
     type: BlogArticle,
   })
   @BypassAuth()
@@ -83,11 +82,11 @@ export class BlogArticlesController {
     description: 'Доступ только для администраторов',
   })
   @ApiOkResponse({
-    status: HttpStatusCodes.OK,
+    status: HttpStatus.OK,
     type: BlogArticle,
   })
   @ApiForbiddenResponse({
-    status: HttpStatusCodes.FORBIDDEN,
+    status: HttpStatus.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
   @UseGuards(UserRolesGuard, AdminPermissionsGuard)
@@ -103,11 +102,11 @@ export class BlogArticlesController {
     description: 'Доступ только для администраторов',
   })
   @ApiOkResponse({
-    status: HttpStatusCodes.OK,
+    status: HttpStatus.OK,
     type: BlogArticle,
   })
   @ApiForbiddenResponse({
-    status: HttpStatusCodes.FORBIDDEN,
+    status: HttpStatus.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
   @UseGuards(UserRolesGuard, AdminPermissionsGuard)

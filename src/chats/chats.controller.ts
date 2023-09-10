@@ -1,9 +1,8 @@
-import { Controller, Post, Param, Get, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Post, Param, Get, Delete, UseGuards, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger'; // Импортируйте аннотации Swagger
 import { ChatsService } from './chats.service';
 import { Chat } from './entities/chat.entity';
 import { JwtGuard } from '../auth/guards/jwt.guard';
-import { HttpStatusCodes } from '../common/constants/httpStatusCodes';
 
 @Controller('chats')
 @ApiTags('Chats')
@@ -14,7 +13,7 @@ export class ChatsController {
 
   @Post()
   @ApiOperation({ summary: 'Создание чата' }) // Добавьте описание операции
-  @ApiResponse({ status: HttpStatusCodes.CREATED, type: Chat })
+  @ApiResponse({ status: HttpStatus.CREATED, type: Chat })
   async createChat(): Promise<Chat> {
     return this.chatsService.createChat();
   }
@@ -22,8 +21,8 @@ export class ChatsController {
   @Get(':id')
   @ApiOperation({ summary: 'Поиск чата по id' })
   @ApiParam({ name: 'id', description: 'строка из 24 шестнадцатеричных символов', type: String })
-  @ApiResponse({ status: HttpStatusCodes.OK, description: 'Чат найден', type: Chat })
-  @ApiResponse({ status: HttpStatusCodes.NOT_FOUND, description: 'Чат не найден' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Чат найден', type: Chat })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Чат не найден' })
   async getChat(@Param('id') id: string): Promise<Chat | undefined> {
     return this.chatsService.getChatById(id);
   }
@@ -32,12 +31,12 @@ export class ChatsController {
   @Delete('deleteExpiredChats')
   @ApiOperation({ summary: 'Удаление истекших чатов' })
   @ApiResponse({
-    status: HttpStatusCodes.CREATED,
+    status: HttpStatus.CREATED,
     description: 'Истекшие чаты успешно удалены',
     type: Object,
   })
   @ApiResponse({
-    status: HttpStatusCodes.INTERNAL_SERVER_ERROR,
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
     description: 'Произошла ошибка при удалении истекших чатов',
     type: Object,
   })
@@ -63,7 +62,7 @@ export class ChatsController {
     description: 'строка из 24 шестнадцатеричных символов',
     type: String,
   })
-  @ApiResponse({ status: HttpStatusCodes.CREATED, description: 'Сообщение успешно удалено' })
+  @ApiResponse({ status: HttpStatus.CREATED, description: 'Сообщение успешно удалено' })
   async deleteMessage(
     @Param('chatId') chatId: string,
     @Param('messageId') messageId: string

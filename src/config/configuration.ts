@@ -2,6 +2,7 @@ export default () => ({
   server: {
     port: process.env.SERVER_PORT || 3001,
     cors_origins: process.env.CORS_ORIGINS,
+    http_address: process.env.HTTP_ADDRESS,
   },
   database: {
     host: process.env.DATABASE_HOST || '127.0.0.1',
@@ -20,10 +21,13 @@ export default () => ({
   },
   jwt: {
     key: process.env.JWT_KEY,
-    // secret: process.env.JWT_SECRET || 'jwt-secret-key',
     ttl: process.env.JWT_TTL || '7d',
   },
   hash: {
     salt: Number(process.env.SALT) || 10,
+  },
+  avatars: {
+    maxSize: Number(process.env.MAX_FILE_SIZE),
+    dest: process.env.AVATARS_LOCATION,
   },
 });

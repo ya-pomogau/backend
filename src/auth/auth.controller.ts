@@ -22,17 +22,12 @@ import { LocalGuard } from './guards/local.guard';
 import type { IJwtUser } from './types';
 import { ApiUnauthorized } from './types/unauthorized';
 import { SignupVkDto } from './dto/signup-vk-dto';
-import { UserService } from '../users/user.service';
 import { SigninDto } from './dto/signin.dto';
-import { HttpStatusCodes } from '../common/constants/httpStatusCodes';
 
 @ApiTags('Auth')
 @Controller()
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly userService: UserService
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   /**
    * пример полной строки первого запроса:
@@ -102,7 +97,7 @@ export class AuthController {
     description: 'Активируется при ответе от вконтаке. Все поля заполняются автоматически.',
   })
   @ApiOkResponse({
-    status: HttpStatusCodes.OK,
+    status: HttpStatus.OK,
     type: SigninResponseDto,
   })
   @ApiUnauthorizedResponse({
@@ -164,7 +159,7 @@ export class AuthController {
     type: SigninDto,
   })
   @ApiOkResponse({
-    status: HttpStatusCodes.OK,
+    status: HttpStatus.OK,
     type: SigninResponseDto,
   })
   @UseGuards(LocalGuard)

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Patch, Post, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiForbiddenResponse,
@@ -11,7 +11,6 @@ import { ContactsService } from './contacts.service';
 import { CreateContactDto } from './dto/create-contact.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';
 import { ApiUnauthorized } from '../auth/types/unauthorized';
-import { HttpStatusCodes } from '../common/constants/httpStatusCodes';
 import exceptions from '../common/constants/exceptions';
 import { UserRolesGuard } from '../auth/guards/user-roles.guard';
 import { EUserRole } from '../users/types';
@@ -36,11 +35,11 @@ export class ContactsController {
     type: ApiUnauthorized,
   })
   @ApiOkResponse({
-    status: HttpStatusCodes.OK,
+    status: HttpStatus.OK,
     type: Contact,
   })
   @ApiForbiddenResponse({
-    status: HttpStatusCodes.FORBIDDEN,
+    status: HttpStatus.BAD_REQUEST,
     description: exceptions.users.onlyForMaster,
   })
   @UseGuards(UserRolesGuard)
@@ -54,7 +53,7 @@ export class ContactsController {
     summary: 'Список контактов',
   })
   @ApiOkResponse({
-    status: HttpStatusCodes.OK,
+    status: HttpStatus.OK,
     type: Contact,
   })
   @BypassAuth()
@@ -71,11 +70,11 @@ export class ContactsController {
     type: ApiUnauthorized,
   })
   @ApiOkResponse({
-    status: HttpStatusCodes.OK,
+    status: HttpStatus.OK,
     type: Contact,
   })
   @ApiForbiddenResponse({
-    status: HttpStatusCodes.FORBIDDEN,
+    status: HttpStatus.FORBIDDEN,
     description: exceptions.users.onlyForMaster,
   })
   @UseGuards(UserRolesGuard)
