@@ -43,7 +43,7 @@ import { Task } from '../tasks/entities/task.entity';
 import { UserQueryDto } from './dto/user-query.dto';
 import { GenerateReportDto } from './dto/generate-report.dto';
 import { BypassAuth } from '../auth/decorators/bypass-auth.decorator';
-import {HttpStatusCodes} from "../common/constants/httpStatusCodes";
+import { HttpStatusCodes } from '../common/constants/httpStatusCodes';
 
 @ApiBearerAuth()
 @ApiTags('Users')
@@ -61,7 +61,7 @@ export class UserController {
     type: ApiUnauthorized,
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatusCodes.OK,
     type: User,
   })
   @ApiForbiddenResponse({

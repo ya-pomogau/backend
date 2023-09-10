@@ -14,6 +14,7 @@ import { TasksModule } from './tasks/tasks.module';
 import { UserModule } from './users/user.module';
 import { BlogArticlesModule } from './blog-articles/blog-articles.module';
 import { ChatsModule } from './chats/chats.module';
+import { ContactsModule } from './contacts/contacts.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { ChatsModule } from './chats/chats.module';
     AuthModule,
     BlogArticlesModule,
     ChatsModule,
+    ContactsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
