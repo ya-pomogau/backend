@@ -16,6 +16,7 @@ import {
   ApiForbiddenResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiParam,
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
@@ -171,6 +172,7 @@ export class TasksController {
     status: HttpStatusCodes.OK,
     type: Task,
   })
+  @ApiParam({ name: 'id', description: 'строка из 24 шестнадцатеричных символов', type: String })
   @Get(':id')
   async findById(@Param('id') id: string, @AuthUser() user: User): Promise<Task> {
     return this.tasksService.findById(id, user);
@@ -188,6 +190,7 @@ export class TasksController {
     status: HttpStatusCodes.FORBIDDEN,
     description: exceptions.users.onlyForVolunteers,
   })
+  @ApiParam({ name: 'id', description: 'строка из 24 шестнадцатеричных символов', type: String })
   @UseGuards(UserRolesGuard)
   @UserRoles(EUserRole.VOLUNTEER)
   @Patch(':id/accept')
@@ -218,6 +221,7 @@ export class TasksController {
     status: HttpStatusCodes.FORBIDDEN,
     description: `${exceptions.users.onlyForVolunteers} ${exceptions.users.onlyForAdmins}`,
   })
+  @ApiParam({ name: 'id', description: 'строка из 24 шестнадцатеричных символов', type: String })
   @UseGuards(UserRolesGuard, AdminPermissionsGuard)
   @UserRoles(EUserRole.VOLUNTEER, EUserRole.ADMIN, EUserRole.MASTER)
   @AdminPermissions(AdminPermission.TASKS, AdminPermission.CONFLICTS)
@@ -249,6 +253,7 @@ export class TasksController {
     status: HttpStatusCodes.FORBIDDEN,
     description: `${exceptions.users.onlyForRecipients} ${exceptions.users.onlyForAdmins}`,
   })
+  @ApiParam({ name: 'id', description: 'строка из 24 шестнадцатеричных символов', type: String })
   @UseGuards(UserRolesGuard, AdminPermissionsGuard)
   @UserRoles(EUserRole.RECIPIENT, EUserRole.ADMIN, EUserRole.MASTER)
   @AdminPermissions(AdminPermission.TASKS)
@@ -280,6 +285,7 @@ export class TasksController {
     status: HttpStatusCodes.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
+  @ApiParam({ name: 'id', description: 'строка из 24 шестнадцатеричных символов', type: String })
   @UseGuards(UserRolesGuard, AdminPermissionsGuard)
   @UserRoles(EUserRole.ADMIN, EUserRole.MASTER)
   @AdminPermissions(AdminPermission.TASKS, AdminPermission.CONFLICTS)
@@ -313,6 +319,7 @@ export class TasksController {
     status: HttpStatusCodes.FORBIDDEN,
     description: `${exceptions.users.onlyForRecipients} ${exceptions.users.onlyForVolunteers}`,
   })
+  @ApiParam({ name: 'id', description: 'строка из 24 шестнадцатеричных символов', type: String })
   @UseGuards(UserRolesGuard)
   @UserRoles(EUserRole.RECIPIENT, EUserRole.VOLUNTEER)
   @Patch(':id/confirm')
@@ -337,6 +344,7 @@ export class TasksController {
     status: HttpStatusCodes.FORBIDDEN,
     description: `${exceptions.users.onlyForRecipients} ${exceptions.users.onlyForAdmins}`,
   })
+  @ApiParam({ name: 'id', description: 'строка из 24 шестнадцатеричных символов', type: String })
   @UseGuards(UserRolesGuard, AdminPermissionsGuard)
   @UserRoles(EUserRole.RECIPIENT, EUserRole.ADMIN, EUserRole.MASTER)
   @AdminPermissions(AdminPermission.TASKS, AdminPermission.CONFLICTS)

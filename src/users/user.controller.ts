@@ -18,6 +18,7 @@ import {
   ApiForbiddenResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiParam,
   ApiQuery,
   ApiTags,
   ApiUnauthorizedResponse,
@@ -190,6 +191,7 @@ export class UserController {
     status: HttpStatusCodes.OK,
     type: User,
   })
+  @ApiParam({ name: 'id', description: 'строка из 24 шестнадцатеричных символов', type: String })
   @Get(':id')
   async getUserById(@Param('id') id: string): Promise<Omit<User, 'login'>> {
     return this.userService.findUserById(id);
@@ -219,6 +221,7 @@ export class UserController {
     status: HttpStatusCodes.OK,
     type: User,
   })
+  @ApiParam({ name: 'id', description: 'строка из 24 шестнадцатеричных символов', type: String })
   @Patch(':id')
   async updateUser(
     @Param('id') id: string,
@@ -245,6 +248,7 @@ export class UserController {
     status: HttpStatusCodes.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
+  @ApiParam({ name: 'id', description: 'строка из 24 шестнадцатеричных символов', type: String })
   @UseGuards(UserRolesGuard, AdminPermissionsGuard)
   @UserRoles(EUserRole.ADMIN, EUserRole.MASTER)
   @AdminPermissions(AdminPermission.CONFIRMATION)
@@ -269,6 +273,7 @@ export class UserController {
     status: HttpStatusCodes.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
+  @ApiParam({ name: 'id', description: 'строка из 24 шестнадцатеричных символов', type: String })
   @UseGuards(UserRolesGuard, AdminPermissionsGuard)
   @UserRoles(EUserRole.ADMIN, EUserRole.MASTER)
   @AdminPermissions(AdminPermission.KEYS)
@@ -290,6 +295,7 @@ export class UserController {
     status: HttpStatusCodes.FORBIDDEN,
     description: exceptions.users.onlyForMaster,
   })
+  @ApiParam({ name: 'id', description: 'строка из 24 шестнадцатеричных символов', type: String })
   @UseGuards(UserRolesGuard)
   @UserRoles(EUserRole.MASTER)
   @Patch(':id/admin-permissions')
@@ -312,6 +318,7 @@ export class UserController {
     status: HttpStatusCodes.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
+  @ApiParam({ name: 'id', description: 'строка из 24 шестнадцатеричных символов', type: String })
   @UseGuards(UserRolesGuard, AdminPermissionsGuard)
   @UserRoles(EUserRole.ADMIN, EUserRole.MASTER)
   @AdminPermissions(AdminPermission.CONFIRMATION)

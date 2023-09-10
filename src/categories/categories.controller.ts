@@ -5,6 +5,7 @@ import {
   ApiForbiddenResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
 
@@ -20,7 +21,7 @@ import { AdminPermission, EUserRole } from '../users/types';
 import { AdminPermissions } from '../auth/decorators/admin-permissions.decorator';
 import { Category } from './entities/category.entity';
 import exceptions from '../common/constants/exceptions';
-import {HttpStatusCodes} from "../common/constants/httpStatusCodes";
+import { HttpStatusCodes } from '../common/constants/httpStatusCodes';
 
 @ApiTags('Categories')
 @ApiBearerAuth()
@@ -69,6 +70,7 @@ export class CategoriesController {
     status: 200,
     type: Category,
   })
+  @ApiParam({ name: 'id', description: 'строка из 24 шестнадцатеричных символов', type: String })
   @Get(':id')
   async findById(@Param('id') id: string): Promise<Category> {
     return this.categoriesService.findById(id);
@@ -87,6 +89,7 @@ export class CategoriesController {
     status: HttpStatusCodes.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
+  @ApiParam({ name: 'id', description: 'строка из 24 шестнадцатеричных символов', type: String })
   @UseGuards(UserRolesGuard, AdminPermissionsGuard)
   @UserRoles(EUserRole.ADMIN, EUserRole.MASTER)
   @AdminPermissions(AdminPermission.CATEGORIES)

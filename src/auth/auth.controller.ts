@@ -24,7 +24,7 @@ import { ApiUnauthorized } from './types/unauthorized';
 import { SignupVkDto } from './dto/signup-vk-dto';
 import { UserService } from '../users/user.service';
 import { SigninDto } from './dto/signin.dto';
-import { HttpStatusCodes } from "../common/constants/httpStatusCodes";
+import { HttpStatusCodes } from '../common/constants/httpStatusCodes';
 
 @ApiTags('Auth')
 @Controller()

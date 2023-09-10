@@ -1,44 +1,43 @@
-import { Controller, Post, Param, Get, Delete } from '@nestjs/common';
+import { Controller, Post, Param, Get, Delete, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger'; // Импортируйте аннотации Swagger
 import { ChatsService } from './chats.service';
 import { Chat } from './entities/chat.entity';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiParam,
-} from '@nestjs/swagger'; // Импортируйте аннотации Swagger
+import { JwtGuard } from '../auth/guards/jwt.guard';
+import { HttpStatusCodes } from '../common/constants/httpStatusCodes';
 
 @Controller('chats')
-@ApiTags('Chats') // Добавьте тег для группировки операций в документации Swagger
+@ApiTags('Chats')
+@ApiBearerAuth()
+@UseGuards(JwtGuard)
 export class ChatsController {
   constructor(private chatsService: ChatsService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Создать чат' }) // Добавьте описание операции
-  @ApiResponse({ status: 201, description: 'Чат успешно создан', type: Chat })
+  @ApiOperation({ summary: 'Создание чата' }) // Добавьте описание операции
+  @ApiResponse({ status: HttpStatusCodes.CREATED, type: Chat })
   async createChat(): Promise<Chat> {
     return this.chatsService.createChat();
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Получить чат по ID' })
-  @ApiParam({ name: 'id', description: 'ID чата', type: String })
-  @ApiResponse({ status: 200, description: 'Чат найден', type: Chat })
-  @ApiResponse({ status: 404, description: 'Чат не найден' })
+  @ApiOperation({ summary: 'Поиск чата по id' })
+  @ApiParam({ name: 'id', description: 'строка из 24 шестнадцатеричных символов', type: String })
+  @ApiResponse({ status: HttpStatusCodes.OK, description: 'Чат найден', type: Chat })
+  @ApiResponse({ status: HttpStatusCodes.NOT_FOUND, description: 'Чат не найден' })
   async getChat(@Param('id') id: string): Promise<Chat | undefined> {
     return this.chatsService.getChatById(id);
   }
 
   // Этот эндпоинт вызывает метод для удаления истекших чатов
   @Delete('deleteExpiredChats')
-  @ApiOperation({ summary: 'Удалить истекшие чаты' })
+  @ApiOperation({ summary: 'Удаление истекших чатов' })
   @ApiResponse({
-    status: 200,
+    status: HttpStatusCodes.CREATED,
     description: 'Истекшие чаты успешно удалены',
     type: Object,
   })
   @ApiResponse({
-    status: 500,
+    status: HttpStatusCodes.INTERNAL_SERVER_ERROR,
     description: 'Произошла ошибка при удалении истекших чатов',
     type: Object,
   })
@@ -53,10 +52,18 @@ export class ChatsController {
   }
 
   @Delete(':chatId/messages/:messageId')
-  @ApiOperation({ summary: 'Удалить сообщение из чата' })
-  @ApiParam({ name: 'chatId', description: 'ID чата', type: String })
-  @ApiParam({ name: 'messageId', description: 'ID сообщения', type: String })
-  @ApiResponse({ status: 200, description: 'Сообщение успешно удалено' })
+  @ApiOperation({ summary: 'Удаление сообщения из чата' })
+  @ApiParam({
+    name: 'chatId',
+    description: 'строка из 24 шестнадцатеричных символов',
+    type: String,
+  })
+  @ApiParam({
+    name: 'messageId',
+    description: 'строка из 24 шестнадцатеричных символов',
+    type: String,
+  })
+  @ApiResponse({ status: HttpStatusCodes.CREATED, description: 'Сообщение успешно удалено' })
   async deleteMessage(
     @Param('chatId') chatId: string,
     @Param('messageId') messageId: string

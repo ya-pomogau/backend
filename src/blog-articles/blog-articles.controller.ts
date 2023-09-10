@@ -4,6 +4,7 @@ import {
   ApiForbiddenResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
 import { BlogArticlesService } from './blog-articles.service';
@@ -20,7 +21,7 @@ import { BlogArticle } from './entities/blog-article.entity';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import exceptions from '../common/constants/exceptions';
 import { BypassAuth } from '../auth/decorators/bypass-auth.decorator';
-import {HttpStatusCodes} from "../common/constants/httpStatusCodes";
+import { HttpStatusCodes } from '../common/constants/httpStatusCodes';
 
 @ApiTags('Blog')
 @ApiBearerAuth()
@@ -66,6 +67,7 @@ export class BlogArticlesController {
   @ApiOperation({
     summary: 'Поиск статьи по id',
   })
+  @ApiParam({ name: 'id', description: 'строка из 24 шестнадцатеричных символов', type: String })
   @ApiOkResponse({
     status: HttpStatusCodes.OK,
     type: BlogArticle,
