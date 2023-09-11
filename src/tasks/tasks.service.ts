@@ -1,5 +1,5 @@
-import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
-import { Between, DataSource, MongoRepository, Repository } from 'typeorm';
+import { ForbiddenException, Injectable } from '@nestjs/common';
+import { DataSource, MongoRepository, Repository } from 'typeorm';
 
 import { InjectRepository } from '@nestjs/typeorm';
 import { ObjectId } from 'mongodb';
@@ -85,7 +85,7 @@ export class TasksService {
       accessStatus: category.accessStatus,
     };
 
-    const newTask = await this.taskRepository.create(dto);
+    const newTask = this.taskRepository.create(dto);
 
     await this.userRepository.update({ _id: recipient._id }, { lastActivityDate: new Date() });
 
@@ -122,9 +122,9 @@ export class TasksService {
   async findBy(query: object) {
     const taskQuery: object = {};
 
-    for (const property in query) {
+    Object.keys(query).forEach((property) => {
       taskQuery[property] = { $in: query[property].split(',') };
-    }
+    });
 
     const tasks = await this.taskRepository.find({
       where: taskQuery,

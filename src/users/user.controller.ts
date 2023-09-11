@@ -1,3 +1,4 @@
+import * as fs from 'fs';
 import {
   Body,
   Controller,
@@ -10,20 +11,24 @@ import {
   Patch,
   Post,
   Query,
+  Res,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
   ValidationPipe,
 } from '@nestjs/common';
-import { ObjectId } from 'mongodb';
 import {
   ApiBearerAuth,
   ApiForbiddenResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiParam,
   ApiQuery,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
+import { FileInterceptor } from '@nestjs/platform-express';
 import { User } from './entities/user.entity';
 import { UserService } from './user.service';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -43,7 +48,9 @@ import exceptions from '../common/constants/exceptions';
 import { Task } from '../tasks/entities/task.entity';
 import { UserQueryDto } from './dto/user-query.dto';
 import { GenerateReportDto } from './dto/generate-report.dto';
-import {BypassAuth} from "../auth/decorators/bypass-auth.decorator";
+import { BypassAuth } from '../auth/decorators/bypass-auth.decorator';
+import { multerAvatarOptions } from '../config/multer-config';
+import configuration from '../config/configuration';
 
 @ApiBearerAuth()
 @ApiTags('Users')
@@ -61,11 +68,11 @@ export class UserController {
     type: ApiUnauthorized,
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatus.OK,
     type: User,
   })
   @ApiForbiddenResponse({
-    status: 403,
+    status: HttpStatus.FORBIDDEN,
     description: exceptions.users.onlyForMaster,
   })
   // @UseGuards(UserRolesGuard)
@@ -84,7 +91,7 @@ export class UserController {
     summary: 'Создание реципиента/волонтера (только для тестов, в проде регистрация через вк!)',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatus.OK,
     type: User,
   })
   @Post()
@@ -102,12 +109,12 @@ export class UserController {
   })
   @ApiQuery({ type: UserQueryDto })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatus.OK,
     type: Task,
     isArray: true,
   })
   @ApiForbiddenResponse({
-    status: 403,
+    status: HttpStatus.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
   @UseGuards(UserRolesGuard)
@@ -118,10 +125,25 @@ export class UserController {
   }
 
   @ApiOperation({
+    summary: 'Получение загруженного аватара по ссылке',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'id пользователя, строка из 24 шестнадцатеричных символов',
+    type: String,
+  })
+  @BypassAuth()
+  @Get(':id/avatar')
+  async getAvatar(@Param('id') id: string, @Res() res) {
+    const image = `${configuration().avatars.dest}/${id}-avatar.jpg`;
+    return res.sendFile(image);
+  }
+
+  @ApiOperation({
     summary: 'Данные о текущем авторизованном пользователе',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatus.OK,
     type: User,
   })
   @Get('own')
@@ -143,12 +165,12 @@ export class UserController {
       '<br> Отсчет дняй активности ведётся от текущих даты и ВРЕМЕНИ минус 30 суток',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatus.OK,
     type: User,
     isArray: true,
   })
   @ApiForbiddenResponse({
-    status: 403,
+    status: HttpStatus.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
   @UseGuards(UserRolesGuard)
@@ -163,12 +185,12 @@ export class UserController {
     description: 'Доступ только для администраторов',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatus.OK,
     type: User,
     isArray: true,
   })
   @ApiForbiddenResponse({
-    status: 403,
+    status: HttpStatus.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
   @UseGuards(UserRolesGuard)
@@ -187,9 +209,10 @@ export class UserController {
     summary: 'Поиск пользователя по id',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatus.OK,
     type: User,
   })
+  @ApiParam({ name: 'id', description: 'строка из 24 шестнадцатеричных символов', type: String })
   @Get(':id')
   async getUserById(@Param('id') id: string): Promise<Omit<User, 'login'>> {
     return this.userService.findUserById(id);
@@ -200,7 +223,7 @@ export class UserController {
     description: 'Доступ только для администраторов с соответствующими правами',
   })
   @ApiForbiddenResponse({
-    status: 403,
+    status: HttpStatus.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
   @UseGuards(UserRolesGuard, AdminPermissionsGuard)
@@ -212,13 +235,51 @@ export class UserController {
   }
 
   @ApiOperation({
+    summary: 'Загрузка аватара с локального ПК',
+    description:
+      'Для загрузки необходимо передать файл в формате jpg/jpeg/png/gif. Файл будет сохранен в формате jpg.',
+  })
+  @ApiOkResponse({
+    status: HttpStatus.OK,
+    type: User,
+  })
+  @Patch('upload-avatar')
+  @UseInterceptors(FileInterceptor('file', multerAvatarOptions))
+  async upload(@AuthUser() user: User, @UploadedFile() file) {
+    try {
+      await fs.promises.mkdir(`${file.destination}`, { recursive: true });
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    const userPath = `${file.destination}/${user._id}-avatar.jpg`;
+
+    try {
+      await fs.rename(file.path, userPath, function (err) {
+        if (err) {
+          return console.error(err);
+        }
+
+        return null;
+      });
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    return this.userService.updateOne(user._id.toString(), {
+      avatar: `${configuration().server.http_address}/users/${user._id.toString()}/avatar`,
+    });
+  }
+
+  @ApiOperation({
     summary: 'Редактирование пользователя по id',
     description: 'Для редактирования доступны только поля, заполняемые при регистрации + аватар',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatus.OK,
     type: User,
   })
+  @ApiParam({ name: 'id', description: 'строка из 24 шестнадцатеричных символов', type: String })
   @Patch(':id')
   async updateUser(
     @Param('id') id: string,
@@ -238,13 +299,14 @@ export class UserController {
       'Доступ только для администраторов с соответствующими правами. Доступные статусы: 0 - не подтвержден, 1 - подтвержден, 2 - подтвержден и проверен. Увеличение статуса до 3 (активирован ключ) доступно только по пути /key.',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatus.OK,
     type: User,
   })
   @ApiForbiddenResponse({
-    status: 403,
+    status: HttpStatus.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
+  @ApiParam({ name: 'id', description: 'строка из 24 шестнадцатеричных символов', type: String })
   @UseGuards(UserRolesGuard, AdminPermissionsGuard)
   @UserRoles(EUserRole.ADMIN, EUserRole.MASTER)
   @AdminPermissions(AdminPermission.CONFIRMATION)
@@ -262,13 +324,14 @@ export class UserController {
       'Доступ только для администраторов с соответствующими правами. Для изменения статусов от 0 до 2 используйте путь /status.',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatus.OK,
     type: User,
   })
   @ApiForbiddenResponse({
-    status: 403,
+    status: HttpStatus.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
+  @ApiParam({ name: 'id', description: 'строка из 24 шестнадцатеричных символов', type: String })
   @UseGuards(UserRolesGuard, AdminPermissionsGuard)
   @UserRoles(EUserRole.ADMIN, EUserRole.MASTER)
   @AdminPermissions(AdminPermission.KEYS)
@@ -283,13 +346,14 @@ export class UserController {
       'Доступ только для главного администратора. Необходимо передать полный массив обновленных прав.',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatus.OK,
     type: User,
   })
   @ApiForbiddenResponse({
-    status: 403,
+    status: HttpStatus.FORBIDDEN,
     description: exceptions.users.onlyForMaster,
   })
+  @ApiParam({ name: 'id', description: 'строка из 24 шестнадцатеричных символов', type: String })
   @UseGuards(UserRolesGuard)
   @UserRoles(EUserRole.MASTER)
   @Patch(':id/admin-permissions')
@@ -305,13 +369,14 @@ export class UserController {
     description: 'Доступ только для администраторов с соответствующими правами',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatus.OK,
     type: User,
   })
   @ApiForbiddenResponse({
-    status: 403,
+    status: HttpStatus.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
+  @ApiParam({ name: 'id', description: 'строка из 24 шестнадцатеричных символов', type: String })
   @UseGuards(UserRolesGuard, AdminPermissionsGuard)
   @UserRoles(EUserRole.ADMIN, EUserRole.MASTER)
   @AdminPermissions(AdminPermission.CONFIRMATION)

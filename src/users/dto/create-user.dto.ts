@@ -9,7 +9,7 @@ import {
   IsArray,
   ArrayMinSize,
   ArrayMaxSize,
-  IsNumber, IsOptional,
+  IsNumber,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 

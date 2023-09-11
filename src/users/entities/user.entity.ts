@@ -99,7 +99,7 @@ export class User {
 
   @ApiResponseProperty()
   @Column()
-  completedTasks: number = 0;
+  completedTasks = 0;
 
   @ApiResponseProperty()
   @Column()

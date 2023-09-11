@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import {Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, HttpStatus} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiForbiddenResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
 import { BlogArticlesService } from './blog-articles.service';
@@ -33,11 +34,11 @@ export class BlogArticlesController {
     description: 'Доступ только для администраторов',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatus.OK,
     type: BlogArticle,
   })
   @ApiForbiddenResponse({
-    status: 403,
+    status: HttpStatus.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
   @UseGuards(UserRolesGuard, AdminPermissionsGuard)
@@ -52,7 +53,7 @@ export class BlogArticlesController {
     summary: 'Список статей блога',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatus.OK,
     type: BlogArticle,
     isArray: true,
   })
@@ -65,8 +66,9 @@ export class BlogArticlesController {
   @ApiOperation({
     summary: 'Поиск статьи по id',
   })
+  @ApiParam({ name: 'id', description: 'строка из 24 шестнадцатеричных символов', type: String })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatus.OK,
     type: BlogArticle,
   })
   @BypassAuth()
@@ -80,11 +82,11 @@ export class BlogArticlesController {
     description: 'Доступ только для администраторов',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatus.OK,
     type: BlogArticle,
   })
   @ApiForbiddenResponse({
-    status: 403,
+    status: HttpStatus.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
   @UseGuards(UserRolesGuard, AdminPermissionsGuard)
@@ -100,11 +102,11 @@ export class BlogArticlesController {
     description: 'Доступ только для администраторов',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatus.OK,
     type: BlogArticle,
   })
   @ApiForbiddenResponse({
-    status: 403,
+    status: HttpStatus.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
   @UseGuards(UserRolesGuard, AdminPermissionsGuard)

@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import * as cron from 'node-cron';
-import { ChatsService } from './chats.service';
 import { ApiOperation } from '@nestjs/swagger';
+import { ChatsService } from './chats.service';
+
 @Injectable()
 export class CronService {
   constructor(private readonly chatsService: ChatsService) {
     this.setupCronJobs();
   }
+
   @ApiOperation({ summary: 'Настроить задачи Cron' })
   private setupCronJobs() {
     // Запустить задачу каждый день в полночь (00:00)

@@ -1,15 +1,17 @@
 /* eslint-disable class-methods-use-this */
 import { WebSocketGateway, SubscribeMessage, WebSocketServer } from '@nestjs/websockets';
 import { Repository } from 'typeorm';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import { Server } from 'socket.io';
 import { ObjectId } from 'mongodb';
-import { Chat } from './entities/chat.entity';
 import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
+import { Chat } from './entities/chat.entity';
+import { disconnectionChatTime } from '../common/constants';
+import exceptions from '../common/constants/exceptions';
 
-@ApiTags('Chat') // Тег для группировки операций
+@ApiTags('Chat')
 @WebSocketGateway({
   namespace: 'chat',
   cors: {
@@ -19,42 +21,44 @@ import { ApiTags, ApiResponse, ApiOperation } from '@nestjs/swagger';
 export class ChatGateway {
   constructor(
     @InjectRepository(Chat)
-    private chatRepository: Repository<Chat>,
+    private chatRepository: Repository<Chat>
   ) {}
-
 
   @WebSocketServer()
   server: Server;
 
   private clientTimers = new Map<string, NodeJS.Timeout>(); // Добавляем Map для таймеров клиентов
 
-  @ApiOperation({ summary: 'Установить соединение' })
-  @ApiResponse({ status: 200, description: 'Успешное соединение' })
+  @ApiOperation({ summary: 'Установка соединения' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Успешное соединение' })
   @SubscribeMessage('connection')
-  handleConnection(client: { disconnect: () => void; id: string; }) {
+  handleConnection(client: { disconnect: () => void; id: string }) {
     // Когда клиент подключается, создаем таймер для него
     const timer = setTimeout(() => {
       // Если клиент не активен в течение 5 минут, разрываем соединение
       client.disconnect();
-    }, 5 * 60 * 1000); // 5 минут в миллисекундах
+    }, disconnectionChatTime);
 
     // Сохраняем таймер в Map, связывая его с идентификатором клиента (например, с его сессией)
     this.clientTimers.set(client.id, timer);
   }
 
-  @ApiOperation({ summary: 'Отправить сообщение' })
-  @ApiResponse({ status: 200, description: 'Сообщение отправлено' })
-  @ApiResponse({ status: 400, description: 'Некорректные данные' })
+  @ApiOperation({ summary: 'Отправка сообщения' })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Сообщение отправлено' })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Некорректные данные' })
   @SubscribeMessage('message')
-  async handleMessage(client : { disconnect: () => void; id: string; }, data: { chatId: string; sender: string; text: string }) {
+  async handleMessage(
+    client: { disconnect: () => void; id: string },
+    data: { chatId: string; sender: string; text: string }
+  ) {
     if (!data.chatId) {
-      throw new BadRequestException('Id чата не введено');
+      throw new BadRequestException(exceptions.chats.noId);
     }
     if (!data.sender) {
-      throw new BadRequestException('Нет отправителя');
+      throw new BadRequestException(exceptions.chats.noSender);
     }
     if (!data.text) {
-      throw new BadRequestException('Сообщение не должно быть пустым');
+      throw new BadRequestException(exceptions.chats.isEmpty);
     }
     // Когда клиент отправляет сообщение, сбрасываем таймер
     const timer = this.clientTimers.get(client.id);
@@ -64,7 +68,7 @@ export class ChatGateway {
       const newTimer = setTimeout(() => {
         // Если клиент не активен в течение 5 минут после последнего сообщения, разрываем соединение
         client.disconnect();
-      }, 5 * 60 * 1000); // 5 минут в миллисекундах
+      }, disconnectionChatTime); // 5 минут в миллисекундах
       // Обновляем таймер в Map
       this.clientTimers.set(client.id, newTimer);
     }
@@ -94,7 +98,7 @@ export class ChatGateway {
       this.server.emit(`chat.${chat._id}.message`, newMessage);
     }
   }
-  
+
   @ApiOperation({ summary: 'Создать чат' })
   @ApiResponse({ status: 200, description: 'Чат создан' })
   @SubscribeMessage('createChat')

@@ -15,7 +15,7 @@ export class BlogArticlesService {
   ) {}
 
   async create(authorId: ObjectId, createBlogArticleDto: CreateBlogArticleDto) {
-    const newArticle = await this.blogArticleRepository.create({
+    const newArticle = this.blogArticleRepository.create({
       ...createBlogArticleDto,
       authorId: authorId.toString(),
     });

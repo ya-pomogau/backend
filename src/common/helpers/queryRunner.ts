@@ -7,10 +7,7 @@ export default async (dataSource: DataSource, operations: unknown[]) => {
   await queryRunner.startTransaction();
 
   try {
-    for (const operation of operations) {
-      await operation;
-    }
-
+    operations.forEach((operation) => operation);
     await queryRunner.commitTransaction();
   } catch (err) {
     await queryRunner.rollbackTransaction();
