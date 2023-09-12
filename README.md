@@ -7,7 +7,7 @@ IP адрес [84.201.139.237](84.201.139.237)
 
 API [https://api.kraev.nomoredomains.xyz/api](https://api.kraev.nomoredomains.xyz/api)
 
-Коллекция postman - collection.json
+Коллекция postman - (https://www.postman.com/phizick/workspace/ihelp)
 
 ## Описание
 Проект для волонтерской организации ЯПомогаю. Цель, создать удобное веб-приложение поиска волонтёров для помощи реципиентам. От выгула собак, до помощи людям с ограниченными возможностями.

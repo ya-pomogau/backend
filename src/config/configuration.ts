@@ -2,6 +2,7 @@ export default () => ({
   server: {
     port: process.env.SERVER_PORT || 3001,
     cors_origins: process.env.CORS_ORIGINS,
+    http_address: process.env.HTTP_ADDRESS,
   },
   database: {
     host: process.env.DATABASE_HOST || '127.0.0.1',
@@ -12,16 +13,25 @@ export default () => ({
   },
 
   vk: {
-    appId: process.env.VK_APP_ID || '51729194',
-    appSecret: process.env.VK_APP_SECRET || 'lyxbTQRoOzpKBX4PqjWm',
-    redirectUri: process.env.VK_APP_REDIRECT_URI || 'http://127.0.0.1:3001/callback',
+    appId: process.env.VK_APP_ID,
+    appSecret: process.env.VK_APP_SECRET,
+    redirectUri: process.env.VK_APP_REDIRECT_URI,
+    api: process.env.VK_API,
+    apiOauth: process.env.VK_API_OAUTH,
   },
   jwt: {
-    key: process.env.JWT_KEY || 'e776c17dcf7b8de11a1647faa49b89c2',
-    secret: process.env.JWT_SECRET || 'jwt-secret-key',
+    key: process.env.JWT_KEY,
     ttl: process.env.JWT_TTL || '7d',
   },
   hash: {
     salt: Number(process.env.SALT) || 10,
+  },
+  avatars: {
+    maxSize: Number(process.env.AVATARS_FILE_SIZE),
+    dest: process.env.AVATARS_LOCATION,
+  },
+  blogs: {
+    maxSize: Number(process.env.BLOG_IMAGES_FILE_SIZE),
+    dest: process.env.BLOG_IMAGES_LOCATION,
   },
 });

@@ -1,11 +1,28 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import * as fs from 'fs';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  HttpStatus,
+  UseInterceptors,
+  UploadedFile,
+  HttpException,
+  Res,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiForbiddenResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { BlogArticlesService } from './blog-articles.service';
 import { CreateBlogArticleDto } from './dto/create-blog-article.dto';
 import { UpdateBlogArticleDto } from './dto/update-blog-article.dto';
@@ -20,8 +37,10 @@ import { BlogArticle } from './entities/blog-article.entity';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import exceptions from '../common/constants/exceptions';
 import { BypassAuth } from '../auth/decorators/bypass-auth.decorator';
+import { multerOptions, uploadType } from '../config/multer-config';
+import configuration from '../config/configuration';
 
-@ApiTags('Blog')
+@ApiTags('Blog-articles')
 @ApiBearerAuth()
 @UseGuards(JwtGuard)
 @Controller('blog-articles')
@@ -33,11 +52,11 @@ export class BlogArticlesController {
     description: 'Доступ только для администраторов',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatus.OK,
     type: BlogArticle,
   })
   @ApiForbiddenResponse({
-    status: 403,
+    status: HttpStatus.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
   @UseGuards(UserRolesGuard, AdminPermissionsGuard)
@@ -49,10 +68,52 @@ export class BlogArticlesController {
   }
 
   @ApiOperation({
+    summary: 'Загрузка картинок блога с локального ПК',
+    description:
+        'Для загрузки необходимо передать файл в формате jpg/jpeg/png/gif. Файл будет сохранен в формате jpg.',
+  })
+  @ApiOkResponse({
+    status: HttpStatus.OK,
+  })
+  @ApiForbiddenResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: exceptions.users.onlyForAdmins,
+  })
+  @UseGuards(UserRolesGuard, AdminPermissionsGuard)
+  @UserRoles(EUserRole.ADMIN, EUserRole.MASTER)
+  @AdminPermissions(AdminPermission.BLOG)
+  @Post('upload-image')
+  @UseInterceptors(FileInterceptor('file', multerOptions(uploadType.BLOGS)))
+  async upload(@UploadedFile() file) {
+    try {
+      await fs.promises.mkdir(`${file.destination}`, { recursive: true });
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    return `${configuration().server.http_address}/blog-articles/images/${file.filename}`;
+  }
+
+  @ApiOperation({
+    summary: 'Получение картинки блога по ссылке',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'id картинки, строка из 24 шестнадцатеричных символов',
+    type: String,
+  })
+  @BypassAuth()
+  @Get('images/:id')
+  async getImage(@Param('id') id: string, @Res() res) {
+    const image = `${configuration().blogs.dest}/${id}`;
+    return res.sendFile(image);
+  }
+
+  @ApiOperation({
     summary: 'Список статей блога',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatus.OK,
     type: BlogArticle,
     isArray: true,
   })
@@ -65,8 +126,9 @@ export class BlogArticlesController {
   @ApiOperation({
     summary: 'Поиск статьи по id',
   })
+  @ApiParam({ name: 'id', description: 'строка из 24 шестнадцатеричных символов', type: String })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatus.OK,
     type: BlogArticle,
   })
   @BypassAuth()
@@ -80,11 +142,11 @@ export class BlogArticlesController {
     description: 'Доступ только для администраторов',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatus.OK,
     type: BlogArticle,
   })
   @ApiForbiddenResponse({
-    status: 403,
+    status: HttpStatus.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
   @UseGuards(UserRolesGuard, AdminPermissionsGuard)
@@ -100,11 +162,11 @@ export class BlogArticlesController {
     description: 'Доступ только для администраторов',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatus.OK,
     type: BlogArticle,
   })
   @ApiForbiddenResponse({
-    status: 403,
+    status: HttpStatus.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
   @UseGuards(UserRolesGuard, AdminPermissionsGuard)

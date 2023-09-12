@@ -1,6 +1,6 @@
 import { Column, CreateDateColumn, Entity, ObjectIdColumn, UpdateDateColumn } from 'typeorm';
 
-import { IsString, Length, MinLength } from 'class-validator';
+import {IsArray, IsString, Length, MinLength} from 'class-validator';
 
 import { ObjectId } from 'mongodb';
 import { ApiProperty, ApiResponseProperty } from '@nestjs/swagger';
@@ -39,4 +39,9 @@ export class BlogArticle {
   @IsString()
   @MinLength(validationOptions.limits.blogArticle.text.min)
   text: string;
+
+  @ApiResponseProperty()
+  @Column()
+  @IsArray()
+  images: string[] = [];
 }

@@ -1,10 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, UseGuards } from '@nestjs/common';
+import {Controller, Get, Post, Body, Patch, Param, UseGuards, HttpStatus} from '@nestjs/common';
 
 import {
   ApiBearerAuth,
   ApiForbiddenResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
 
@@ -33,11 +34,11 @@ export class CategoriesController {
     description: 'Доступ только для администраторов с соответствующим статусом.',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatus.OK,
     type: Category,
   })
   @ApiForbiddenResponse({
-    status: 403,
+    status: HttpStatus.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
   @UseGuards(UserRolesGuard, AdminPermissionsGuard)
@@ -52,7 +53,7 @@ export class CategoriesController {
     summary: 'Список всех категорий',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatus.OK,
     type: Category,
     isArray: true,
   })
@@ -65,9 +66,10 @@ export class CategoriesController {
     summary: 'Поиск категории по id',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatus.OK,
     type: Category,
   })
+  @ApiParam({ name: 'id', description: 'строка из 24 шестнадцатеричных символов', type: String })
   @Get(':id')
   async findById(@Param('id') id: string): Promise<Category> {
     return this.categoriesService.findById(id);
@@ -79,13 +81,14 @@ export class CategoriesController {
       'Доступ только для администраторов с соответствующим статусом. При обновлении баллов или уровня доступа происходит автоматическое обновление данных полей во всех незакрытых заявках категории.',
   })
   @ApiOkResponse({
-    status: 200,
+    status: HttpStatus.OK,
     type: Category,
   })
   @ApiForbiddenResponse({
-    status: 403,
+    status: HttpStatus.FORBIDDEN,
     description: exceptions.users.onlyForAdmins,
   })
+  @ApiParam({ name: 'id', description: 'строка из 24 шестнадцатеричных символов', type: String })
   @UseGuards(UserRolesGuard, AdminPermissionsGuard)
   @UserRoles(EUserRole.ADMIN, EUserRole.MASTER)
   @AdminPermissions(AdminPermission.CATEGORIES)

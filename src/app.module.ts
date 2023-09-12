@@ -13,6 +13,8 @@ import { TasksWsModule } from './tasks-ws/tasks-ws.module';
 import { TasksModule } from './tasks/tasks.module';
 import { UserModule } from './users/user.module';
 import { BlogArticlesModule } from './blog-articles/blog-articles.module';
+import { ChatsModule } from './chats/chats.module';
+import { ContactsModule } from './contacts/contacts.module';
 
 @Module({
   imports: [
@@ -31,6 +33,8 @@ import { BlogArticlesModule } from './blog-articles/blog-articles.module';
     HashModule,
     AuthModule,
     BlogArticlesModule,
+    ChatsModule,
+    ContactsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

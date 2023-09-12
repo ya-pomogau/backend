@@ -4,7 +4,6 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { VK_API_HOST } from '../common/constants';
 import exceptions from '../common/constants/exceptions';
 import { HashService } from '../hash/hash.service';
 import { User } from '../users/entities/user.entity';
@@ -37,8 +36,9 @@ export class AuthService {
    * Get Redirect VK Login Page
    */
   getRedirectUrl(isSignup: boolean, signupDto?: SignupVkDto): string {
-    let { appId, redirectUri } = this.config.get('vk');
-    const url = new URL(`${VK_API_HOST}/authorize`);
+    const { appId, apiOauth } = this.config.get('vk');
+    let { redirectUri } = this.config.get('vk');
+    const url = new URL(`${apiOauth}/authorize`);
 
     if (isSignup) {
       redirectUri += `?signup=1&fullname=${signupDto.fullname}&role=${signupDto.role}&address=${signupDto.address}&coordinates=${signupDto.coordinates}&phone=${signupDto.phone}`;
@@ -46,9 +46,6 @@ export class AuthService {
 
     url.searchParams.set('client_id', appId);
     url.searchParams.append('redirect_uri', this._getRedirectUri(redirectUri));
-    // url.searchParams.append('display', display);
-    // url.searchParams.append('scope', scope);
-    // url.searchParams.append('response_type', responseType);
 
     return url.toString();
   }
@@ -58,8 +55,9 @@ export class AuthService {
     signupVkDto: SignupVkDto,
     isSignup: boolean
   ): Promise<{ expiresIn: number; accessToken: string; userId: number }> {
-    let { appId, appSecret, redirectUri } = this.config.get('vk');
-    const url = new URL(`${VK_API_HOST}/access_token`);
+    const { appId, appSecret, apiOauth } = this.config.get('vk');
+    let { redirectUri } = this.config.get('vk');
+    const url = new URL(`${apiOauth}/access_token`);
 
     if (isSignup) {
       redirectUri += `?signup=1&fullname=${signupVkDto.fullname}&role=${signupVkDto.role}&address=${signupVkDto.address}&coordinates=${signupVkDto.coordinates}&phone=${signupVkDto.phone}`;
@@ -106,7 +104,7 @@ export class AuthService {
     code: string,
     signupVkDto: SignupVkDto | null,
     isSignup: boolean
-  ): Promise<{ access_token: string }> {
+  ): Promise<{ access_token: string; user: User }> {
     const { accessToken, userId, expiresIn } = await this.getVkInfo(code, signupVkDto, isSignup);
 
     if (isSignup) {
@@ -115,7 +113,6 @@ export class AuthService {
       try {
         await this.signupViaVk(vkUser, signupVkDto);
       } catch (error) {
-        console.error('Ошибка при попытке регистрации пользователя:', error);
         throw new InternalServerErrorException('Ошибка при попытке регистрации пользователя');
       }
     }
@@ -141,6 +138,7 @@ export class AuthService {
           expiresIn,
         }
       ),
+      user,
     };
   }
 
@@ -177,7 +175,7 @@ export class AuthService {
   auth(user: User) {
     const payload = { sub: user._id };
 
-    return { access_token: this.jwtService.sign(payload) };
+    return { access_token: this.jwtService.sign(payload), user };
   }
 
   /**

@@ -80,7 +80,7 @@ export class Task {
 
   @ApiResponseProperty()
   @Column()
-  completed: boolean = false;
+  completed = false;
 
   @ApiResponseProperty()
   @Column()
@@ -96,5 +96,5 @@ export class Task {
 
   @ApiResponseProperty()
   @Column()
-  isConflict: boolean = false;
+  isConflict = false;
 }
