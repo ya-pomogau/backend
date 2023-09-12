@@ -1,4 +1,19 @@
-import {Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, HttpStatus} from '@nestjs/common';
+import * as fs from 'fs';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  HttpStatus,
+  UseInterceptors,
+  UploadedFile,
+  HttpException,
+  Res,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiForbiddenResponse,
@@ -7,6 +22,7 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { BlogArticlesService } from './blog-articles.service';
 import { CreateBlogArticleDto } from './dto/create-blog-article.dto';
 import { UpdateBlogArticleDto } from './dto/update-blog-article.dto';
@@ -21,8 +37,10 @@ import { BlogArticle } from './entities/blog-article.entity';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import exceptions from '../common/constants/exceptions';
 import { BypassAuth } from '../auth/decorators/bypass-auth.decorator';
+import { multerOptions, uploadType } from '../config/multer-config';
+import configuration from '../config/configuration';
 
-@ApiTags('Blog')
+@ApiTags('Blog-articles')
 @ApiBearerAuth()
 @UseGuards(JwtGuard)
 @Controller('blog-articles')
@@ -47,6 +65,48 @@ export class BlogArticlesController {
   @Post()
   async create(@AuthUser() user: User, @Body() createBlogArticleDto: CreateBlogArticleDto) {
     return this.blogArticlesService.create(user._id, createBlogArticleDto);
+  }
+
+  @ApiOperation({
+    summary: 'Загрузка картинок блога с локального ПК',
+    description:
+        'Для загрузки необходимо передать файл в формате jpg/jpeg/png/gif. Файл будет сохранен в формате jpg.',
+  })
+  @ApiOkResponse({
+    status: HttpStatus.OK,
+  })
+  @ApiForbiddenResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: exceptions.users.onlyForAdmins,
+  })
+  @UseGuards(UserRolesGuard, AdminPermissionsGuard)
+  @UserRoles(EUserRole.ADMIN, EUserRole.MASTER)
+  @AdminPermissions(AdminPermission.BLOG)
+  @Post('upload-image')
+  @UseInterceptors(FileInterceptor('file', multerOptions(uploadType.BLOGS)))
+  async upload(@UploadedFile() file) {
+    try {
+      await fs.promises.mkdir(`${file.destination}`, { recursive: true });
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    return `${configuration().server.http_address}/blog-articles/images/${file.filename}`;
+  }
+
+  @ApiOperation({
+    summary: 'Получение картинки блога по ссылке',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'id картинки, строка из 24 шестнадцатеричных символов',
+    type: String,
+  })
+  @BypassAuth()
+  @Get('images/:id')
+  async getImage(@Param('id') id: string, @Res() res) {
+    const image = `${configuration().blogs.dest}/${id}`;
+    return res.sendFile(image);
   }
 
   @ApiOperation({

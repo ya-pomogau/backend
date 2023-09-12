@@ -28,28 +28,28 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
-import { FileInterceptor } from '@nestjs/platform-express';
-import { User } from './entities/user.entity';
-import { UserService } from './user.service';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { ChangeStatusDto } from './dto/change-status.dto';
-import { ChangeAdminPermissionsDto } from './dto/change-adminPermissions.dto';
-import { CreateAdminDto } from './dto/create-admin.dto';
-import { JwtGuard } from '../auth/guards/jwt.guard';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UserRolesGuard } from '../auth/guards/user-roles.guard';
-import { AdminPermissionsGuard } from '../auth/guards/admin-permissions.guard';
-import { UserRoles } from '../auth/decorators/user-roles.decorator';
-import { AdminPermission, EUserRole } from './types';
-import { AdminPermissions } from '../auth/decorators/admin-permissions.decorator';
-import { AuthUser } from '../auth/decorators/auth-user.decorator';
-import { ApiUnauthorized } from '../auth/types/unauthorized';
+import {FileInterceptor} from '@nestjs/platform-express';
+import {User} from './entities/user.entity';
+import {UserService} from './user.service';
+import {UpdateUserDto} from './dto/update-user.dto';
+import {ChangeStatusDto} from './dto/change-status.dto';
+import {ChangeAdminPermissionsDto} from './dto/change-adminPermissions.dto';
+import {CreateAdminDto} from './dto/create-admin.dto';
+import {JwtGuard} from '../auth/guards/jwt.guard';
+import {CreateUserDto} from './dto/create-user.dto';
+import {UserRolesGuard} from '../auth/guards/user-roles.guard';
+import {AdminPermissionsGuard} from '../auth/guards/admin-permissions.guard';
+import {UserRoles} from '../auth/decorators/user-roles.decorator';
+import {AdminPermission, EUserRole} from './types';
+import {AdminPermissions} from '../auth/decorators/admin-permissions.decorator';
+import {AuthUser} from '../auth/decorators/auth-user.decorator';
+import {ApiUnauthorized} from '../auth/types/unauthorized';
 import exceptions from '../common/constants/exceptions';
-import { Task } from '../tasks/entities/task.entity';
-import { UserQueryDto } from './dto/user-query.dto';
-import { GenerateReportDto } from './dto/generate-report.dto';
-import { BypassAuth } from '../auth/decorators/bypass-auth.decorator';
-import { multerAvatarOptions } from '../config/multer-config';
+import {Task} from '../tasks/entities/task.entity';
+import {UserQueryDto} from './dto/user-query.dto';
+import {GenerateReportDto} from './dto/generate-report.dto';
+import {BypassAuth} from '../auth/decorators/bypass-auth.decorator';
+import {multerOptions, uploadType} from '../config/multer-config';
 import configuration from '../config/configuration';
 
 @ApiBearerAuth()
@@ -244,7 +244,7 @@ export class UserController {
     type: User,
   })
   @Patch('upload-avatar')
-  @UseInterceptors(FileInterceptor('file', multerAvatarOptions))
+  @UseInterceptors(FileInterceptor('file', multerOptions(uploadType.AVATARS)))
   async upload(@AuthUser() user: User, @UploadedFile() file) {
     try {
       await fs.promises.mkdir(`${file.destination}`, { recursive: true });
