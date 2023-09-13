@@ -23,6 +23,8 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { NotFoundException } from '@nestjs/common/exceptions';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { BlogArticlesService } from './blog-articles.service';
 import { CreateBlogArticleDto } from './dto/create-blog-article.dto';
 import { UpdateBlogArticleDto } from './dto/update-blog-article.dto';
@@ -39,8 +41,7 @@ import exceptions from '../common/constants/exceptions';
 import { BypassAuth } from '../auth/decorators/bypass-auth.decorator';
 import { multerOptions, uploadType } from '../config/multer-config';
 import configuration from '../config/configuration';
-import {NotFoundException} from "@nestjs/common/exceptions";
-import {dayInMs} from "../common/constants";
+import { dayInMs } from '../common/constants';
 
 @ApiTags('Blog-articles')
 @ApiBearerAuth()
@@ -72,7 +73,7 @@ export class BlogArticlesController {
   @ApiOperation({
     summary: 'Загрузка картинок блога с локального ПК',
     description:
-        'Для загрузки необходимо передать файл в формате jpg/jpeg/png/gif. Файл будет сохранен в формате jpg.',
+      'Для загрузки необходимо передать файл в формате jpg/jpeg/png/gif. Файл будет сохранен в формате jpg.',
   })
   @ApiOkResponse({
     status: HttpStatus.OK,
@@ -159,36 +160,24 @@ export class BlogArticlesController {
     return this.blogArticlesService.update(id, updateBlogArticleDto);
   }
 
-  @ApiOperation({
-    summary: 'Автоматическое удаление картинок, неиспользуемых в блогах'
-  })
-  @ApiOkResponse({
-    status: HttpStatus.OK,
-  })
-  @ApiForbiddenResponse({
-    status: HttpStatus.FORBIDDEN,
-    description: exceptions.users.onlyForAdmins,
-  })
-  @UseGuards(UserRolesGuard, AdminPermissionsGuard)
-  @UserRoles(EUserRole.ADMIN, EUserRole.MASTER)
-  @AdminPermissions(AdminPermission.BLOG)
-  @Delete('images/unused')
+  @Cron(CronExpression.EVERY_MINUTE)
   async removeUnused() {
+    console.log('START');
     const usedImages = await this.blogArticlesService.findUsedImages();
-    const usedFileNames = usedImages.map(image => image.split('/').at(-1))
-    fs.readdir(`${configuration().blogs.dest}`,  (err, files) => {
-      files.forEach( async (file) => {
-        const { birthtimeMs} = await fs.promises.stat(`${configuration().blogs.dest}/${file}`);
-        const now = new Date().getTime()
+    const usedFileNames = usedImages.map((image) => image.split('/').at(-1));
+    fs.readdir(`${configuration().blogs.dest}`, (err, files) => {
+      files.forEach(async (file) => {
+        const { birthtimeMs } = await fs.promises.stat(`${configuration().blogs.dest}/${file}`);
+        const now = new Date().getTime();
         if (!usedFileNames.includes(file) && now - birthtimeMs < dayInMs) {
-          await this.deleteImage(file)
+          await this.deleteImage(file);
         }
       });
     });
   }
 
   @ApiOperation({
-    summary: 'Удаление загруженных картинок блога'
+    summary: 'Удаление загруженных картинок блога',
   })
   @ApiOkResponse({
     status: HttpStatus.OK,
@@ -207,7 +196,6 @@ export class BlogArticlesController {
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
-
   }
 
   @ApiOperation({
@@ -230,16 +218,14 @@ export class BlogArticlesController {
     const articleToDelete = await this.findOne(id);
 
     if (!articleToDelete) {
-      throw new NotFoundException(exceptions.blogArticles.notFound)
+      throw new NotFoundException(exceptions.blogArticles.notFound);
     }
 
     await this.blogArticlesService.remove(id);
 
-    for (const image of articleToDelete.images) {
-      const id = image.split('/').at(-1)
-      await this.deleteImage(id);
-    }
-
+    articleToDelete.images.forEach((image) => {
+      const id = image.split('/').at(-1);
+      this.deleteImage(id);
+    });
   }
-
 }
