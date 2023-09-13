@@ -1,18 +1,18 @@
-import { IsNotEmpty, IsString } from "class-validator";
-import validationOptions from "../../common/constants/validation-options";
-import {ApiProperty} from "@nestjs/swagger";
+import { IsNotEmpty, IsString } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import validationOptions from '../../common/constants/validation-options';
 
 export class CreatePoliticDto {
-    @IsString({ message: validationOptions.messages.shouldBeString })
-    @IsNotEmpty({ message: validationOptions.messages.isEmpty })
-    @ApiProperty({ example: 'Благотворительность в рекламе' })
-    title: string;
+  @IsString({ message: validationOptions.messages.shouldBeString })
+  @IsNotEmpty({ message: validationOptions.messages.isEmpty })
+  @ApiProperty({ example: 'Политика конфиденциальности' })
+  title: string;
 
-    @IsString({ message: validationOptions.messages.shouldBeString })
-    @IsNotEmpty({ message: validationOptions.messages.isEmpty })
-    @ApiProperty({
-        example:
-            'Реклама благотворительности встречается везде: от интернет-сайтов до уличных билбордов...',
-    })
-    text: string;
+  @IsString({ message: validationOptions.messages.shouldBeString })
+  @IsNotEmpty({ message: validationOptions.messages.isEmpty })
+  @ApiProperty({
+    example:
+      '<h2>1. Общие положения</h2> <p>Настоящая политика обработки персональных данных составлена в соответствии с требованиями Федерального закона...</p>',
+  })
+  text: string;
 }

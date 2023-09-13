@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -24,7 +25,7 @@ import { PoliticsModule } from './politics/politics.module';
       imports: [],
       useClass: TypeOrmConfigService,
     }),
-
+    ScheduleModule.forRoot(),
     AuthModule,
 
     TasksModule,

@@ -51,7 +51,7 @@ export class BlogArticlesController {
   constructor(private readonly blogArticlesService: BlogArticlesService) {}
 
   @ApiOperation({
-    summary: 'Создание новой записи в блоге',
+    summary: 'Создание новой статьи в блоге',
     description: 'Доступ только для администраторов',
   })
   @ApiOkResponse({
@@ -73,7 +73,8 @@ export class BlogArticlesController {
   @ApiOperation({
     summary: 'Загрузка картинок блога с локального ПК',
     description:
-      'Для загрузки необходимо передать файл в формате jpg/jpeg/png/gif. Файл будет сохранен в формате jpg.',
+      'Для загрузки необходимо передать файл в формате jpg/jpeg/png/gif. Файл будет сохранен в формате jpg.' +
+      '<br>Загруженные картинки, которые не были прикреплены к какой-либо статье в течении суток, будут удалены автоматически.',
   })
   @ApiOkResponse({
     status: HttpStatus.OK,
@@ -141,7 +142,7 @@ export class BlogArticlesController {
   }
 
   @ApiOperation({
-    summary: 'Редактирование записи в блоге',
+    summary: 'Редактирование статьи в блоге',
     description: 'Доступ только для администраторов',
   })
   @ApiOkResponse({
@@ -160,22 +161,6 @@ export class BlogArticlesController {
     return this.blogArticlesService.update(id, updateBlogArticleDto);
   }
 
-  @Cron(CronExpression.EVERY_MINUTE)
-  async removeUnused() {
-    console.log('START');
-    const usedImages = await this.blogArticlesService.findUsedImages();
-    const usedFileNames = usedImages.map((image) => image.split('/').at(-1));
-    fs.readdir(`${configuration().blogs.dest}`, (err, files) => {
-      files.forEach(async (file) => {
-        const { birthtimeMs } = await fs.promises.stat(`${configuration().blogs.dest}/${file}`);
-        const now = new Date().getTime();
-        if (!usedFileNames.includes(file) && now - birthtimeMs < dayInMs) {
-          await this.deleteImage(file);
-        }
-      });
-    });
-  }
-
   @ApiOperation({
     summary: 'Удаление загруженных картинок блога',
   })
@@ -192,6 +177,7 @@ export class BlogArticlesController {
   @Delete('images/:id')
   async deleteImage(@Param('id') id: string) {
     try {
+      console.log(id);
       await fs.promises.unlink(`${configuration().blogs.dest}/${id}`);
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -199,8 +185,9 @@ export class BlogArticlesController {
   }
 
   @ApiOperation({
-    summary: 'Удаление записи в блоге',
-    description: 'Доступ только для администраторов',
+    summary: 'Удаление статьи в блоге',
+    description:
+      'Доступ только для администраторов. При удалении записи автоматически удаляются все загруженные картинки, прикрепленные к данной статье',
   })
   @ApiOkResponse({
     status: HttpStatus.OK,
@@ -226,6 +213,22 @@ export class BlogArticlesController {
     articleToDelete.images.forEach((image) => {
       const id = image.split('/').at(-1);
       this.deleteImage(id);
+    });
+  }
+
+  // удаление картинок, созданных более суток назад и не прикрепленных к блогу
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  async removeUnused() {
+    const usedImages = await this.blogArticlesService.findUsedImages();
+    const usedFileNames = usedImages.map((image) => image.split('/').at(-1));
+    fs.readdir(`${configuration().blogs.dest}`, (err, files) => {
+      files.forEach(async (file) => {
+        const { birthtimeMs } = await fs.promises.stat(`${configuration().blogs.dest}/${file}`);
+        const now = new Date().getTime();
+        if (!usedFileNames.includes(file) && now - birthtimeMs > dayInMs) {
+          await this.deleteImage(file);
+        }
+      });
     });
   }
 }
