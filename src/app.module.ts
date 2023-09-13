@@ -15,6 +15,7 @@ import { UserModule } from './users/user.module';
 import { BlogArticlesModule } from './blog-articles/blog-articles.module';
 import { ChatsModule } from './chats/chats.module';
 import { ContactsModule } from './contacts/contacts.module';
+import { PoliticsModule } from './politics/politics.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { ContactsModule } from './contacts/contacts.module';
     BlogArticlesModule,
     ChatsModule,
     ContactsModule,
+    PoliticsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

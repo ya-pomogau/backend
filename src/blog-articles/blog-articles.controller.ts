@@ -39,6 +39,8 @@ import exceptions from '../common/constants/exceptions';
 import { BypassAuth } from '../auth/decorators/bypass-auth.decorator';
 import { multerOptions, uploadType } from '../config/multer-config';
 import configuration from '../config/configuration';
+import {NotFoundException} from "@nestjs/common/exceptions";
+import {dayInMs} from "../common/constants";
 
 @ApiTags('Blog-articles')
 @ApiBearerAuth()
@@ -158,6 +160,57 @@ export class BlogArticlesController {
   }
 
   @ApiOperation({
+    summary: 'Автоматическое удаление картинок, неиспользуемых в блогах'
+  })
+  @ApiOkResponse({
+    status: HttpStatus.OK,
+  })
+  @ApiForbiddenResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: exceptions.users.onlyForAdmins,
+  })
+  @UseGuards(UserRolesGuard, AdminPermissionsGuard)
+  @UserRoles(EUserRole.ADMIN, EUserRole.MASTER)
+  @AdminPermissions(AdminPermission.BLOG)
+  @Delete('images/unused')
+  async removeUnused() {
+    const usedImages = await this.blogArticlesService.findUsedImages();
+    const usedFileNames = usedImages.map(image => image.split('/').at(-1))
+    fs.readdir(`${configuration().blogs.dest}`,  (err, files) => {
+      files.forEach( async (file) => {
+        const { birthtimeMs} = await fs.promises.stat(`${configuration().blogs.dest}/${file}`);
+        const now = new Date().getTime()
+        if (!usedFileNames.includes(file) && now - birthtimeMs < dayInMs) {
+          await this.deleteImage(file)
+        }
+      });
+    });
+  }
+
+  @ApiOperation({
+    summary: 'Удаление загруженных картинок блога'
+  })
+  @ApiOkResponse({
+    status: HttpStatus.OK,
+  })
+  @ApiForbiddenResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: exceptions.users.onlyForAdmins,
+  })
+  @UseGuards(UserRolesGuard, AdminPermissionsGuard)
+  @UserRoles(EUserRole.ADMIN, EUserRole.MASTER)
+  @AdminPermissions(AdminPermission.BLOG)
+  @Delete('images/:id')
+  async deleteImage(@Param('id') id: string) {
+    try {
+      await fs.promises.unlink(`${configuration().blogs.dest}/${id}`);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+  }
+
+  @ApiOperation({
     summary: 'Удаление записи в блоге',
     description: 'Доступ только для администраторов',
   })
@@ -173,7 +226,20 @@ export class BlogArticlesController {
   @UserRoles(EUserRole.ADMIN, EUserRole.MASTER)
   @AdminPermissions(AdminPermission.BLOG)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.blogArticlesService.remove(id);
+  async remove(@Param('id') id: string) {
+    const articleToDelete = await this.findOne(id);
+
+    if (!articleToDelete) {
+      throw new NotFoundException(exceptions.blogArticles.notFound)
+    }
+
+    await this.blogArticlesService.remove(id);
+
+    for (const image of articleToDelete.images) {
+      const id = image.split('/').at(-1)
+      await this.deleteImage(id);
+    }
+
   }
+
 }

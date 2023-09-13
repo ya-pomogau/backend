@@ -26,13 +26,13 @@ export class CreateBlogArticleDto {
   })
   text: string;
 
-  @IsUrl(
-    { require_protocol: true },
-    {
-      each: true,
-      message: validationOptions.messages.incorrectUrl,
-    }
-  )
+  // @IsUrl(
+  //   { require_protocol: true },
+  //   {
+  //     each: true,
+  //     message: validationOptions.messages.incorrectUrl,
+  //   }
+  // )
   @IsArray({ message: validationOptions.messages.shouldBeArray })
   @IsNotEmpty({ message: validationOptions.messages.isEmpty })
   @ApiProperty({
