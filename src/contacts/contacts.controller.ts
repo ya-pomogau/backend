@@ -29,7 +29,7 @@ export class ContactsController {
   @ApiOperation({
     summary: 'Создание контактов',
     description:
-      'Доступ только для администраторов. Создается один раз, далее только корректировки через PATCH.',
+      'Доступ только для главного администратора. Создается один раз, далее только корректировки через PATCH.',
   })
   @ApiUnauthorizedResponse({
     type: ApiUnauthorized,
@@ -64,7 +64,7 @@ export class ContactsController {
 
   @ApiOperation({
     summary: 'Редактирование контактов',
-    description: 'Доступ только для администраторов.',
+    description: 'Доступ только для главного администратора.',
   })
   @ApiUnauthorizedResponse({
     type: ApiUnauthorized,

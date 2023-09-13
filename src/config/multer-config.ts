@@ -5,16 +5,19 @@ import { v4 as uuid } from 'uuid';
 import { HttpException, HttpStatus } from '@nestjs/common';
 import configuration from './configuration';
 
-export const multerAvatarOptions = {
+export enum uploadType {
+  AVATARS = 'avatars',
+  BLOGS = 'blogs',
+}
+
+export const multerOptions = (type: uploadType) => ({
   limits: {
-    fileSize: configuration().avatars.maxSize,
+    fileSize: configuration()[type].maxSize,
   },
   fileFilter: (req: any, file: any, cb: any) => {
     if (file.mimetype.match(/\/(jpg|jpeg|png|gif)$/)) {
-      // Allow storage of file
       cb(null, true);
     } else {
-      // Reject file
       cb(
         new HttpException(
           `Unsupported file type ${extname(file.originalname)}`,
@@ -26,7 +29,7 @@ export const multerAvatarOptions = {
   },
   storage: diskStorage({
     destination: (req: any, file: any, cb: any) => {
-      const uploadPath = configuration().avatars.dest;
+      const uploadPath = configuration()[type].dest;
       if (!existsSync(uploadPath)) {
         mkdirSync(uploadPath);
       }
@@ -36,4 +39,4 @@ export const multerAvatarOptions = {
       cb(null, `${uuid()}${extname(file.originalname)}`);
     },
   }),
-};
+});

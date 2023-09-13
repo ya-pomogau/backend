@@ -46,4 +46,9 @@ export class BlogArticlesService {
     const objectId = new ObjectId(id);
     await this.blogArticleRepository.delete(objectId);
   }
+
+  async findUsedImages() {
+    const articles = await this.blogArticleRepository.find();
+    return [...new Set(articles.flatMap(article => article.images))];
+  }
 }

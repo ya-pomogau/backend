@@ -27,7 +27,11 @@ export default () => ({
     salt: Number(process.env.SALT) || 10,
   },
   avatars: {
-    maxSize: Number(process.env.MAX_FILE_SIZE),
+    maxSize: Number(process.env.AVATARS_FILE_SIZE),
     dest: process.env.AVATARS_LOCATION,
+  },
+  blogs: {
+    maxSize: Number(process.env.BLOG_IMAGES_FILE_SIZE),
+    dest: process.env.BLOG_IMAGES_LOCATION,
   },
 });

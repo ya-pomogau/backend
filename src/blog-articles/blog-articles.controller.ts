@@ -1,4 +1,19 @@
-import {Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, HttpStatus} from '@nestjs/common';
+import * as fs from 'fs';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  HttpStatus,
+  UseInterceptors,
+  UploadedFile,
+  HttpException,
+  Res,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiForbiddenResponse,
@@ -7,6 +22,9 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { NotFoundException } from '@nestjs/common/exceptions';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { BlogArticlesService } from './blog-articles.service';
 import { CreateBlogArticleDto } from './dto/create-blog-article.dto';
 import { UpdateBlogArticleDto } from './dto/update-blog-article.dto';
@@ -21,8 +39,11 @@ import { BlogArticle } from './entities/blog-article.entity';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import exceptions from '../common/constants/exceptions';
 import { BypassAuth } from '../auth/decorators/bypass-auth.decorator';
+import { multerOptions, uploadType } from '../config/multer-config';
+import configuration from '../config/configuration';
+import { dayInMs } from '../common/constants';
 
-@ApiTags('Blog')
+@ApiTags('Blog-articles')
 @ApiBearerAuth()
 @UseGuards(JwtGuard)
 @Controller('blog-articles')
@@ -30,7 +51,7 @@ export class BlogArticlesController {
   constructor(private readonly blogArticlesService: BlogArticlesService) {}
 
   @ApiOperation({
-    summary: 'Создание новой записи в блоге',
+    summary: 'Создание новой статьи в блоге',
     description: 'Доступ только для администраторов',
   })
   @ApiOkResponse({
@@ -47,6 +68,49 @@ export class BlogArticlesController {
   @Post()
   async create(@AuthUser() user: User, @Body() createBlogArticleDto: CreateBlogArticleDto) {
     return this.blogArticlesService.create(user._id, createBlogArticleDto);
+  }
+
+  @ApiOperation({
+    summary: 'Загрузка картинок блога с локального ПК',
+    description:
+      'Для загрузки необходимо передать файл в формате jpg/jpeg/png/gif. Файл будет сохранен в формате jpg.' +
+      '<br>Загруженные картинки, которые не были прикреплены к какой-либо статье в течении суток, будут удалены автоматически.',
+  })
+  @ApiOkResponse({
+    status: HttpStatus.OK,
+  })
+  @ApiForbiddenResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: exceptions.users.onlyForAdmins,
+  })
+  @UseGuards(UserRolesGuard, AdminPermissionsGuard)
+  @UserRoles(EUserRole.ADMIN, EUserRole.MASTER)
+  @AdminPermissions(AdminPermission.BLOG)
+  @Post('upload-image')
+  @UseInterceptors(FileInterceptor('file', multerOptions(uploadType.BLOGS)))
+  async upload(@UploadedFile() file) {
+    try {
+      await fs.promises.mkdir(`${file.destination}`, { recursive: true });
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    return `${configuration().server.http_address}/blog-articles/images/${file.filename}`;
+  }
+
+  @ApiOperation({
+    summary: 'Получение картинки блога по ссылке',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'id картинки, строка из 24 шестнадцатеричных символов',
+    type: String,
+  })
+  @BypassAuth()
+  @Get('images/:id')
+  async getImage(@Param('id') id: string, @Res() res) {
+    const image = `${configuration().blogs.dest}/${id}`;
+    return res.sendFile(image);
   }
 
   @ApiOperation({
@@ -78,7 +142,7 @@ export class BlogArticlesController {
   }
 
   @ApiOperation({
-    summary: 'Редактирование записи в блоге',
+    summary: 'Редактирование статьи в блоге',
     description: 'Доступ только для администраторов',
   })
   @ApiOkResponse({
@@ -98,8 +162,32 @@ export class BlogArticlesController {
   }
 
   @ApiOperation({
-    summary: 'Удаление записи в блоге',
-    description: 'Доступ только для администраторов',
+    summary: 'Удаление загруженных картинок блога',
+  })
+  @ApiOkResponse({
+    status: HttpStatus.OK,
+  })
+  @ApiForbiddenResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: exceptions.users.onlyForAdmins,
+  })
+  @UseGuards(UserRolesGuard, AdminPermissionsGuard)
+  @UserRoles(EUserRole.ADMIN, EUserRole.MASTER)
+  @AdminPermissions(AdminPermission.BLOG)
+  @Delete('images/:id')
+  async deleteImage(@Param('id') id: string) {
+    try {
+      console.log(id);
+      await fs.promises.unlink(`${configuration().blogs.dest}/${id}`);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @ApiOperation({
+    summary: 'Удаление статьи в блоге',
+    description:
+      'Доступ только для администраторов. При удалении записи автоматически удаляются все загруженные картинки, прикрепленные к данной статье',
   })
   @ApiOkResponse({
     status: HttpStatus.OK,
@@ -113,7 +201,34 @@ export class BlogArticlesController {
   @UserRoles(EUserRole.ADMIN, EUserRole.MASTER)
   @AdminPermissions(AdminPermission.BLOG)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.blogArticlesService.remove(id);
+  async remove(@Param('id') id: string) {
+    const articleToDelete = await this.findOne(id);
+
+    if (!articleToDelete) {
+      throw new NotFoundException(exceptions.blogArticles.notFound);
+    }
+
+    await this.blogArticlesService.remove(id);
+
+    articleToDelete.images.forEach((image) => {
+      const id = image.split('/').at(-1);
+      this.deleteImage(id);
+    });
+  }
+
+  // удаление картинок, созданных более суток назад и не прикрепленных к блогу
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  async removeUnused() {
+    const usedImages = await this.blogArticlesService.findUsedImages();
+    const usedFileNames = usedImages.map((image) => image.split('/').at(-1));
+    fs.readdir(`${configuration().blogs.dest}`, (err, files) => {
+      files.forEach(async (file) => {
+        const { birthtimeMs } = await fs.promises.stat(`${configuration().blogs.dest}/${file}`);
+        const now = new Date().getTime();
+        if (!usedFileNames.includes(file) && now - birthtimeMs > dayInMs) {
+          await this.deleteImage(file);
+        }
+      });
+    });
   }
 }
