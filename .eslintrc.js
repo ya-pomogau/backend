@@ -21,7 +21,7 @@ module.exports = {
     jest: true,
   },
   rules: {
-    'prettier/prettier': 'error',
+    'prettier/prettier': ['error', { singleQuote: true, endOfLine: "auto" }],
     'import/extensions': [
       'error',
       'ignorePackages',
@@ -29,18 +29,17 @@ module.exports = {
         ts: 'never',
       },
     ],
-    "import/no-extraneous-dependencies": [
+    'import/no-extraneous-dependencies': [
       'error',
       {
-        'devDependencies':
-          ['**/*.test.ts', '**/*.spec.ts', '**/*e2e-spec.ts']
-      }
+        devDependencies: ['**/*.test.ts', '**/*.spec.ts', '**/*e2e-spec.ts'],
+      },
     ],
     'class-methods-use-this': 'off',
     'import/prefer-default-export': 'off', // Отключаем правило
     'no-useless-constructor': 'off',
     'no-underscore-dangle': 'off',
-    'no-console': ['warn', { 'allow': ['info'] }],
+    'no-console': ['warn', { allow: ['info'] }],
     'no-shadow': 'off',
   },
 };
