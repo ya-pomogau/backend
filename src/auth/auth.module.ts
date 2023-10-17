@@ -5,7 +5,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtConfigService } from '../config/jwt-config.factory';
-import { HashModule } from '../hash/hash.module';
+import { HashModule } from '../common/hash/hash.module';
 import { UserModule } from '../users/user.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
