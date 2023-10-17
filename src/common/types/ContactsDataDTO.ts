@@ -1,9 +1,3 @@
-export class ContactsDataDTO {
-  email: string;
+import { CreateContactDto } from '../../datalake/contacts/dto/create-contact.dto';
 
-  socialNetwork: string;
-
-  expirationDate: Date | null;
-
-  createdAt: Date;
-}
+export class ContactsDataDTO extends CreateContactDto {}
