@@ -4,4 +4,6 @@ export class CreateContactDto {
   socialNetwork: string;
 
   expirationDate: Date | null;
+
+  createdAt: Date;
 }

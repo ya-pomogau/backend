@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Date } from 'mongoose';
 
-@Schema({ timestamps: { createdAt: true, updatedAt: false } })
+@Schema()
 export class Contact {
   @Prop({
     required: true,
@@ -21,6 +21,9 @@ export class Contact {
 
   @Prop()
   expirationDate: Date | null;
+
+  @Prop({ required: true })
+  createdAt: Date;
 }
 
 export const ContactSchema = SchemaFactory.createForClass(Contact);

@@ -8,8 +8,23 @@ import { Contact } from './entities/contact.entity';
 export class ContactsService {
   constructor(@InjectModel('Contact') private ContactModel: Model<Contact>) {}
 
+  private async isContactsExist(): Promise<boolean> {
+    const count = await this.ContactModel.countDocuments().exec();
+    return Promise.resolve(count > 0);
+  }
+
   async create(createContactDto: CreateContactDto): Promise<Contact> {
-    const createdContact = new this.ContactModel(createContactDto);
+    const now = Date.now();
+    if (await this.isContactsExist()) {
+      await this.ContactModel.updateOne(
+        { expiredAt: null },
+        { expiredAt: now }
+      );
+    }
+    const createdContact = new this.ContactModel({
+      ...createContactDto,
+      createdAt: now,
+    });
     const savedContact = await createdContact.save();
     return savedContact.toObject();
   }
