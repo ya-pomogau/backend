@@ -20,7 +20,7 @@ export class Contact {
   socialNetwork: string;
 
   @Prop()
-  expirationDate: Date | null;
+  expiredAt: Date | null;
 
   @Prop({ required: true })
   createdAt: Date;
