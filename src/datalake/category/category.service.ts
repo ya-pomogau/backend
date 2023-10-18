@@ -30,11 +30,9 @@ export class CategoryService {
   }
 
   async update(id: string, updateCategoryDto: UpdateCategoryDto): Promise<Category | null> {
-    const now = Date.now();
-    const updatedCategory = await this.categoryModel.findByIdAndUpdate(
-      updateCategoryDto,
-      { new: true }
-    );
+    const updatedCategory = await this.categoryModel.findByIdAndUpdate(id, updateCategoryDto, {
+      new: true,
+    });
 
     if (!updatedCategory) {
       return null; // Возвращаем null, если категория с указанным id не найдена
