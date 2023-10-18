@@ -15,14 +15,10 @@ export class ContactsService {
   }
 
   async create(createContactDto: CreateContactDto): Promise<CreateContactDto> {
-    const now = Date.now();
     if (await this.isContactsExist()) {
-      await this.ContactModel.updateOne({ expiredAt: null }, { expiredAt: now });
+      await this.ContactModel.updateOne({ expiredAt: null }, { expiredAt: Date.now() });
     }
-    const createdContact = new this.ContactModel({
-      ...createContactDto,
-      createdAt: now,
-    });
+    const createdContact = new this.ContactModel(createContactDto);
     const savedContact = await createdContact.save();
     return savedContact.toObject();
   }

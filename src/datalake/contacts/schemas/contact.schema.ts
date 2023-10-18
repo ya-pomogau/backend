@@ -22,7 +22,7 @@ export class Contact {
   @Prop()
   expiredAt: Date | null;
 
-  @Prop({ required: true })
+  @Prop({ required: true, default: Date.now() })
   createdAt: Date;
 }
 
