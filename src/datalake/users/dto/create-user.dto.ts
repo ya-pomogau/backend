@@ -1,4 +1,4 @@
-import { PointGeoJSONDocument } from '../../../common/schemas/PointGeoJSON.schema';
+import { PointGeoJSON } from '../../../common/schemas/PointGeoJSON.schema';
 import { UserRole, UserProfile } from '../../../common/types/user.types';
 import { UserStatus, AdminPermission } from '../../../users/types';
 
@@ -7,9 +7,9 @@ export class CreateUserDto {
 
   profile: UserProfile;
 
-  vk_id: string;
+  vkID: string;
 
-  location: PointGeoJSONDocument;
+  location: PointGeoJSON;
 
   score: number | null;
 
