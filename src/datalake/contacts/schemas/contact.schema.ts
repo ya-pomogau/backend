@@ -1,8 +1,15 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Date } from 'mongoose';
+import { HydratedDocument } from 'mongoose';
+
+export interface IContact {
+  email: string;
+  socialNetwork: string;
+  expiredAt: Date | null;
+  createdAt: Date;
+}
 
 @Schema()
-export class Contact {
+export class Contact implements IContact {
   @Prop({
     required: true,
     validate: {
