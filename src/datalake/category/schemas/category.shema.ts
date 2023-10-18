@@ -4,7 +4,7 @@ import { Document } from 'mongoose';
 
 export type CategoryDocument = Category & Document;
 
-@Schema()
+@Schema({ timestamps: true }) // timestamps автоматическое отслеживание времени создания (createdAt) и времени обновления (updatedAt)
 export class Category {
   @Prop({ required: true })
   title: string;
@@ -14,17 +14,6 @@ export class Category {
 
   @Prop({ required: true, type: UserStatus })
   accessLevel: UserStatus;
-
-  @Prop({ required: true, type: Date, default: Date.now })
-  createdAt: Date;
-
-  @Prop({ required: true, type: Date, default: Date.now  })
-  updatedAt: Date;
 }
 
 export const CategorySchema = SchemaFactory.createForClass(Category);
-
-// Добавляем пре-хук для обновления updatedAt
-CategorySchema.pre('findOneAndUpdate', function () {
-  this.set({ updatedAt: new Date() });
-});
