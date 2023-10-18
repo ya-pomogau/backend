@@ -10,7 +10,6 @@ export class CategoryService {
   constructor(@InjectModel(Category.name) private categoryModel: Model<CategoryDocument>) {}
 
   async create(createCategoryDto: CreateCategoryDto) {
-    const now = Date.now();
     const createdCategory = new this.categoryModel(createCategoryDto);
     const saveCategory = await createdCategory.save();
     return saveCategory.toObject();
