@@ -11,10 +11,7 @@ export class CategoryService {
 
   async create(createCategoryDto: CreateCategoryDto) {
     const now = Date.now();
-    const createdCategory = new this.categoryModel({
-      ...createCategoryDto,
-      createdAt: now,
-    });
+    const createdCategory = new this.categoryModel(createCategoryDto);
     const saveCategory = await createdCategory.save();
     return saveCategory.toObject();
   }

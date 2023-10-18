@@ -18,7 +18,7 @@ export class Category {
   @Prop({ required: true, type: Date })
   createdAt: Date;
 
-  @Prop({ required: true, type: Date })
+  @Prop({ required: true, type: Date, default: Date.now })
   updatedAt: Date;
 }
 
