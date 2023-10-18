@@ -1,6 +1,7 @@
 import mongoose, { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Injectable } from '@nestjs/common';
+import exceptions from '../../common/constants/exceptions';
 import { CreateContactDto } from './dto/create-contact.dto';
 import { Contact } from './schemas/contact.schema';
 
@@ -34,7 +35,10 @@ export class ContactsService {
     return this.ContactModel.findOne({ expiredAt: null }).lean().exec();
   }
 
-  async findOne(id: mongoose.Schema.Types.ObjectId): Promise<Contact> {
-    return this.ContactModel.findById(id).lean().exec();
+  async findOne(id: string): Promise<Contact> {
+    return this.ContactModel.findById(id)
+      .orFail(new Error(exceptions.users.notFound))
+      .lean()
+      .exec();
   }
 }
