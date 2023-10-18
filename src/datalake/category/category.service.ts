@@ -33,8 +33,7 @@ export class CategoryService {
   async update(id: string, updateCategoryDto: UpdateCategoryDto): Promise<Category | null> {
     const now = Date.now();
     const updatedCategory = await this.categoryModel.findByIdAndUpdate(
-      id,
-      { ...updateCategoryDto, updatedAt: now },
+      updateCategoryDto,
       { new: true }
     );
 
