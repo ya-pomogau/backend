@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
-import { CreateContactDto } from '../../datalake/contacts/dto/create-contact.dto';
+import { Contact } from '../../datalake/contacts/schemas/contact.schema';
 
-export class ContactsDataDTO extends CreateContactDto {
+export class ContactsDataDTO extends Contact {
   _id: mongoose.Types.ObjectId;
 }
