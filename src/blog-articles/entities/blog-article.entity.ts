@@ -1,6 +1,6 @@
 import { Column, CreateDateColumn, Entity, ObjectIdColumn, UpdateDateColumn } from 'typeorm';
 
-import {IsArray, IsString, Length, MinLength} from 'class-validator';
+import { IsArray, IsString, Length, MinLength } from 'class-validator';
 
 import { ObjectId } from 'mongodb';
 import { ApiProperty, ApiResponseProperty } from '@nestjs/swagger';

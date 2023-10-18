@@ -7,26 +7,26 @@ import { ApiProperty, ApiResponseProperty } from '@nestjs/swagger';
 
 @Entity()
 export class Politic {
-    @ApiResponseProperty({ type: 'string' })
-    @ObjectIdColumn()
-    _id: ObjectId;
+  @ApiResponseProperty({ type: 'string' })
+  @ObjectIdColumn()
+  _id: ObjectId;
 
-    @ApiResponseProperty()
-    @CreateDateColumn()
-    createdAt: Date;
+  @ApiResponseProperty()
+  @CreateDateColumn()
+  createdAt: Date;
 
-    @ApiResponseProperty()
-    @UpdateDateColumn()
-    updatedAt: Date;
+  @ApiResponseProperty()
+  @UpdateDateColumn()
+  updatedAt: Date;
 
-    @ApiResponseProperty()
-    @Column()
-    @IsString()
-    @ApiProperty()
-    title: string;
+  @ApiResponseProperty()
+  @Column()
+  @IsString()
+  @ApiProperty()
+  title: string;
 
-    @ApiResponseProperty()
-    @Column()
-    @IsString()
-    text: string;
+  @ApiResponseProperty()
+  @Column()
+  @IsString()
+  text: string;
 }

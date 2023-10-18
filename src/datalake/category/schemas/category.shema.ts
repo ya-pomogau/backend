@@ -1,5 +1,5 @@
-import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { UserStatus } from "src/users/types"; //скорей всего будет лежать не там
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { UserStatus } from 'src/users/types'; //скорей всего будет лежать не там
 import { Document } from 'mongoose';
 
 export type CategoryDocument = Category & Document;
