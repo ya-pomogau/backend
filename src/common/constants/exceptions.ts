@@ -1,5 +1,5 @@
 export default {
-  categories: {
+  category: {
     notFound: 'Категория не найдена',
   },
   users: {

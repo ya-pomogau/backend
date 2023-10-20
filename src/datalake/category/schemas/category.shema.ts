@@ -5,7 +5,7 @@ import { Document } from 'mongoose';
 export interface ICategory {
   title: string;
   points: number;
-  accessLevel: UserStatus;  
+  accessLevel: UserStatus;
 }
 
 export type CategoryDocument = Category & Document;

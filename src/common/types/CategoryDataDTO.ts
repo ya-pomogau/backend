@@ -1,5 +1,5 @@
-import { Category } from "src/datalake/category/schemas/category.shema";
+import { Category } from 'src/datalake/category/schemas/category.shema';
 
 export class CategoryDataDTO extends Category {
-    _id: string;
+  _id: string;
 }

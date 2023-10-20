@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Category, CategoryDocument } from './schemas/category.shema';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import exceptions from 'src/common/constants/exceptions';
 
 @Injectable()
 export class CategoryService {
@@ -23,7 +24,7 @@ export class CategoryService {
     const findCategory = await this.categoryModel.findById(id).lean().exec();
 
     if (!findCategory) {
-      return null; // Возвращаем null, если категория с указанным id не найдена
+      throw new NotFoundException(exceptions.category.notFound);
     }
 
     return findCategory;
@@ -35,7 +36,7 @@ export class CategoryService {
     });
 
     if (!updatedCategory) {
-      return null; // Возвращаем null, если категория с указанным id не найдена
+      throw new NotFoundException(exceptions.category.notFound);
     }
 
     return updatedCategory.toObject();
@@ -45,7 +46,7 @@ export class CategoryService {
     const removeCategory = await this.categoryModel.findByIdAndRemove(id).lean().exec();
 
     if (!removeCategory) {
-      return null; // Возвращаем null, если категория с указанным id не найдена
+      throw new NotFoundException(exceptions.category.notFound);
     }
 
     return removeCategory;
