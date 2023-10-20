@@ -1,9 +1,4 @@
-import { UserStatus } from 'src/users/types';
+import { PartialType } from "@nestjs/mapped-types";
+import { CreateCategoryDto } from "./create-category.dto";
 
-export class UpdateCategoryDto {
-  title: string;
-  points: number;
-  accessLevel: UserStatus;
-  createdAt: Date;
-  updatedAt: Date;
-}
+export class UpdateCategoryDto extends PartialType(CreateCategoryDto) {}
