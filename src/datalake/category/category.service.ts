@@ -9,7 +9,7 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 export class CategoryService {
   constructor(@InjectModel(Category.name) private categoryModel: Model<Category>) {}
 
-  async create(createCategoryDto: CreateCategoryDto) {
+  async create(createCategoryDto: CreateCategoryDto): Promise<CreateCategoryDto> {
     const createdCategory = new this.categoryModel(createCategoryDto);
     const saveCategory = await createdCategory.save();
     return saveCategory.toObject();
