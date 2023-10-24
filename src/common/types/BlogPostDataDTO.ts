@@ -1,6 +1,7 @@
-import { CreateBlogPostDto } from '../../datalake/blog-post/dto/create-blog-post.dto';
-import { BlogPost } from '../../datalake/blog-post/schema/blog-post.schema';
+import { IBlogPost } from '../../datalake/blog-post/schema/blog-post.schema';
 
-export class BlogPostDataDTO extends BlogPost {
+export interface BlogPostDataDTO extends IBlogPost {
   _id: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
