@@ -8,6 +8,20 @@ import {
   UserRole,
 } from '../../../common/types/user.types';
 
+export interface IUser {
+  role: UserRole;
+  profile: UserProfile;
+  vkID: string;
+  location: PointGeoJSON;
+  score: number;
+  status: UserStatus;
+  administrative: {
+    permissions: AdminPermission[];
+    login: string;
+    password: string;
+  };
+}
+
 @Schema({ timestamps: true })
 export class User {
   @Prop({ required: true })
@@ -19,7 +33,12 @@ export class User {
   @Prop({ required: true, unique: true })
   vkID: string;
 
-  @Prop({ required: true, type: PointGeoJSON, index: '2dsphere' })
+  @Prop({
+    required: true,
+    type: PointGeoJSON,
+    index: '2dsphere',
+    default: { type: 'Point', coordinates: [0, 0] },
+  })
   location: PointGeoJSON;
 
   @Prop()

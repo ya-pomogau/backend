@@ -1,23 +1,3 @@
-import { PointGeoJSON } from '../../../common/schemas/PointGeoJSON.schema';
-import { UserRole, UserProfile } from '../../../common/types/user.types';
-import { UserStatus, AdminPermission } from '../../../users/types';
+import { IUser } from '../schemas/user.schema';
 
-export class CreateUserDto {
-  role: UserRole;
-
-  profile: UserProfile;
-
-  vkID: string;
-
-  location: PointGeoJSON;
-
-  score: number | null;
-
-  status: UserStatus;
-
-  administrative: null | {
-    permissions: AdminPermission[];
-    login: string;
-    password: string;
-  };
-}
+export type CreateUserDto = IUser;
