@@ -10,7 +10,7 @@ import { AuthModule } from './auth/auth.module';
 import { CategoriesModule } from './categories/categories.module';
 import configuration from './config/configuration';
 import { TypeOrmConfigService } from './config/database-config.factory';
-import { HashModule } from './hash/hash.module';
+import { HashModule } from './common/hash/hash.module';
 import { TasksWsModule } from './tasks-ws/tasks-ws.module';
 import { TasksModule } from './tasks/tasks.module';
 import { UserModule } from './users/user.module';
