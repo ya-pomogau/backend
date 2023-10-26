@@ -39,7 +39,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
     "mongodb": "^5.7.0",
-    "mongoose": "^7.6.2",
+    "mongoose": "^7.6.3",
     "multer": "^1.4.5-lts.1",
     "node-cron": "^3.0.2",
     "passport-jwt": "^4.0.1",
