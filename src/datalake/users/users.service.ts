@@ -49,8 +49,8 @@ export class UsersService {
       .exec();
   }
 
-  async remove(id: string) {
-    return this.UserModel.findByIdAndRemove(id)
+  async remove(params: FilterQuery<IUser>) {
+    return this.UserModel.deleteOne(params)
       .orFail(new NotFoundException(exceptions.users.notFound))
       .lean()
       .exec();
@@ -60,11 +60,9 @@ export class UsersService {
     center: PointGeoJSON,
     distance: number
   ): Promise<User[]> {
-    const xCenter = center.coordinates[0];
-    const yCenter = center.coordinates[1];
     const volunteers = await this.UserModel.find({
       location: {
-        $geoWithin: { $center: [[xCenter, yCenter], distance] },
+        $geoWithin: { $center: [[...center.coordinates], distance] },
       },
       role: UserRole.VOLUNTEER,
     });
