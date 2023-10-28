@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import mongoose, { Model } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
+import { NotFoundException } from '@nestjs/common/exceptions';
 import { HashService } from '../../hash/hash.service';
 import { User, IUser, IUserWithoutPassword } from './schemas/user.schema';
 import { PointGeoJSON } from '../../common/schemas/PointGeoJSON.schema';
@@ -36,21 +37,21 @@ export class UsersService {
 
   async findOne(id: string): Promise<User> {
     return this.UserModel.findById(id)
-      .orFail(new Error(exceptions.users.notFound))
+      .orFail(new NotFoundException(exceptions.users.notFound))
       .lean()
       .exec();
   }
 
-  async update(id: string, updateUserDto: Partial<IUser>) {
-    return this.UserModel.findByIdAndUpdate(id, updateUserDto)
-      .orFail(new Error(exceptions.users.notFound))
+  async update(params: FilterQuery<IUser>, updateUserDto: Partial<IUser>) {
+    return this.UserModel.updateOne(params, updateUserDto)
+      .orFail(new NotFoundException(exceptions.users.notFound))
       .lean()
       .exec();
   }
 
   async remove(id: string) {
     return this.UserModel.findByIdAndRemove(id)
-      .orFail(new Error(exceptions.users.notFound))
+      .orFail(new NotFoundException(exceptions.users.notFound))
       .lean()
       .exec();
   }
@@ -95,7 +96,7 @@ export class UsersService {
     const user = await this.UserModel.findOne({
       role: { $in: [UserRole.RECIPIENT, UserRole.VOLUNTEER] },
       vkID,
-    }).orFail(new Error(exceptions.users.notFound));
+    }).orFail(new NotFoundException(exceptions.users.notFound));
     return user.toObject();
   }
 }
