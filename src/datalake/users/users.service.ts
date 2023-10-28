@@ -94,7 +94,7 @@ export class UsersService {
     const user = await this.UserModel.findOne({
       role: { $in: [UserRole.RECIPIENT, UserRole.VOLUNTEER] },
       vkID,
-    }).orFail(new NotFoundException(exceptions.users.notFound));
-    return user.toObject();
+    });
+    return user ? user.toObject() : null;
   }
 }
