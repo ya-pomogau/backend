@@ -26,31 +26,29 @@ export class UsersService {
       },
     });
     const savedUser = await createdUser.save();
-    const savedUserObject = savedUser.toObject();
-    delete savedUserObject.administrative.password;
 
-    return savedUserObject;
+    return savedUser.toObject();
   }
 
   async findAll(): Promise<User[]> {
     return this.UserModel.find().lean().exec();
   }
 
-  async findOne(id: mongoose.Types.ObjectId): Promise<User> {
+  async findOne(id: string): Promise<User> {
     return this.UserModel.findById(id)
       .orFail(new Error(exceptions.users.notFound))
       .lean()
       .exec();
   }
 
-  async update(id: mongoose.Types.ObjectId, updateUserDto: Partial<IUser>) {
+  async update(id: string, updateUserDto: Partial<IUser>) {
     return this.UserModel.findByIdAndUpdate(id, updateUserDto)
       .orFail(new Error(exceptions.users.notFound))
       .lean()
       .exec();
   }
 
-  async remove(id: mongoose.Types.ObjectId) {
+  async remove(id: string) {
     return this.UserModel.findByIdAndRemove(id)
       .orFail(new Error(exceptions.users.notFound))
       .lean()
