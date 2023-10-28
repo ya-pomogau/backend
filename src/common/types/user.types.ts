@@ -7,6 +7,7 @@ export type UserProfile = {
   address: string;
 };
 
+
 export enum UserStatus {
   UNCONFIRMED = 0,
   CONFIRMED = 1,
@@ -20,6 +21,7 @@ export enum UserRole {
   RECIPIENT = 'recipient',
   VOLUNTEER = 'volunteer',
   VISITOR = 'visitor',
+
 }
 
 export enum AdminPermission {

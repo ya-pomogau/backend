@@ -49,6 +49,6 @@ export class BlogArticlesService {
 
   async findUsedImages() {
     const articles = await this.blogArticleRepository.find();
-    return [...new Set(articles.flatMap(article => article.images))];
+    return [...new Set(articles.flatMap((article) => article.images))];
   }
 }
