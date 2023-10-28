@@ -2,18 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
 import { HashService } from '../../hash/hash.service';
-import { User, IUser } from './schemas/user.schema';
+import { User, IUser, IUserWithoutPassword } from './schemas/user.schema';
 import { PointGeoJSON } from '../../common/schemas/PointGeoJSON.schema';
 import { UserRole } from '../../common/types/user.types';
 import exceptions from '../../common/constants/exceptions';
-
-type ChangeFields<T, R> = Omit<T, keyof R> & R;
-type CreateUserDtoWithoutPassword = ChangeFields<
-  IUser,
-  {
-    administrative: Omit<IUser['administrative'], 'password'>;
-  }
->;
 
 @Injectable()
 export class UsersService {
@@ -22,7 +14,7 @@ export class UsersService {
     private hashService: HashService
   ) {}
 
-  async create(createUserDto: IUser): Promise<CreateUserDtoWithoutPassword> {
+  async create(createUserDto: IUser): Promise<IUserWithoutPassword> {
     const hashedPassword = this.hashService.generateHash(
       createUserDto.administrative.password
     );
