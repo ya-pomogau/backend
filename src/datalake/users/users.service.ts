@@ -2,18 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
 import { HashService } from '../../hash/hash.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './schemas/user.schema';
+import { User, IUser } from './schemas/user.schema';
 import { PointGeoJSON } from '../../common/schemas/PointGeoJSON.schema';
 import { UserRole } from '../../common/types/user.types';
 import exceptions from '../../common/constants/exceptions';
 
 type ChangeFields<T, R> = Omit<T, keyof R> & R;
 type CreateUserDtoWithoutPassword = ChangeFields<
-  CreateUserDto,
+  IUser,
   {
-    administrative: Omit<CreateUserDto['administrative'], 'password'>;
+    administrative: Omit<IUser['administrative'], 'password'>;
   }
 >;
 
@@ -24,11 +22,16 @@ export class UsersService {
     private hashService: HashService
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<CreateUserDtoWithoutPassword> {
-    const hashedPassword = this.hashService.generateHash(createUserDto.administrative.password);
+  async create(createUserDto: IUser): Promise<CreateUserDtoWithoutPassword> {
+    const hashedPassword = this.hashService.generateHash(
+      createUserDto.administrative.password
+    );
     const createdUser = new this.UserModel({
       ...createUserDto,
-      administrative: { ...createUserDto.administrative, password: hashedPassword },
+      administrative: {
+        ...createUserDto.administrative,
+        password: hashedPassword,
+      },
     });
     const savedUser = await createdUser.save();
     const savedUserObject = savedUser.toObject();
@@ -42,10 +45,13 @@ export class UsersService {
   }
 
   async findOne(id: mongoose.Types.ObjectId): Promise<User> {
-    return this.UserModel.findById(id).orFail(new Error(exceptions.users.notFound)).lean().exec();
+    return this.UserModel.findById(id)
+      .orFail(new Error(exceptions.users.notFound))
+      .lean()
+      .exec();
   }
 
-  async update(id: mongoose.Types.ObjectId, updateUserDto: UpdateUserDto) {
+  async update(id: mongoose.Types.ObjectId, updateUserDto: Partial<IUser>) {
     return this.UserModel.findByIdAndUpdate(id, updateUserDto)
       .orFail(new Error(exceptions.users.notFound))
       .lean()
@@ -59,7 +65,10 @@ export class UsersService {
       .exec();
   }
 
-  async findVolunteerWithin(center: PointGeoJSON, distance: number): Promise<User[]> {
+  async findVolunteerWithin(
+    center: PointGeoJSON,
+    distance: number
+  ): Promise<User[]> {
     const xCenter = center.coordinates[0];
     const yCenter = center.coordinates[1];
     const volunteers = await this.UserModel.find({
@@ -71,14 +80,20 @@ export class UsersService {
     return volunteers;
   }
 
-  async checkAdminCredentials(login: string, password: string): Promise<User> | null {
+  async checkAdminCredentials(
+    login: string,
+    password: string
+  ): Promise<User> | null {
     let comparePassword: boolean;
     const admin = await this.UserModel.findOne({
       role: UserRole.ADMIN,
       administrative: { login },
     });
     if (admin) {
-      comparePassword = await this.hashService.compareHash(password, admin.administrative.password);
+      comparePassword = await this.hashService.compareHash(
+        password,
+        admin.administrative.password
+      );
     }
     if (comparePassword) {
       return admin.toObject();
