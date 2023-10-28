@@ -55,7 +55,7 @@ export class User {
     type: {
       permissions: [AdminPermission],
       login: { type: String, unique: true },
-      password: String,
+      password: { type: String, select: false },
     },
   })
   administrative: {
