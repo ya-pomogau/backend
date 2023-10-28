@@ -12,7 +12,7 @@ export class PointGeoJSON implements IPointGeoJSON {
   type: string;
 
   @Prop({ required: true, type: [Number] })
-  coordinates: number[];
+  coordinates: [longitude: number, latitude: number];
 }
 
 export const PointGeoJSONSchema = SchemaFactory.createForClass(PointGeoJSON);
