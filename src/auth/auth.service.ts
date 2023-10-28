@@ -5,7 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import exceptions from '../common/constants/exceptions';
-import { HashService } from '../hash/hash.service';
+import { HashService } from '../common/hash/hash.service';
 import { User } from '../users/entities/user.entity';
 import { UserService } from '../users/user.service';
 import { VkApiUsers } from '../vk/users';

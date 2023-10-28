@@ -11,7 +11,7 @@ import exceptions from '../common/constants/exceptions';
 import { AdminPermission, EUserRole, ReportStatus, UserStatus } from './types';
 
 import { CreateAdminDto } from './dto/create-admin.dto';
-import { HashService } from '../hash/hash.service';
+import { HashService } from '../common/hash/hash.service';
 import { GenerateReportDto } from './dto/generate-report.dto';
 import { daysOfActivityMS } from '../common/constants';
 import checkValidId from '../common/helpers/checkValidId';
