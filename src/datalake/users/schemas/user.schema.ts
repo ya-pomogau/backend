@@ -8,24 +8,6 @@ import {
   UserRole,
 } from '../../../common/types/user.types';
 
-export interface IUser {
-  role: UserRole;
-  profile: UserProfile;
-  vkID: string;
-  location: PointGeoJSON;
-  score: number;
-  status: UserStatus;
-  administrative: {
-    permissions: AdminPermission[];
-    login: string;
-    password: string;
-  };
-}
-
-export type IUserWithoutPassword = Omit<IUser, 'administrative'> & {
-  administrative: Omit<IUser['administrative'], 'password'>;
-};
-
 @Schema({ timestamps: true })
 export class User {
   @Prop({ required: true })
