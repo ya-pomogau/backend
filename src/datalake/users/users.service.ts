@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model } from 'mongoose';
 import { NotFoundException } from '@nestjs/common/exceptions';
-import { HashService } from '../../hash/hash.service';
+import { HashService } from '../../common/hash/hash.service';
 import { User, IUser, IUserWithoutPassword } from './schemas/user.schema';
 import { PointGeoJSON } from '../../common/schemas/PointGeoJSON.schema';
 import { UserRole } from '../../common/types/user.types';
