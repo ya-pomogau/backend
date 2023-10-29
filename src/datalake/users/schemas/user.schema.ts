@@ -27,7 +27,7 @@ export class User {
   })
   location: PointGeoJSON;
 
-  @Prop()
+  @Prop({ default: 0 })
   score: number;
 
   @Prop({ required: true })
