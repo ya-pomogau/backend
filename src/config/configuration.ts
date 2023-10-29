@@ -23,9 +23,7 @@ export default () => ({
     key: process.env.JWT_KEY,
     ttl: process.env.JWT_TTL || '7d',
   },
-  hash: {
-    salt: Number(process.env.SALT) || 10,
-  },
+  saltRounds: Number(process.env.SALT) || 10,
   avatars: {
     maxSize: Number(process.env.AVATARS_FILE_SIZE),
     dest: process.env.AVATARS_LOCATION,

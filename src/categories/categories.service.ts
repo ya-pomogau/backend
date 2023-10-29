@@ -36,7 +36,7 @@ export class CategoriesService {
     const category = await this.categoryRepository.findOneBy({ _id: objectId });
 
     if (!category) {
-      throw new NotFoundException(exeptions.categories.notFound);
+      throw new NotFoundException(exeptions.category.notFound);
     }
 
     return category;
@@ -49,7 +49,7 @@ export class CategoriesService {
     const category = await this.categoryRepository.findOneBy({ _id: objectId });
 
     if (!category) {
-      throw new NotFoundException(exeptions.categories.notFound);
+      throw new NotFoundException(exeptions.category.notFound);
     }
 
     if (updateCategoryDto.points) {
