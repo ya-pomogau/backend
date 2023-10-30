@@ -34,6 +34,16 @@ import { UserProfileSchema } from '../../../common/schemas/user-profile.schema';
     },
   },
   statics: {
+    findWithin(center: IPointGeoJSON, distance: number) {
+      return this.find({
+        location: {
+          $near: {
+            $geometry: center,
+            $maxDistance: distance,
+          },
+        },
+      });
+    },
     findNotAccepted() {
       return this.find({ volunteer: { $eq: null } });
     },
