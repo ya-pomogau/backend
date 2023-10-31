@@ -44,7 +44,9 @@ export class TasksService {
       recipient = ownUser;
     } else {
       const recipientObjectId = new ObjectId(recipientId);
-      recipient = await this.userRepository.findOneBy({ _id: recipientObjectId });
+      recipient = await this.userRepository.findOneBy({
+        _id: recipientObjectId,
+      });
       if (!recipient) {
         throw new NotFoundException(exceptions.users.notFound);
       }
@@ -75,7 +77,7 @@ export class TasksService {
     });
 
     if (!category) {
-      throw new NotFoundException(exceptions.categories.notFound);
+      throw new NotFoundException(exceptions.category.notFound);
     }
 
     const dto = {
@@ -87,7 +89,10 @@ export class TasksService {
 
     const newTask = this.taskRepository.create(dto);
 
-    await this.userRepository.update({ _id: recipient._id }, { lastActivityDate: new Date() });
+    await this.userRepository.update(
+      { _id: recipient._id },
+      { lastActivityDate: new Date() }
+    );
 
     return this.taskRepository.save(newTask);
   }
@@ -108,7 +113,8 @@ export class TasksService {
     }
 
     if (
-      (user.role === EUserRole.RECIPIENT && task.recipientId !== user._id.toString()) ||
+      (user.role === EUserRole.RECIPIENT &&
+        task.recipientId !== user._id.toString()) ||
       (user.role === EUserRole.VOLUNTEER &&
         task.volunteerId !== user._id.toString() &&
         task.status !== TaskStatus.CREATED)
@@ -140,7 +146,10 @@ export class TasksService {
 
     if (user.role === EUserRole.RECIPIENT) {
       return this.taskRepository.find({
-        where: { status: { $in: statusArray }, recipientId: user._id.toString() },
+        where: {
+          status: { $in: statusArray },
+          recipientId: user._id.toString(),
+        },
       });
     }
     return this.taskRepository.find({
@@ -151,7 +160,9 @@ export class TasksService {
   async acceptTask(taskId: string, user: User) {
     checkValidId(taskId);
     const objectTaskId = new ObjectId(taskId);
-    const task: Task = await this.taskRepository.findOneBy({ _id: objectTaskId });
+    const task: Task = await this.taskRepository.findOneBy({
+      _id: objectTaskId,
+    });
 
     if (!task) {
       throw new NotFoundException(exceptions.tasks.notFound);
@@ -182,7 +193,10 @@ export class TasksService {
       }
     );
 
-    await this.userRepository.update({ _id: user._id }, { lastActivityDate: new Date() });
+    await this.userRepository.update(
+      { _id: user._id },
+      { lastActivityDate: new Date() }
+    );
 
     return this.taskRepository.findOneBy({ _id: objectTaskId });
   }
@@ -190,7 +204,9 @@ export class TasksService {
   async refuseTask(taskId: string, user: User) {
     checkValidId(taskId);
     const objectTaskId = new ObjectId(taskId);
-    const task: Task = await this.taskRepository.findOneBy({ _id: objectTaskId });
+    const task: Task = await this.taskRepository.findOneBy({
+      _id: objectTaskId,
+    });
 
     if (!task) {
       throw new NotFoundException(exceptions.tasks.notFound);
@@ -204,7 +220,10 @@ export class TasksService {
       throw new ForbiddenException(exceptions.tasks.noTimeForRefusal);
     }
 
-    if (task.volunteerId !== user._id.toString() && user.role === EUserRole.VOLUNTEER) {
+    if (
+      task.volunteerId !== user._id.toString() &&
+      user.role === EUserRole.VOLUNTEER
+    ) {
       throw new ForbiddenException(exceptions.tasks.wrongUser);
     }
 
@@ -219,13 +238,18 @@ export class TasksService {
   async removeTask(taskId: string, user: User) {
     checkValidId(taskId);
     const objectTaskId = new ObjectId(taskId);
-    const task: Task = await this.taskRepository.findOneBy({ _id: objectTaskId });
+    const task: Task = await this.taskRepository.findOneBy({
+      _id: objectTaskId,
+    });
 
     if (!task) {
       throw new NotFoundException(exceptions.tasks.notFound);
     }
 
-    if (task.recipientId !== user._id.toString() && user.role === EUserRole.RECIPIENT) {
+    if (
+      task.recipientId !== user._id.toString() &&
+      user.role === EUserRole.RECIPIENT
+    ) {
       throw new ForbiddenException(exceptions.tasks.wrongUser);
     }
 
@@ -244,7 +268,9 @@ export class TasksService {
     }
 
     const objectVolunteerId = new ObjectId(task.volunteerId);
-    const volunteer: User = await this.userRepository.findOneBy({ _id: objectVolunteerId });
+    const volunteer: User = await this.userRepository.findOneBy({
+      _id: objectVolunteerId,
+    });
 
     if (!volunteer) {
       throw new NotFoundException(exceptions.users.notFound);
@@ -277,7 +303,9 @@ export class TasksService {
   async closeTask(taskId: string, completed: boolean) {
     checkValidId(taskId);
     const objectTaskId = new ObjectId(taskId);
-    const task: Task = await this.taskRepository.findOneBy({ _id: objectTaskId });
+    const task: Task = await this.taskRepository.findOneBy({
+      _id: objectTaskId,
+    });
 
     if (!task) {
       throw new NotFoundException(exceptions.tasks.notFound);
@@ -298,7 +326,9 @@ export class TasksService {
   async confirmTask(taskId: string, user: User, isTaskCompleted: boolean) {
     checkValidId(taskId);
     const objectTaskId = new ObjectId(taskId);
-    const task: Task = await this.taskRepository.findOneBy({ _id: objectTaskId });
+    const task: Task = await this.taskRepository.findOneBy({
+      _id: objectTaskId,
+    });
 
     if (!task) {
       throw new NotFoundException(exceptions.tasks.notFound);
@@ -322,7 +352,9 @@ export class TasksService {
       throw new ForbiddenException(exceptions.tasks.wrongUser);
     }
 
-    const updatedTask = await this.taskRepository.findOneBy({ _id: objectTaskId });
+    const updatedTask = await this.taskRepository.findOneBy({
+      _id: objectTaskId,
+    });
 
     if (
       updatedTask.confirmation.recipient !== null &&
@@ -342,7 +374,10 @@ export class TasksService {
           { status: TaskStatus.CLOSED, completed: false }
         );
       } else {
-        await this.taskRepository.update({ _id: objectTaskId }, { isConflict: true });
+        await this.taskRepository.update(
+          { _id: objectTaskId },
+          { isConflict: true }
+        );
         console.log('Вызывайте админа!!!'); // отбивка в чат админу
       }
     }
@@ -353,7 +388,9 @@ export class TasksService {
   async update(id: string, user: User, updateTaskDto: UpdateTaskDto) {
     checkValidId(id);
     const objectTaskId = new ObjectId(id);
-    const task: Task = await this.taskRepository.findOneBy({ _id: objectTaskId });
+    const task: Task = await this.taskRepository.findOneBy({
+      _id: objectTaskId,
+    });
 
     if (!task) {
       throw new NotFoundException(exceptions.tasks.notFound);
@@ -363,7 +400,10 @@ export class TasksService {
       throw new ForbiddenException(exceptions.tasks.onlyForCreated);
     }
 
-    if (task.recipientId !== user._id.toString() && user.role === EUserRole.RECIPIENT) {
+    if (
+      task.recipientId !== user._id.toString() &&
+      user.role === EUserRole.RECIPIENT
+    ) {
       throw new ForbiddenException(exceptions.tasks.wrongUser);
     }
 
@@ -372,8 +412,16 @@ export class TasksService {
     return this.taskRepository.findOneBy({ _id: objectTaskId });
   }
 
-  async generateReport({ status, startDate, endDate, check }: GenerateReportDto) {
-    const query: { [p: symbol]: { $gte: Date; $lt: Date }; status?: TaskStatus } = {
+  async generateReport({
+    status,
+    startDate,
+    endDate,
+    check,
+  }: GenerateReportDto) {
+    const query: {
+      [p: symbol]: { $gte: Date; $lt: Date };
+      status?: TaskStatus;
+    } = {
       [`${status}At`]: {
         $gte: startDate,
         $lt: endDate,
