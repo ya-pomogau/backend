@@ -1,7 +1,6 @@
 import { type ObjectId } from 'mongoose';
 
 export interface MessageInterface {
-  _id: ObjectId;
   title: string;
   body: string;
   attach: string[];
@@ -9,12 +8,15 @@ export interface MessageInterface {
   author: ObjectId;
 }
 export interface ChatInterface {
-  _id: ObjectId;
   users: [ObjectId, ObjectId | null];
-  messages: MessageInterface;
+  messages: MessageInterface[];
   isOpen: boolean;
   ownerId: ObjectId;
   taskId: ObjectId;
-  createdAt: Date;
-  updatedAt: Date;
+}
+
+export enum ChatType {
+  TASK_CHAT = 'TaskChat',
+  CONFLICT_CHAT = 'ConflictChat',
+  SYSTEM_CHAT = 'SystemChat',
 }
