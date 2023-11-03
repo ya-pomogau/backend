@@ -194,7 +194,7 @@ export abstract class BaseRepositoryService<T extends Document> {
     id: string | ObjectId,
     options?: Record<string, unknown>
   ): Promise<QueryWithHelpers<
-    HydratedDocument<T, unknown, Record<string, unknown>>[],
+    DeleteResult,
     HydratedDocument<T, unknown, Record<string, unknown>>,
     Record<string, unknown>,
     T,
@@ -223,7 +223,15 @@ export abstract class BaseRepositoryService<T extends Document> {
     return this.entityModel.updateMany(query, updateDto, options);
   }
 
-  async deleteMany(entityFilterQuery: FilterQuery<T>): Promise<QueryWithHelpers<unknown, unknown>> {
+  async deleteMany(
+    entityFilterQuery: FilterQuery<T>
+  ): Promise<QueryWithHelpers<
+    DeleteResult,
+    HydratedDocument<T, unknown, Record<string, unknown>>,
+    Record<string, unknown>,
+    T,
+    'deleteOne'
+  > | null> {
     return this.entityModel.deleteMany(entityFilterQuery);
   }
 }
