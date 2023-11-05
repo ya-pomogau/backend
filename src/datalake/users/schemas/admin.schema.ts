@@ -8,8 +8,6 @@ export class AdminRole {
 
   profile: UserProfile;
 
-  vkID: string;
-
   @Prop({
     type: {
       permissions: [AdminPermission],
@@ -22,6 +20,11 @@ export class AdminRole {
     login: string;
     password: string;
   };
+
+  @Prop({
+    required: false,
+  })
+  vkID: string | null;
 }
 
 export const AdminUserSchema = SchemaFactory.createForClass(AdminRole);
