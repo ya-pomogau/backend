@@ -21,7 +21,6 @@ export class VolunteerRole {
     required: true,
     type: PointGeoJSON,
     index: '2dsphere',
-    default: { type: 'Point', coordinates: [0, 0] },
   })
   location: PointGeoJSON;
 }
