@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model } from 'mongoose';
+import { FilterQuery, Model, HydratedDocument } from 'mongoose';
 import { NotFoundException } from '@nestjs/common/exceptions';
 import {
   AdminDataDTO,
@@ -28,15 +28,43 @@ export class UsersService {
     private hashService: HashService
   ) {}
 
-  async create(createUserDto: AdminDataDTO): Promise<AdminDataDTOWithoutPassword> {
-    const hashedPassword = this.hashService.generateHash(createUserDto.administrative.password);
-    const createdUser = new this.AdminModel({
-      ...createUserDto,
+  _createAdmin(createAdminDto: AdminDataDTO): HydratedDocument<AdminRole> {
+    const hashedPassword = this.hashService.generateHash(createAdminDto.administrative.password);
+    return new this.AdminModel({
+      ...createAdminDto,
       administrative: {
-        ...createUserDto.administrative,
+        ...createAdminDto.administrative,
         password: hashedPassword,
       },
     });
+  }
+
+  _createVolunteer(createVolunteerDto: VolunteerDataDTO): HydratedDocument<VolunteerRole> {
+    return new this.VolunteerModel(createVolunteerDto);
+  }
+
+  _createRecipient(createRecipientDto: RecipientDataDTO): HydratedDocument<RecipientRole> {
+    return new this.RecipientModel(createRecipientDto);
+  }
+
+  async create(
+    createUserDto: AdminDataDTO | VolunteerDataDTO | RecipientDataDTO
+  ): Promise<AdminDataDTOWithoutPassword | VolunteerDataDTO | RecipientDataDTO | null> {
+    let createdUser: HydratedDocument<RecipientRole | VolunteerRole | AdminRole>;
+    switch (createUserDto.role) {
+      case UserRole.ADMIN:
+        createdUser = this._createAdmin(createUserDto as AdminDataDTO);
+        break;
+      case UserRole.RECIPIENT:
+        createdUser = this._createRecipient(createUserDto as RecipientDataDTO);
+        break;
+      case UserRole.VOLUNTEER:
+        createdUser = this._createVolunteer(createUserDto as VolunteerDataDTO);
+        break;
+      default:
+        return null;
+    }
+
     const savedUser = await createdUser.save();
 
     return savedUser.toObject();
