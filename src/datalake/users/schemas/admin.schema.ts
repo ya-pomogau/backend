@@ -1,9 +1,12 @@
+/* eslint-disable func-names */
 import { Prop, SchemaFactory, Schema } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { NotAcceptableException } from '@nestjs/common';
 import { AdminDataDTO } from '../../../common/types/UsersDataDTO';
 import { UserModel } from './user.schema';
 import { AdminPermission, UserProfile, UserRole } from '../../../common/types/user.types';
 import { HashService } from '../../../common/hash/hash.service';
+import exceptions from '../../../common/constants/exceptions';
 
 @Schema()
 class AdminRole {
@@ -28,6 +31,11 @@ class AdminRole {
     required: false,
   })
   vkID: string | null;
+
+  @Prop({
+    required: true,
+  })
+  isRoot: boolean;
 }
 
 interface AdminModelStatics extends Model<AdminRole> {
@@ -36,7 +44,14 @@ interface AdminModelStatics extends Model<AdminRole> {
 
 const AdminUserSchema = SchemaFactory.createForClass(AdminRole);
 
-// eslint-disable-next-line func-names
+AdminUserSchema.pre('updateOne', { document: true, query: false }, function (next) {
+  if (this.isRoot) {
+    next(new NotAcceptableException(exceptions.users.notModified));
+  }
+
+  return next();
+});
+
 AdminUserSchema.statics.checkAdminCredentials = async function (
   login: string,
   password: string
