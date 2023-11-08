@@ -11,7 +11,6 @@ import {
 } from '../../common/types/UsersDataDTO';
 import { HashService } from '../../common/hash/hash.service';
 import { User } from './schemas/user.schema';
-import { PointGeoJSON } from '../../common/schemas/PointGeoJSON.schema';
 import { UserRole } from '../../common/types/user.types';
 import exceptions from '../../common/constants/exceptions';
 import { AdminRole } from './schemas/admin.schema';
@@ -95,33 +94,8 @@ export class UsersService {
       .exec();
   }
 
-  async findVolunteerWithin(center: PointGeoJSON, distance: number): Promise<VolunteerDataDTO[]> {
-    const volunteers = await this.VolunteerModel.find({
-      location: {
-        $geoWithin: { $center: [[...center.coordinates], distance] },
-      },
-      role: UserRole.VOLUNTEER,
-    });
-    return volunteers;
-  }
-
-  async checkAdminCredentials(login: string, password: string): Promise<AdminDataDTO> | null {
-    let comparePassword: boolean;
-    const admin = await this.AdminModel.findOne({
-      role: UserRole.ADMIN,
-      administrative: { login },
-    });
-    if (admin) {
-      comparePassword = await this.hashService.compareHash(password, admin.administrative.password);
-    }
-    if (comparePassword) {
-      return admin.toObject();
-    }
-    return null;
-  }
-
-  async checkVKCredentials(vkID: number): Promise<RecipientDataDTO> | null {
-    const user = await this.RecipientModel.findOne({
+  async checkVKCredentials(vkID: number): Promise<RecipientDataDTO | VolunteerDataDTO> | null {
+    const user = await this.UserModel.findOne({
       role: { $in: [UserRole.RECIPIENT, UserRole.VOLUNTEER] },
       vkID,
     });

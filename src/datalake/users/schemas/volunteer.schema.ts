@@ -1,16 +1,12 @@
 import { Prop, SchemaFactory, Schema } from '@nestjs/mongoose';
-import { UserProfile } from '../../../common/types/user.types';
+import mongoose, { Model } from 'mongoose';
+import { VolunteerDataDTO } from '../../../common/types/UsersDataDTO';
+import { UserProfile, UserRole } from '../../../common/types/user.types';
 import { UserStatus } from '../../../users/types';
 import { PointGeoJSON } from '../../../common/schemas/PointGeoJSON.schema';
 
 @Schema()
-export class VolunteerRole {
-  role: string;
-
-  profile: UserProfile;
-
-  vkID: string;
-
+class VolunteerRole {
   @Prop({ default: 0 })
   score: number;
 
@@ -23,6 +19,37 @@ export class VolunteerRole {
     index: '2dsphere',
   })
   location: PointGeoJSON;
+
+  role: string;
+
+  profile: UserProfile;
+
+  vkID: string;
 }
 
-export const VolunteerUserSchema = SchemaFactory.createForClass(VolunteerRole);
+interface VolunteerModelStatics extends Model<VolunteerRole> {
+  findVolunteerWithin(center: PointGeoJSON, distance: number): Promise<VolunteerDataDTO[]>;
+}
+
+const VolunteerUserSchema = SchemaFactory.createForClass(VolunteerRole);
+
+// eslint-disable-next-line func-names
+VolunteerUserSchema.statics.findVolunteerWithin = async function (
+  center: PointGeoJSON,
+  distance: number
+): Promise<VolunteerDataDTO[]> {
+  const volunteers = await this.find({
+    location: {
+      $geoWithin: { $center: [[...center.coordinates], distance] },
+    },
+    role: UserRole.VOLUNTEER,
+  });
+  return volunteers;
+};
+
+const VolunteerModel = mongoose.model<VolunteerRole, VolunteerModelStatics>(
+  'Volunteer',
+  VolunteerUserSchema
+);
+
+export { VolunteerRole, VolunteerUserSchema, VolunteerModel };
