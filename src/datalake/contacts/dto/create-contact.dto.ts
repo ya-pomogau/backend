@@ -1,9 +1,3 @@
-export class CreateContactDto {
-  email: string;
+import { IContact } from '../schemas/contact.schema';
 
-  socialNetwork: string;
-
-  expirationDate: Date | null;
-
-  createdAt: Date;
-}
+export type CreateContactDto = Omit<IContact, 'expiredAt' | 'createdAt'>;

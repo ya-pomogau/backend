@@ -1,3 +1,5 @@
-import { CreateContactDto } from '../../datalake/contacts/dto/create-contact.dto';
+import { IContact } from '../../datalake/contacts/schemas/contact.schema';
 
-export class ContactsDataDTO extends CreateContactDto {}
+export interface ContactsDataDTO extends IContact {
+  _id: string;
+}
