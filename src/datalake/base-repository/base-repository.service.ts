@@ -1,38 +1,30 @@
 import { Injectable } from '@nestjs/common';
-import { DeleteResult } from 'mongodb';
+import { DeleteResult, UpdateResult } from 'mongodb';
 import {
   Document,
   FilterQuery,
   HydratedDocument,
   Model,
-  QueryWithHelpers,
   UpdateQuery,
-  UpdateWriteOpResult,
   type ObjectId,
 } from 'mongoose';
+
+import { POJOType } from '../../common/types/pojo.type';
 
 @Injectable()
 export abstract class BaseRepositoryService<T extends Document> {
   constructor(protected readonly entityModel: Model<T>) {}
 
-  async create(
-    createEntityDto: Record<string, unknown>
-  ): Promise<HydratedDocument<T, unknown, Record<string, unknown>>> {
-    const entity = new Model<T>(createEntityDto as T);
-    return entity.save();
+  async create(createEntityDto: Record<string, unknown>): Promise<POJOType<T>> {
+    const entity = await this.entityModel.create(createEntityDto as T);
+    return (await entity.save()).toObject();
   }
 
   async find(
     query: FilterQuery<T>,
     projection?: Record<string, unknown>,
     options?: Record<string, unknown>
-  ): Promise<QueryWithHelpers<
-    HydratedDocument<T, unknown, Record<string, unknown>>[],
-    HydratedDocument<T, unknown, Record<string, unknown>>,
-    Record<string, unknown>,
-    T,
-    'find'
-  > | null> {
+  ): Promise<Array<POJOType<T>>> {
     return this.entityModel.find(
       query,
       {
@@ -47,61 +39,48 @@ export abstract class BaseRepositoryService<T extends Document> {
     query: FilterQuery<T>,
     projection?: Record<string, unknown>,
     options?: Record<string, unknown>
-  ): Promise<QueryWithHelpers<
-    HydratedDocument<T, unknown, Record<string, unknown>>[],
-    HydratedDocument<T, unknown, Record<string, unknown>>,
-    Record<string, unknown>,
-    T,
-    'findOne'
-  > | null> {
-    return this.entityModel.findOne(
-      query,
-      {
-        __v: false,
-        ...projection,
-      },
-      options
-    );
+  ): Promise<POJOType<T>> {
+    return (
+      await this.entityModel
+        .findOne(
+          query,
+          {
+            __v: false,
+            ...projection,
+          },
+          options
+        )
+        .exec()
+    ).toObject();
   }
 
   async updateOne(
     query: FilterQuery<T>,
     updateDto: UpdateQuery<unknown>,
     options: Record<string, unknown>
-  ): Promise<QueryWithHelpers<
-    UpdateWriteOpResult,
-    HydratedDocument<T, unknown, Record<string, unknown>>,
-    Record<string, unknown>,
-    T,
-    'updateOne'
-  > | null> {
-    return this.entityModel.updateOne(query, updateDto, options);
+  ): Promise<POJOType<T>> {
+    const res: UpdateResult = await this.entityModel.updateOne(query, updateDto, options);
+    let doc: Document<T> | null = null;
+    if (res.acknowledged) {
+      doc = await this.entityModel.findOne(query).exec();
+    }
+    return doc ? doc.toObject() : null;
   }
 
   async replaceOne(
     query: FilterQuery<T>,
     replaceDoc: T,
     options: Record<string, unknown>
-  ): Promise<QueryWithHelpers<
-    UpdateWriteOpResult,
-    HydratedDocument<T, unknown, Record<string, unknown>>,
-    Record<string, unknown>,
-    T,
-    'replaceOne'
-  > | null> {
-    return this.entityModel.replaceOne(query, replaceDoc, options);
+  ): Promise<POJOType<T>> {
+    const res: UpdateResult = await this.entityModel.replaceOne(query, replaceDoc, options);
+    let doc: Document<T> | null = null;
+    if (res.acknowledged) {
+      doc = await this.entityModel.findOne(query).exec();
+    }
+    return doc ? doc.toObject() : null;
   }
 
-  async deleteOne(
-    query: FilterQuery<T>,
-    options: Record<string, unknown>
-  ): Promise<QueryWithHelpers<
-    DeleteResult,
-    HydratedDocument<T, unknown, Record<string, unknown>>,
-    Record<string, unknown>,
-    T,
-    'deleteOne'
-  > | null> {
+  async deleteOne(query: FilterQuery<T>, options: Record<string, unknown>): Promise<DeleteResult> {
     return this.entityModel.deleteOne(query, options);
   }
 
@@ -109,98 +88,76 @@ export abstract class BaseRepositoryService<T extends Document> {
     query: FilterQuery<T>,
     updateDto: UpdateQuery<unknown>,
     options: Record<string, unknown>
-  ): Promise<QueryWithHelpers<
-    HydratedDocument<T, unknown, Record<string, unknown>>[],
-    HydratedDocument<T, unknown, Record<string, unknown>>,
-    Record<string, unknown>,
-    T,
-    'findOneAndUpdate'
-  > | null> {
-    return this.entityModel.findOneAndUpdate(query, updateDto, {
+  ): Promise<POJOType<T>> {
+    const doc: Document<T> = await this.entityModel.findOneAndUpdate(query, updateDto, {
       new: true,
       ...options,
     });
+    return doc.toObject();
   }
 
   async findOneAndReplace(
     query: FilterQuery<T>,
     replaceDoc: T,
     options: Record<string, unknown>
-  ): Promise<QueryWithHelpers<
-    HydratedDocument<T, unknown, Record<string, unknown>>[],
-    HydratedDocument<T, unknown, Record<string, unknown>>,
-    Record<string, unknown>,
-    T,
-    'findOneAndReplace'
-  > | null> {
-    return this.entityModel.findOneAndReplace(query, replaceDoc, {
-      new: true,
-      ...options,
-    });
+  ): Promise<POJOType<T>> {
+    const doc = await this.entityModel
+      .findOneAndReplace(query, replaceDoc, {
+        new: true,
+        ...options,
+      })
+      .exec();
+    return doc.toObject();
   }
+
+  s;
 
   async findOneAndDelete(
     query: FilterQuery<T>,
     options: Record<string, unknown>
-  ): Promise<QueryWithHelpers<
-    HydratedDocument<T, unknown, Record<string, unknown>>[],
-    HydratedDocument<T, unknown, Record<string, unknown>>,
-    Record<string, unknown>,
-    T,
-    'findOneAndDelete'
-  > | null> {
-    return this.entityModel.findOneAndDelete(query, options);
+  ): Promise<POJOType<T>> {
+    const doc = await this.entityModel.findOneAndDelete(query, options).exec();
+    return doc.toObject();
   }
 
   async findById(
     id: string | ObjectId,
     projection?: Record<string, unknown>,
     options?: Record<string, unknown>
-  ): Promise<QueryWithHelpers<
-    HydratedDocument<T, unknown, Record<string, unknown>>[],
-    HydratedDocument<T, unknown, Record<string, unknown>>,
-    Record<string, unknown>,
-    T,
-    'findOne'
-  > | null> {
-    return this.entityModel.findById(
-      id,
-      {
-        __v: false,
-        ...projection,
-      },
-      options
-    );
+  ): Promise<POJOType<T>> {
+    const doc = await this.entityModel
+      .findById(
+        id,
+        {
+          __v: false,
+          ...projection,
+        },
+        options
+      )
+      .exec();
+    return doc.toObject();
   }
 
   async findByIdAndUpdate(
     id: string | ObjectId,
     updateDto: UpdateQuery<unknown>,
     options: Record<string, unknown>
-  ): Promise<QueryWithHelpers<
-    HydratedDocument<T, unknown, Record<string, unknown>>[],
-    HydratedDocument<T, unknown, Record<string, unknown>>,
-    Record<string, unknown>,
-    T,
-    'findOneAndUpdate'
-  > | null> {
-    return this.entityModel.findByIdAndUpdate(id, updateDto, {
-      new: true,
-      ...options,
-    });
+  ): Promise<POJOType<T>> {
+    const doc = await this.entityModel
+      .findByIdAndUpdate(id, updateDto, {
+        new: true,
+        ...options,
+      })
+      .exec();
+    return doc.toObject();
   }
 
   async findByIdAndDelete(
     id: string | ObjectId,
     options?: Record<string, unknown>
-  ): Promise<QueryWithHelpers<
-    DeleteResult,
-    HydratedDocument<T, unknown, Record<string, unknown>>,
-    Record<string, unknown>,
-    T,
-    'findOneAndDelete'
-  > | null> {
-    return this.entityModel.findByIdAndDelete(id, options);
+  ): Promise<POJOType<T>> {
+    const doc = await this.entityModel.findByIdAndDelete(id, options).exec();
+    return doc.toObject();
   }
 
   async insertMany(
@@ -213,25 +170,21 @@ export abstract class BaseRepositoryService<T extends Document> {
     query: FilterQuery<T>,
     updateDto: Record<string, unknown>,
     options?: Record<string, unknown>
-  ): Promise<QueryWithHelpers<
-    UpdateWriteOpResult,
-    HydratedDocument<T, unknown, Record<string, unknown>>,
-    Record<string, unknown>,
-    T,
-    'updateOne'
-  > | null> {
-    return this.entityModel.updateMany(query, updateDto, options);
+  ): Promise<Array<POJOType<T>>> {
+    const res = await this.entityModel.updateMany(query, updateDto, options).exec();
+    if (res.acknowledged) {
+      return this.entityModel.find(
+        query,
+        {
+          __v: false,
+        },
+        options
+      );
+    }
+    return null;
   }
 
-  async deleteMany(
-    entityFilterQuery: FilterQuery<T>
-  ): Promise<QueryWithHelpers<
-    DeleteResult,
-    HydratedDocument<T, unknown, Record<string, unknown>>,
-    Record<string, unknown>,
-    T,
-    'deleteOne'
-  > | null> {
+  async deleteMany(entityFilterQuery: FilterQuery<T>): Promise<DeleteResult> {
     return this.entityModel.deleteMany(entityFilterQuery);
   }
 }
