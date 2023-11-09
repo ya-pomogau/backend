@@ -110,8 +110,6 @@ export abstract class BaseRepositoryService<T extends Document> {
     return doc.toObject();
   }
 
-  s;
-
   async findOneAndDelete(
     query: FilterQuery<T>,
     options: Record<string, unknown>
