@@ -1,4 +1,3 @@
-import { Injectable } from '@nestjs/common';
 import { DeleteResult, UpdateResult } from 'mongodb';
 import {
   Document,
@@ -12,7 +11,7 @@ import {
 import { POJOType } from '../../common/types/pojo.type';
 
 export abstract class BaseRepositoryService<T extends Document> {
-  constructor(protected readonly entityModel: Model<T>) {}
+  protected constructor(protected readonly entityModel: Model<T>) {}
 
   async create(createEntityDto: Record<string, unknown>): Promise<POJOType<T>> {
     const entity = await this.entityModel.create(createEntityDto as T);
