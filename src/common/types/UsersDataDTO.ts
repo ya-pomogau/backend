@@ -1,3 +1,3 @@
-import { User } from '../../datalake/users/schemas/user.schema';
+// import { User } from '../../datalake/users/schemas/user.schema';
 
-export class UsersDataDTO extends User {}
+// export class UsersDataDTO extends User {}
