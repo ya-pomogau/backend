@@ -1,6 +1,6 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
-import { UserStatus } from '../../../common/types/user.types';
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
+import { Document } from "mongoose";
+import { UserStatus } from "../../../users/types";
 
 export interface ICategory {
   title: string;
@@ -8,7 +8,7 @@ export interface ICategory {
   accessLevel: UserStatus;
 }
 
-@Schema({ timestamps: true }) // timestamps автоматическое отслеживание времени создания (createdAt) и времени обновления (updatedAt)
+@Schema({ timestamps: true })
 export class Category implements ICategory {
   @Prop({ required: true })
   title: string;
@@ -16,10 +16,9 @@ export class Category implements ICategory {
   @Prop({ required: true, type: Number })
   points: number;
 
-  @Prop({ required: true, type: UserStatus })
-  accessLevel: UserStatus;
+  @Prop({ required: true, enum: Object.values(UserStatus), type: Number })
+  accessLevel: number;
 }
 
-export type CategoryDocument = Category & Document;
-
 export const CategorySchema = SchemaFactory.createForClass(Category);
+export type CategoryDocument = Category & Document;

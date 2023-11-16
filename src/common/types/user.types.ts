@@ -1,3 +1,13 @@
+export type UserProfile = {
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  phone: string;
+  avatar: string;
+  address: string;
+};
+
+
 import { ObjectId } from 'mongoose';
 
 export enum UserStatus {
@@ -12,6 +22,7 @@ export enum UserRole {
   ADMIN = 'admin',
   RECIPIENT = 'recipient',
   VOLUNTEER = 'volunteer',
+  VISITOR = 'visitor',
 }
 
 export enum AdminPermission {
