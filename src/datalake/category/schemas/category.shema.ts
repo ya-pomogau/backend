@@ -1,15 +1,10 @@
-import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { Document } from "mongoose";
-import { UserStatus } from "../../../users/types";
-
-export interface ICategory {
-  title: string;
-  points: number;
-  accessLevel: UserStatus;
-}
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document } from 'mongoose';
+import { UserStatus } from '../../../users/types';
+import { CategoryInterface } from '../../../common/types/category.types';
 
 @Schema({ timestamps: true })
-export class Category implements ICategory {
+export class Category implements CategoryInterface {
   @Prop({ required: true })
   title: string;
 
