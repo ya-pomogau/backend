@@ -1,5 +1,5 @@
 import mongoose, { Document, ObjectId } from 'mongoose';
-import { Prop, Schema } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ResolveStatus, TaskInterface, TaskStatus } from '../../../common/types/task.types';
 import { ICategory } from '../../category/schemas/category.shema';
 import { IPointGeoJSON, PointGeoJSONSchema } from '../../../common/schemas/geoJson.schema';
@@ -91,3 +91,5 @@ export class Task extends Document implements TaskInterface {
   @Prop({ type: mongoose.SchemaTypes.Boolean, required: true })
   isPendingChanges: boolean;
 }
+
+export const TaskSchema = SchemaFactory.createForClass<TaskInterface>(Task);
