@@ -13,7 +13,7 @@ export enum TaskStatus {
 export enum ResolveStatus {
   VIRGIN = 'virgin',
   PENDING = 'pending',
-  FULLFILLED = 'fullfilled',
+  FULFILLED = 'fulfilled',
   REJECTED = 'rejected',
 }
 

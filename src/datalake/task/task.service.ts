@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Task, TaskSchema } from './schemas/task.schema';
+import { Task } from './schemas/task.schema';
+import { BaseRepositoryService } from '../base-repository/base-repository.service';
 
 @Injectable()
-export class TaskService {
+export class TasksRepository extends BaseRepositoryService<Task> {
   constructor(@InjectModel(Task.name) private readonly taskModel: Model<Task>) {
-    console.dir(typeof Task.prototype);
-    console.dir(typeof TaskSchema);
+    super(taskModel);
   }
 }
