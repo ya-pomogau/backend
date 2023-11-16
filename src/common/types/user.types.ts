@@ -1,3 +1,5 @@
+import { ObjectId } from 'mongoose';
+
 export type UserProfile = {
   firstName: string;
   middleName: string;
@@ -6,9 +8,6 @@ export type UserProfile = {
   avatar: string;
   address: string;
 };
-
-
-import { ObjectId } from 'mongoose';
 
 export enum UserStatus {
   UNCONFIRMED = 0,
