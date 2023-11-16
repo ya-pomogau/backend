@@ -11,7 +11,6 @@ import {
 
 import { POJOType } from '../../common/types/pojo.type';
 
-@Injectable()
 export abstract class BaseRepositoryService<T extends Document> {
   constructor(protected readonly entityModel: Model<T>) {}
 
