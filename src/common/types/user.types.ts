@@ -1,3 +1,5 @@
+import { ObjectId } from 'mongoose';
+
 export type UserProfile = {
   firstName: string;
   middleName: string;
@@ -6,7 +8,6 @@ export type UserProfile = {
   avatar: string;
   address: string;
 };
-
 
 export enum UserStatus {
   UNCONFIRMED = 0,
@@ -21,7 +22,6 @@ export enum UserRole {
   RECIPIENT = 'recipient',
   VOLUNTEER = 'volunteer',
   VISITOR = 'visitor',
-
 }
 
 export enum AdminPermission {
@@ -31,4 +31,16 @@ export enum AdminPermission {
   CONFLICTS = 'resolve conflicts',
   BLOG = 'write the blog',
   CATEGORIES = 'change categories',
+}
+
+export interface UserProfileInterface {
+  _id?: string | ObjectId;
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  phone: string;
+  avatar: string;
+  address: string;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
 }

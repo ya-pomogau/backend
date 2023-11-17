@@ -20,7 +20,7 @@ export default () => ({
     apiOauth: process.env.VK_API_OAUTH,
   },
   jwt: {
-    key: process.env.JWT_KEY,
+    key: process.env.JWT_KEY || 'mY-ZypEr-sEKRet-23549',
     ttl: process.env.JWT_TTL || '7d',
   },
   saltRounds: Number(process.env.SALT) || 10,

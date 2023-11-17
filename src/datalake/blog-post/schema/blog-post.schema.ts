@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
 
 export interface IBlogPost {
-  author: User;
+  author: string;
   title: string;
   text: string;
   files: string[];
@@ -11,7 +11,7 @@ export interface IBlogPost {
 @Schema({ timestamps: true })
 export class BlogPost implements IBlogPost {
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
-  author: User;
+  author: string;
 
   @Prop({ required: true })
   title: string;
