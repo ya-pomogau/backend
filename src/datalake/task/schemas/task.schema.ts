@@ -1,10 +1,12 @@
-import mongoose, { Document, ObjectId } from 'mongoose';
+import mongoose, { Document } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ResolveStatus, TaskInterface, TaskStatus } from '../../../common/types/task.types';
-import { ICategory } from '../../category/schemas/category.shema';
+
 import { IPointGeoJSON, PointGeoJSONSchema } from '../../../common/schemas/geoJson.schema';
 import { UserProfileInterface } from '../../../common/types/user.types';
 import { UserProfileSchema } from '../../../common/schemas/user-profile.schema';
+import { POJOType } from '../../../common/types/pojo.type';
+import { Category } from '../../category/schemas/category.schema';
 
 @Schema({
   timestamps: true,
@@ -57,7 +59,7 @@ export class Task extends Document implements TaskInterface {
   })
   adminResolve: ResolveStatus | null;
 
-  category: ICategory & { _id: string | ObjectId };
+  category: POJOType<Category>;
 
   @Prop({ required: true, type: mongoose.SchemaTypes.Date })
   date: Date | null;
