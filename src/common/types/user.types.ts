@@ -1,15 +1,12 @@
 import { ObjectId } from 'mongoose';
 
 export type UserProfile = {
-  _id?: string | ObjectId;
   firstName: string;
   middleName: string;
   lastName: string;
   phone: string;
   avatar: string;
   address: string;
-  createdAt?: Date | string;
-  updatedAt?: Date | string;
 };
 
 export enum UserStatus {
@@ -35,9 +32,19 @@ export enum AdminPermission {
   BLOG = 'write the blog',
   CATEGORIES = 'change categories',
 }
-
 export enum ResolveStatus {
   PENDING = 'pending',
   FULLFILLED = 'fullfilled',
   REJECTED = 'rejected',
+  
+export interface UserProfileInterface {
+  _id?: string | ObjectId;
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  phone: string;
+  avatar: string;
+  address: string;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
 }

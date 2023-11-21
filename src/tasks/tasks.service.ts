@@ -75,7 +75,7 @@ export class TasksService {
     });
 
     if (!category) {
-      throw new NotFoundException(exceptions.categories.notFound);
+      throw new NotFoundException(exceptions.category.notFound);
     }
 
     const dto = {

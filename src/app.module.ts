@@ -18,12 +18,15 @@ import { BlogArticlesModule } from './blog-articles/blog-articles.module';
 import { ChatsModule } from './chats/chats.module';
 import { ContactsModule } from './contacts/contacts.module';
 import { PoliticsModule } from './politics/politics.module';
+import { CategoryModule } from './datalake/category/category.module';
+import { TaskModule } from './datalake/task/task.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, load: [configuration] }),
     MongooseModule.forRoot('mongodb://localhost:27017/ya-pomogau-db'),
-    TypeOrmModule.forRootAsync({
+    HashModule,
+    /*   TypeOrmModule.forRootAsync({
       imports: [],
       useClass: TypeOrmConfigService,
     }),
@@ -34,12 +37,14 @@ import { PoliticsModule } from './politics/politics.module';
     CategoriesModule,
     UserModule,
     TasksWsModule,
-    HashModule,
     AuthModule,
     BlogArticlesModule,
     ChatsModule,
     ContactsModule,
     PoliticsModule,
+    */
+    TaskModule,
+    // CategoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
