@@ -1,7 +1,7 @@
-import { ObjectId } from 'mongoose';
 import { UserProfileInterface } from './user.types';
 import { IPointGeoJSON } from '../schemas/geoJson.schema';
-import { ICategory } from '../../datalake/category/schemas/category.shema';
+import { POJOType } from './pojo.type';
+import { Category } from '../../datalake/category/schemas/category.schema';
 
 export enum TaskStatus {
   CREATED = 'created',
@@ -25,7 +25,7 @@ export interface TaskInterface {
   date: Date | null;
   address: string;
   location: IPointGeoJSON;
-  category: ICategory & { _id: string | ObjectId };
+  category: POJOType<Category>;
   volunteerReport: ResolveStatus;
   recipientReport: ResolveStatus;
   adminResolve: ResolveStatus | null;

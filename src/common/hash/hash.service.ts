@@ -5,7 +5,7 @@ import configuration from '../../config/configuration';
 
 @Injectable()
 export class HashService {
-  constructor(private readonly configService: ConfigService) {}
+  constructor(private readonly configService?: ConfigService) {}
 
   async generateHash(password: string): Promise<string> {
     return bcrypt.hash(password, configuration().saltRounds);
