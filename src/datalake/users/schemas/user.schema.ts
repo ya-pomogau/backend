@@ -30,12 +30,6 @@ import { Admin } from './admin.schema';
     },
   },
   toObject: {
-    transform(doc, ret) {
-      // Из transform запрещено возвращать значение, это требование самого Mongoose
-      // Необходимо изменять именно параметр ret.
-      // eslint-disable-next-line no-param-reassign
-      delete ret._id;
-    },
     versionKey: false,
     virtuals: true,
   },

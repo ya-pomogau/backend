@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+/* import mongoose from 'mongoose';
 import { PointGeoJSON } from '../schemas/PointGeoJSON.schema';
 import { UserProfile, UserStatus, AdminPermission } from './user.types';
 
@@ -34,3 +34,4 @@ export type VisitorDataDTO = UserDataDTO;
 export type AdminDataDTOWithoutPassword = Omit<AdminDataDTO, 'administrative'> & {
   administrative: Omit<AdminDataDTO['administrative'], 'password'>;
 };
+*/
