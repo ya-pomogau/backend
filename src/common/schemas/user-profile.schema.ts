@@ -1,9 +1,30 @@
 import { Schema, SchemaFactory } from '@nestjs/mongoose';
-import { ObjectId } from 'mongoose';
+import { Document, ObjectId } from 'mongoose';
 import { UserProfileInterface } from '../types/user.types';
 
-@Schema({ timestamps: false })
-export class UserProfile implements UserProfileInterface {
+@Schema({
+  timestamps: false,
+  toObject: {
+    transform(doc, ret) {
+      // Из transform запрещено возвращать значение, это требование самого Mongoose
+      // Необходимо изменять именно параметр ret.
+      // eslint-disable-next-line no-param-reassign
+      delete ret._id;
+    },
+    versionKey: false,
+    virtuals: true,
+  },
+  virtuals: {
+    fullName: {
+      get() {
+        return `${this.firstName ? this.firstName : ''} ${this.middleName ? this.firstName : ''}  ${
+          this.lastName ? this.lastName : ''
+        }`;
+      },
+    },
+  },
+})
+export class UserProfile extends Document implements UserProfileInterface {
   _id: string | ObjectId;
 
   address: string;
