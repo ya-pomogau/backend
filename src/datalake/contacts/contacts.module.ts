@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ContactsService } from './contacts.service';
-import { Contact, ContactSchema } from './schemas/contact.schema';
+import { ContactsRepository } from './contacts.repository';
+import { Contacts, ContactSchema } from './schemas/contact.schema';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: Contact.name, schema: ContactSchema }])],
-  providers: [ContactsService],
-  exports: [ContactsService],
+  imports: [MongooseModule.forFeature([{ name: Contacts.name, schema: ContactSchema }])],
+  providers: [ContactsRepository],
+  exports: [ContactsRepository],
 })
 // eslint-disable-next-line prettier/prettier
 export class ContactsModule {}

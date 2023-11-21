@@ -1,17 +1,24 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import { Document, SchemaTypes } from 'mongoose';
+import { ContactsInterface } from '../../../common/types/contacts.types';
 
-export interface IContact {
-  email: string;
-  socialNetwork: string;
-  expiredAt: Date | null;
-  createdAt: Date;
-}
-
-@Schema()
-export class Contact implements IContact {
+@Schema({
+  timestamps: true,
+  toObject: {
+    versionKey: false,
+    virtuals: true,
+  },
+  statics: {
+    async isContactsExist(): Promise<boolean> {
+      const count = await this.ContactModel.countDocuments().exec();
+      return Promise.resolve(count > 0);
+    },
+  },
+})
+export class Contacts extends Document implements ContactsInterface {
   @Prop({
     required: true,
+    type: SchemaTypes.String,
     validate: {
       validator(v) {
         return /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(
@@ -23,15 +30,8 @@ export class Contact implements IContact {
   })
   email: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, type: SchemaTypes.String })
   socialNetwork: string;
-
-  @Prop()
-  expiredAt: Date | null;
-
-  @Prop({ required: true, default: Date.now() })
-  createdAt: Date;
 }
 
-export const ContactSchema = SchemaFactory.createForClass(Contact);
-export type ContactDocument = HydratedDocument<Contact>;
+export const ContactSchema = SchemaFactory.createForClass(Contacts);
