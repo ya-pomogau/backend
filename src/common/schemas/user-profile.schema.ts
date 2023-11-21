@@ -1,5 +1,6 @@
-import { Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, ObjectId } from 'mongoose';
+import * as mongoose from 'mongoose';
 import { UserProfileInterface } from '../types/user.types';
 
 @Schema({
@@ -25,18 +26,25 @@ import { UserProfileInterface } from '../types/user.types';
   },
 })
 export class UserProfile extends Document implements UserProfileInterface {
+  @Prop({ required: false, type: mongoose.SchemaTypes.ObjectId })
   _id: string | ObjectId;
 
+  @Prop({ required: true, type: mongoose.SchemaTypes.String })
   address: string;
 
+  @Prop({ required: true, type: mongoose.SchemaTypes.String })
   avatar: string;
 
+  @Prop({ required: true, type: mongoose.SchemaTypes.String })
   firstName: string;
 
+  @Prop({ required: true, type: mongoose.SchemaTypes.String })
   lastName: string;
 
+  @Prop({ required: true, type: mongoose.SchemaTypes.String })
   middleName: string;
 
+  @Prop({ required: true, type: mongoose.SchemaTypes.String })
   phone: string;
 }
 

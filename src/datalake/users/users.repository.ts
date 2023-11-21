@@ -1,33 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model, HydratedDocument } from 'mongoose';
-import { NotFoundException } from '@nestjs/common/exceptions';
-import {
-  AdminDataDTO,
-  AdminDataDTOWithoutPassword,
-  RecipientDataDTO,
-  UserDataDTO,
-  VolunteerDataDTO,
-} from '../../common/types/UsersDataDTO';
-import { HashService } from '../../common/hash/hash.service';
+import { Model } from 'mongoose';
 import { User } from './schemas/user.schema';
-import { UserRole } from '../../common/types/user.types';
-import exceptions from '../../common/constants/exceptions';
-import { AdminRole } from './schemas/admin.schema';
-import { VolunteerRole } from './schemas/volunteer.schema';
-import { RecipientRole } from './schemas/recipient.schema';
+
+import { BaseRepositoryService } from '../base-repository/base-repository.service';
 
 @Injectable()
-export class UsersService {
-  constructor(
+export class UsersRepository extends BaseRepositoryService<User> {
+  constructor(@InjectModel(User.name) private readonly userModel: Model<User>) {
+    super(userModel);
+  }
+}
+/* constructor(
     @InjectModel(User.name) private UserModel: Model<User>,
-    @InjectModel(AdminRole.name) private AdminModel: Model<AdminRole>,
+    @InjectModel(Admin.name) private AdminModel: Model<Admin>,
     @InjectModel(VolunteerRole.name) private VolunteerModel: Model<VolunteerRole>,
     @InjectModel(RecipientRole.name) private RecipientModel: Model<RecipientRole>,
     private hashService: HashService
   ) {}
 
-  _createAdmin(createAdminDto: AdminDataDTO): HydratedDocument<AdminRole> {
+  _createAdmin(createAdminDto: AdminDataDTO): HydratedDocument<Admin> {
     const hashedPassword = this.hashService.generateHash(createAdminDto.administrative.password);
     return new this.AdminModel({
       ...createAdminDto,
@@ -49,7 +41,7 @@ export class UsersService {
   async create(
     createUserDto: AdminDataDTO | VolunteerDataDTO | RecipientDataDTO
   ): Promise<AdminDataDTOWithoutPassword | VolunteerDataDTO | RecipientDataDTO | null> {
-    let createdUser: HydratedDocument<RecipientRole | VolunteerRole | AdminRole>;
+    let createdUser: HydratedDocument<RecipientRole | VolunteerRole | Admin>;
     switch (createUserDto.role) {
       case UserRole.ADMIN:
         createdUser = this._createAdmin(createUserDto as AdminDataDTO);
@@ -101,4 +93,5 @@ export class UsersService {
     });
     return user ? user.toObject() : null;
   }
-}
+
+  */
