@@ -36,7 +36,7 @@ export enum ResolveStatus {
   PENDING = 'pending',
   FULLFILLED = 'fullfilled',
   REJECTED = 'rejected',
-  
+}
 export interface UserProfileInterface {
   _id?: string | ObjectId;
   firstName: string;
