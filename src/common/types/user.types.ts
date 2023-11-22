@@ -1,19 +1,19 @@
 import { ObjectId } from 'mongoose';
 
-/* export interface UserProfileInterface {
+export type UserProfile = {
   firstName: string;
   middleName: string;
   lastName: string;
   phone: string;
   avatar: string;
   address: string;
-}; */
+};
 
 export enum UserStatus {
-  UNCONFIRMED = 'Unconfirmed',
-  CONFIRMED = 'Confirmed',
-  VERIFIED = 'Verified',
-  ACTIVATED = 'Activated',
+  UNCONFIRMED = 0,
+  CONFIRMED = 1,
+  VERIFIED = 2,
+  ACTIVATED = 3,
 }
 
 export enum UserRole {
