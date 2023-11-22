@@ -14,4 +14,5 @@ export type CreateAdminDto = CreateUserDto & {
   permissions: Array<AdminPermission>;
   login: string;
   password: string;
+  isRoot: false;
 };
