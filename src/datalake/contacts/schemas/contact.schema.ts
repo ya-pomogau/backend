@@ -10,7 +10,7 @@ import { ContactsInterface } from '../../../common/types/contacts.types';
   },
   statics: {
     async isContactsExist(): Promise<boolean> {
-      const count = await this.ContactModel.countDocuments().exec();
+      const count = await this.countDocuments().exec();
       return Promise.resolve(count > 0);
     },
   },

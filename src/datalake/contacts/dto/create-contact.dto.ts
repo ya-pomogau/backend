@@ -1,3 +1,3 @@
-import { IContact } from '../schemas/contact.schema';
+import { ContactsInterface } from '../../../common/types/contacts.types';
 
-export type CreateContactDto = Omit<IContact, 'expiredAt' | 'createdAt'>;
+export type CreateContactDto = Omit<ContactsInterface, 'expiredAt' | 'createdAt'>;
