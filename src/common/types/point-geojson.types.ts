@@ -5,6 +5,6 @@ type GeoCoordinatesObject = {
 };
 export type GeoCoordinates = GeoCoordinatesArray | GeoCoordinatesObject;
 export interface PointGeoJSONInterface {
-  type: string;
+  type: 'Point';
   coordinates: GeoCoordinates;
 }

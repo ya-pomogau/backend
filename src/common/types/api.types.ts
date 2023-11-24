@@ -1,5 +1,5 @@
 export interface VKLoginDtoInterface {
   code: string;
-  redirectUri: string;
+  redirectUrl: string;
   state?: string;
 }

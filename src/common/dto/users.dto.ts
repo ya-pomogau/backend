@@ -5,7 +5,7 @@ export type CreateUserDto = {
   profile: Partial<UserProfileInterface>;
   role: UserRole;
   vkId: string;
-  location: PointGeoJSON;
+  location?: PointGeoJSON;
   keys?: boolean;
   score?: number;
 };
