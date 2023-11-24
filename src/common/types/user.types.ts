@@ -17,11 +17,9 @@ export enum UserStatus {
 }
 
 export enum UserRole {
-  MASTER = 'master',
-  ADMIN = 'admin',
-  RECIPIENT = 'recipient',
-  VOLUNTEER = 'volunteer',
-  VISITOR = 'visitor',
+  ADMIN = 'Admin',
+  RECIPIENT = 'Recipient',
+  VOLUNTEER = 'Volunteer',
 }
 
 export enum AdminPermission {
@@ -36,7 +34,8 @@ export enum ResolveStatus {
   PENDING = 'pending',
   FULLFILLED = 'fullfilled',
   REJECTED = 'rejected',
-  
+}
+
 export interface UserProfileInterface {
   _id?: string | ObjectId;
   firstName: string;

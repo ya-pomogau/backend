@@ -1,38 +1,39 @@
 import { Prop, SchemaFactory, Schema } from '@nestjs/mongoose';
-import mongoose, { Model } from 'mongoose';
-import { VolunteerDataDTO } from '../../../common/types/UsersDataDTO';
-import { UserProfile, UserRole } from '../../../common/types/user.types';
+import { SchemaTypes, Document } from 'mongoose';
 import { UserStatus } from '../../../users/types';
-import { PointGeoJSON } from '../../../common/schemas/PointGeoJSON.schema';
+import { PointGeoJSON, PointGeoJSONSchema } from '../../../common/schemas/PointGeoJSON.schema';
 
-@Schema()
-class VolunteerRole {
-  @Prop({ default: 0 })
+@Schema({
+  timestamps: true,
+})
+export class Volunteer extends Document {
+  @Prop({ default: 0, type: SchemaTypes.Number })
   score: number;
 
-  @Prop({ required: true })
+  @Prop({
+    type: SchemaTypes.String,
+    required: true,
+    enum: ['Unconfirmed', 'Confirmed', 'Verified', 'Activated'],
+  })
   status: UserStatus;
 
   @Prop({
     required: true,
-    type: PointGeoJSON,
+    type: PointGeoJSONSchema,
     index: '2dsphere',
   })
   location: PointGeoJSON;
 
-  role: string;
-
-  profile: UserProfile;
-
-  vkID: string;
+  @Prop({ required: false, default: false, type: SchemaTypes.Boolean })
+  keys: boolean;
 }
 
+export const VolunteerUserSchema = SchemaFactory.createForClass(Volunteer);
+
+/*
 interface VolunteerModelStatics extends Model<VolunteerRole> {
   findVolunteerWithin(center: PointGeoJSON, distance: number): Promise<VolunteerDataDTO[]>;
 }
-
-const VolunteerUserSchema = SchemaFactory.createForClass(VolunteerRole);
-
 // eslint-disable-next-line func-names
 VolunteerUserSchema.statics.findVolunteerWithin = async function (
   center: PointGeoJSON,
@@ -47,9 +48,12 @@ VolunteerUserSchema.statics.findVolunteerWithin = async function (
   return volunteers;
 };
 
-const VolunteerModel = mongoose.model<VolunteerRole, VolunteerModelStatics>(
+const VolunteerModel = model<VolunteerRole, VolunteerModelStatics>(
   'Volunteer',
   VolunteerUserSchema
 );
 
+
+
 export { VolunteerRole, VolunteerUserSchema, VolunteerModel };
+ */
