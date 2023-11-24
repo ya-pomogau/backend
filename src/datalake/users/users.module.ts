@@ -1,12 +1,11 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
-import { HashModule } from '../../common/hash/hash.module';
-import { UsersService } from './users.service';
+import { ModelDefinition, MongooseModule } from '@nestjs/mongoose';
+import { UsersRepository } from './users.repository';
 import { UserSchema, User } from './schemas/user.schema';
-import { AdminUserSchema } from './schemas/admin.schema';
-import { RecipientUserSchema } from './schemas/recipient.schema';
-import { VolunteerUserSchema } from './schemas/volunteer.schema';
-import { UserRole } from '../../common/types/user.types';
+import { AdminUserSchema, Admin } from './schemas/admin.schema';
+import { Recipient, RecipientUserSchema } from './schemas/recipient.schema';
+import { Volunteer, VolunteerUserSchema } from './schemas/volunteer.schema';
+import { UsersTestcontrollerController } from './users-testcontroller.controller';
 
 @Module({
   imports: [
@@ -15,15 +14,15 @@ import { UserRole } from '../../common/types/user.types';
         name: User.name,
         schema: UserSchema,
         discriminators: [
-          { name: UserRole.ADMIN, schema: AdminUserSchema },
-          { name: UserRole.RECIPIENT, schema: RecipientUserSchema },
-          { name: UserRole.VOLUNTEER, schema: VolunteerUserSchema },
+          { name: Admin.name, schema: AdminUserSchema },
+          { name: Recipient.name, schema: RecipientUserSchema },
+          { name: Volunteer.name, schema: VolunteerUserSchema },
         ],
-      },
+      } as ModelDefinition,
     ]),
-    HashModule,
   ],
-  providers: [UsersService],
-  exports: [UsersService],
+  providers: [UsersRepository],
+  exports: [UsersRepository],
+  controllers: [UsersTestcontrollerController],
 })
 export class UsersModule {}
