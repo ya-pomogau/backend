@@ -2,7 +2,13 @@ import { Document } from 'mongoose';
 import { Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ConfidentialityPolicyInterface } from '../../../common/types/confidentiality-policy.types';
 
-@Schema({ timestamps: true })
+@Schema({
+  timestamps: true,
+  toObject: {
+    versionKey: false,
+    virtuals: true,
+  },
+})
 export class ConfidentialityPolicy extends Document implements ConfidentialityPolicyInterface {
   text: string;
 

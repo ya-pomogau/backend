@@ -1,27 +1,28 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { HydratedDocument } from 'mongoose';
+import { Document, SchemaTypes } from 'mongoose';
+import { BlogPostInterface } from '../../../common/types/blog-post.types';
+import { UserProfileInterface } from '../../../common/types/user.types';
+import { UserProfileSchema } from '../../../common/schemas/user-profile.schema';
 
-export interface IBlogPost {
-  author: string;
+@Schema({
+  timestamps: true,
+  toObject: {
+    versionKey: false,
+    virtuals: true,
+  },
+})
+export class BlogPost extends Document implements BlogPostInterface {
+  @Prop({ type: UserProfileSchema, required: true, immutable: true })
+  author: UserProfileInterface;
+
+  @Prop({ required: true, type: SchemaTypes.String })
   title: string;
-  text: string;
-  files: string[];
-}
 
-@Schema({ timestamps: true })
-export class BlogPost implements IBlogPost {
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User' })
-  author: string;
-
-  @Prop({ required: true })
-  title: string;
-
-  @Prop({ required: true })
+  @Prop({ required: true, type: SchemaTypes.String })
   text: string;
 
-  @Prop({ required: true, type: [String] })
+  @Prop({ required: false, default: [], type: [String] })
   files: string[];
 }
 
 export const BlogPostSchema = SchemaFactory.createForClass(BlogPost);
-export type BlogPostDocument = HydratedDocument<BlogPost>;

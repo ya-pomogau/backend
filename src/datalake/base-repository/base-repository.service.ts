@@ -11,7 +11,7 @@ import {
 import { POJOType } from '../../common/types/pojo.type';
 
 export abstract class BaseRepositoryService<T extends Document> {
-  protected constructor(protected readonly entityModel: Model<T>) {}
+  constructor(protected readonly entityModel: Model<T>) {}
 
   async create(createEntityDto: Record<string, unknown>): Promise<POJOType<T>> {
     const entity = await this.entityModel.create(createEntityDto as T);
