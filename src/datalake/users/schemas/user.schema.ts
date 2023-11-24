@@ -6,6 +6,9 @@ import { UserProfileSchema } from '../../../common/schemas/user-profile.schema';
 import { PointGeoJSON } from '../../../common/schemas/PointGeoJSON.schema';
 import { POJOType } from '../../../common/types/pojo.type';
 import { Admin } from './admin.schema';
+import { HashService } from '../../../common/hash/hash.service';
+import { Volunteer } from './volunteer.schema';
+import { Recipient } from './recipient.schema';
 
 @Schema({
   timestamps: true,
@@ -22,11 +25,18 @@ import { Admin } from './admin.schema';
         role: UserRole.VOLUNTEER,
       });
     },
-    async checkAdminCredentials(login: string): Promise<POJOType<Admin>> {
-      return this.findOne({
+    async checkAdminCredentials(login: string, password: string): Promise<POJOType<Admin>> | null {
+      const user = this.findOne({
         role: UserRole.ADMIN,
-        administrative: { login },
+        login,
       }).select('password');
+      const isOk = HashService.compareHash(password, user.password);
+      return isOk ? user : null;
+    },
+    async checkVKCredential(vkId: string): Promise<POJOType<Volunteer | Recipient>> | null {
+      return this.findOne({
+        vkID: vkId,
+      });
     },
   },
   toObject: {
