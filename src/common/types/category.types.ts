@@ -1,4 +1,4 @@
-import { UserStatus } from '../../users/types';
+import { UserStatus } from './user.types';
 
 export interface CategoryInterface {
   title: string;

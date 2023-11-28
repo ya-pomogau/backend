@@ -7,8 +7,8 @@ import { PointGeoJSON, PointGeoJSONSchema } from '../../../common/schemas/PointG
 export class Recipient extends Document {
   @Prop({
     required: true,
-    type: SchemaTypes.String,
-    enum: ['Unconfirmed', 'Confirmed', 'Verified', 'Activated'],
+    type: SchemaTypes.Number,
+    enum: [0, 1, 2, 3],
   })
   status: UserStatus;
 

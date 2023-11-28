@@ -11,9 +11,9 @@ export class Volunteer extends Document {
   score: number;
 
   @Prop({
-    type: SchemaTypes.String,
     required: true,
-    enum: ['Unconfirmed', 'Confirmed', 'Verified', 'Activated'],
+    type: SchemaTypes.Number,
+    enum: [0, 1, 2, 3],
   })
   status: UserStatus;
 
