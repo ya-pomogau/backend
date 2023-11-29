@@ -1,49 +1,47 @@
 /* eslint-disable func-names */
+/* eslint-disable no-use-before-define */
 import { Prop, SchemaFactory, Schema } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { NotAcceptableException } from '@nestjs/common';
-import { AdminDataDTO } from '../../../common/types/UsersDataDTO';
-import { UserModel } from './user.schema';
-import { AdminPermission, UserProfile, UserRole } from '../../../common/types/user.types';
-import { HashService } from '../../../common/hash/hash.service';
-import exceptions from '../../../common/constants/exceptions';
+import { Document, SchemaTypes } from 'mongoose';
+import { AdminPermission } from '../../../common/types/user.types';
 
-@Schema()
-class AdminRole {
-  role: string;
-
-  profile: UserProfile;
-
+@Schema({
+  timestamps: true,
+})
+export class Admin extends Document {
   @Prop({
-    type: {
-      permissions: [AdminPermission],
-      login: { type: String, unique: true },
-      password: { type: String, select: false },
-    },
+    type: [{ type: SchemaTypes.String, enum: Object.values(AdminPermission) }],
+    required: true,
+    default: [],
   })
-  administrative: {
-    permissions: AdminPermission[];
-    login: string;
-    password: string;
-  };
+  permissions: AdminPermission[];
+
+  @Prop({ type: SchemaTypes.String, unique: true, required: true })
+  login: string;
+
+  @Prop({ type: SchemaTypes.String, select: false, required: true })
+  password: string;
 
   @Prop({
     required: false,
+    default: null,
   })
   vkID: string | null;
 
   @Prop({
     required: true,
+    type: SchemaTypes.Boolean,
+    default: false,
+    immutable: true,
   })
   isRoot: boolean;
 }
 
+export const AdminUserSchema = SchemaFactory.createForClass(Admin);
+
+/*
 interface AdminModelStatics extends Model<AdminRole> {
   checkAdminCredentials(login: string, password: string): Promise<AdminDataDTO> | null;
 }
-
-const AdminUserSchema = SchemaFactory.createForClass(AdminRole);
-
 AdminUserSchema.pre('updateOne', { document: true, query: false }, function (next) {
   if (this.isRoot) {
     next(new NotAcceptableException(exceptions.users.notModified));
@@ -52,23 +50,13 @@ AdminUserSchema.pre('updateOne', { document: true, query: false }, function (nex
   return next();
 });
 
-AdminUserSchema.statics.checkAdminCredentials = async function (
-  login: string,
-  password: string
-): Promise<AdminDataDTO> | null {
-  const hashService = new HashService();
-  let comparePassword: boolean;
-  const admin = await this.findOne({
+AdminUserSchema.statics.getAdminByCredential = async function (
+  login: string
+): Promise<POJOType<AdminRole>> | null {
+  return this.findOne({
     role: UserRole.ADMIN,
     administrative: { login },
-  });
-  if (admin) {
-    comparePassword = await hashService.compareHash(password, admin.administrative.password);
-  }
-  if (comparePassword) {
-    return admin.toObject();
-  }
-  return null;
+  }).select('password');
 };
 
 const AdminRoleUserModel = UserModel.discriminator<AdminRole, AdminModelStatics>(
@@ -77,3 +65,6 @@ const AdminRoleUserModel = UserModel.discriminator<AdminRole, AdminModelStatics>
 );
 
 export { AdminRoleUserModel, AdminUserSchema, AdminRole };
+
+
+ */
