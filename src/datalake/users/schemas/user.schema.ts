@@ -28,6 +28,9 @@ import { Admin } from './admin.schema';
         administrative: { login },
       }).select('password');
     },
+    async checkVKCredential(vkId: string): Promise<POJOType<User> | null> {
+      return this.findOne({ vkID: vkId });
+    },
   },
   toObject: {
     versionKey: false,
