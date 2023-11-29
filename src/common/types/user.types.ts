@@ -10,10 +10,10 @@ import { ObjectId } from 'mongoose';
 }; */
 
 export enum UserStatus {
-  UNCONFIRMED = 0,
-  CONFIRMED = 1,
-  VERIFIED = 2,
-  ACTIVATED = 3,
+  UNCONFIRMED = 'Unconfirmed',
+  CONFIRMED = 'Confirmed',
+  VERIFIED = 'Verified',
+  ACTIVATED = 'Activated',
 }
 
 export enum UserRole {
