@@ -5,7 +5,6 @@ import { UserSchema, User } from './schemas/user.schema';
 import { AdminUserSchema, Admin } from './schemas/admin.schema';
 import { Recipient, RecipientUserSchema } from './schemas/recipient.schema';
 import { Volunteer, VolunteerUserSchema } from './schemas/volunteer.schema';
-import { UsersTestcontrollerController } from './users-testcontroller.controller';
 
 @Module({
   imports: [
@@ -23,6 +22,5 @@ import { UsersTestcontrollerController } from './users-testcontroller.controller
   ],
   providers: [UsersRepository],
   exports: [UsersRepository],
-  controllers: [UsersTestcontrollerController],
 })
-export class UsersModule {}
+export class UsersRepositoryModule {}

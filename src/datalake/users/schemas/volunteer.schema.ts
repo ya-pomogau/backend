@@ -1,6 +1,6 @@
 import { Prop, SchemaFactory, Schema } from '@nestjs/mongoose';
 import { SchemaTypes, Document } from 'mongoose';
-import { UserStatus } from '../../../users/types';
+import { UserStatus } from '../../../common/types/user.types';
 import { PointGeoJSON, PointGeoJSONSchema } from '../../../common/schemas/PointGeoJSON.schema';
 
 @Schema({
@@ -11,9 +11,9 @@ export class Volunteer extends Document {
   score: number;
 
   @Prop({
-    type: SchemaTypes.String,
+    type: SchemaTypes.Number,
     required: true,
-    enum: ['Unconfirmed', 'Confirmed', 'Verified', 'Activated'],
+    enum: [0, 1, 2, 3],
   })
   status: UserStatus;
 
@@ -29,31 +29,3 @@ export class Volunteer extends Document {
 }
 
 export const VolunteerUserSchema = SchemaFactory.createForClass(Volunteer);
-
-/*
-interface VolunteerModelStatics extends Model<VolunteerRole> {
-  findVolunteerWithin(center: PointGeoJSON, distance: number): Promise<VolunteerDataDTO[]>;
-}
-// eslint-disable-next-line func-names
-VolunteerUserSchema.statics.findVolunteerWithin = async function (
-  center: PointGeoJSON,
-  distance: number
-): Promise<VolunteerDataDTO[]> {
-  const volunteers = await this.find({
-    location: {
-      $geoWithin: { $center: [[...center.coordinates], distance] },
-    },
-    role: UserRole.VOLUNTEER,
-  });
-  return volunteers;
-};
-
-const VolunteerModel = model<VolunteerRole, VolunteerModelStatics>(
-  'Volunteer',
-  VolunteerUserSchema
-);
-
-
-
-export { VolunteerRole, VolunteerUserSchema, VolunteerModel };
- */

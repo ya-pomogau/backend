@@ -1,7 +1,10 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { UsersRepository } from '../../datalake/users/users.repository';
 import { CreateAdminDto, CreateUserDto } from '../../common/dto/users.dto';
 import { UserRole, UserStatus } from '../../common/types/user.types';
+import { POJOType } from '../../common/types/pojo.type';
+import { Volunteer } from '../../datalake/users/schemas/volunteer.schema';
+import { Recipient } from '../../datalake/users/schemas/recipient.schema';
 
 @Injectable()
 export class UsersService {
@@ -9,6 +12,12 @@ export class UsersService {
 
   private async create(dto: CreateUserDto | CreateAdminDto) {
     return this.usersRepo.create(dto);
+  }
+
+  async checkVKCredential(vkId: string): Promise<POJOType<Volunteer | Recipient>> | null {
+    return this.usersRepo.findOne({
+      vkId,
+    });
   }
 
   async createUser(dto: CreateUserDto) {

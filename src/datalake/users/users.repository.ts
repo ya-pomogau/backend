@@ -10,4 +10,16 @@ export class UsersRepository extends BaseRepositoryService<User> {
   constructor(@InjectModel(User.name) private readonly userModel: Model<User>) {
     super(userModel);
   }
+
+  /* async checkAdminCredentials(login: string, password: string): Promise<POJOType<Admin>> | null {
+    const user = await this.findOne(
+      {
+        role: UserRole.ADMIN,
+        login,
+      },
+      { password: true }
+    );
+    const isOk = HashService.compareHash(password, user.password);
+    return isOk ? user : null;
+  } */
 }

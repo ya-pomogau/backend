@@ -2,15 +2,17 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 // import { ScheduleModule } from '@nestjs/schedule';
 import { MongooseModule } from '@nestjs/mongoose';
-import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
 import configuration from './config/configuration';
 import { HashModule } from './common/hash/hash.module';
-import { UsersModule } from './datalake/users/users.module';
+import { UsersRepositoryModule } from './datalake/users/users-repository.module';
 import { CategoryModule } from './datalake/category/category.module';
 import { TaskModule } from './datalake/task/task.module';
 import { ConfidentialityPolicyModule } from './datalake/confidentiality-policy/confidentiality-policy.module';
+import { AuthApiModule } from './api/auth-api/auth-api.module';
+import { AuthModule } from './core/auth/auth.module';
+import { UsersModule } from './core/users/users.module';
 
 @Module({
   imports: [
@@ -19,11 +21,13 @@ import { ConfidentialityPolicyModule } from './datalake/confidentiality-policy/c
     HashModule,
     // ScheduleModule.forRoot(),
     TaskModule,
-    UsersModule,
+    UsersRepositoryModule,
     CategoryModule,
     ConfidentialityPolicyModule,
+    AuthApiModule,
+    AuthModule,
+    UsersModule,
   ],
-  controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
