@@ -5,7 +5,7 @@ import { UserRole, UserStatus } from '../../common/types/user.types';
 
 @Injectable()
 export class UsersService {
-  constructor(@Inject() private readonly usersRepo: UsersRepository) {}
+  constructor(private readonly usersRepo: UsersRepository) {}
 
   private async create(dto: CreateUserDto | CreateAdminDto) {
     return this.usersRepo.create(dto);
