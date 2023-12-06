@@ -7,11 +7,11 @@ import configuration from '../../config/configuration';
 export class HashService {
   constructor(private readonly configService?: ConfigService) {}
 
-  async generateHash(password: string): Promise<string> {
+  static async generateHash(password: string): Promise<string> {
     return bcrypt.hash(password, configuration().saltRounds);
   }
 
-  async compareHash(password: string, hash: string): Promise<boolean> {
+  static async compareHash(password: string, hash: string): Promise<boolean> {
     return bcrypt.compare(password, hash);
   }
 }
