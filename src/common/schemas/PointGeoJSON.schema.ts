@@ -1,14 +1,26 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import { Document } from 'mongoose';
+import { GeoCoordinates, PointGeoJSONInterface } from '../types/point-geojson.types';
 
-@Schema()
-export class PointGeoJSON {
+@Schema({
+  timestamps: true,
+  toObject: {
+    transform(doc, ret) {
+      // Из transform запрещено возвращать значение, это требование самого Mongoose
+      // Необходимо изменять именно параметр ret.
+      // eslint-disable-next-line no-param-reassign
+      delete ret._id;
+    },
+    versionKey: false,
+    virtuals: true,
+  },
+})
+export class PointGeoJSON extends Document implements PointGeoJSONInterface {
   @Prop({ required: true, enum: ['Point'] })
-  type: string;
+  type: 'Point';
 
   @Prop({ required: true, type: [Number] })
-  coordinates: number[];
+  coordinates: GeoCoordinates;
 }
 
 export const PointGeoJSONSchema = SchemaFactory.createForClass(PointGeoJSON);
-export type PointGeoJSONDocument = HydratedDocument<PointGeoJSON>;

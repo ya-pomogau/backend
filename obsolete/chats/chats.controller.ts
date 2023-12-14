@@ -45,7 +45,7 @@ export class ChatsController {
       await this.chatsService.deleteExpiredChats();
       return { message: 'Истекшие чаты успешно удалены' };
     } catch (error) {
-      console.error('Error deleting expired chats:', error);
+      console.error('Error deleting expired chat:', error);
       return { error: 'Произошла ошибка при удалении истекших чатов' };
     }
   }

@@ -1,7 +1,7 @@
-import { UserProfileInterface } from './user.types';
-import { IPointGeoJSON } from '../schemas/geoJson.schema';
 import { POJOType } from './pojo.type';
 import { Category } from '../../datalake/category/schemas/category.schema';
+import { PointGeoJSON } from '../schemas/PointGeoJSON.schema';
+import { UserProfile } from '../schemas/user-profile.schema';
 
 export enum TaskStatus {
   CREATED = 'created',
@@ -18,13 +18,13 @@ export enum ResolveStatus {
 }
 
 export interface TaskInterface {
-  recipient: UserProfileInterface;
-  volunteer: UserProfileInterface;
+  recipient: POJOType<UserProfile>;
+  volunteer: POJOType<UserProfile>;
   title: string;
   description?: string;
   date: Date | null;
   address: string;
-  location: IPointGeoJSON;
+  location: POJOType<PointGeoJSON>;
   category: POJOType<Category>;
   volunteerReport: ResolveStatus;
   recipientReport: ResolveStatus;

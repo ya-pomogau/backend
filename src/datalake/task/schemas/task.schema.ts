@@ -1,12 +1,11 @@
 import mongoose, { Document } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ResolveStatus, TaskInterface, TaskStatus } from '../../../common/types/task.types';
-
-import { IPointGeoJSON, PointGeoJSONSchema } from '../../../common/schemas/geoJson.schema';
-import { UserProfileInterface } from '../../../common/types/user.types';
-import { UserProfileSchema } from '../../../common/schemas/user-profile.schema';
+import { PointGeoJSON, PointGeoJSONSchema } from '../../../common/schemas/PointGeoJSON.schema';
+import { UserProfile, UserProfileSchema } from '../../../common/schemas/user-profile.schema';
 import { POJOType } from '../../../common/types/pojo.type';
 import { Category } from '../../category/schemas/category.schema';
+import { GeoCoordinates } from '../../../common/types/point-geojson.types';
 
 @Schema({
   timestamps: true,
@@ -36,7 +35,7 @@ import { Category } from '../../category/schemas/category.schema';
     },
   },
   statics: {
-    findWithin(center: IPointGeoJSON, distance: number) {
+    findWithin(center: GeoCoordinates, distance: number) {
       return this.find({
         location: {
           $near: {
@@ -46,6 +45,10 @@ import { Category } from '../../category/schemas/category.schema';
         },
       });
     },
+  },
+  toObject: {
+    versionKey: false,
+    virtuals: true,
   },
 })
 export class Task extends Document implements TaskInterface {
@@ -65,10 +68,10 @@ export class Task extends Document implements TaskInterface {
   date: Date | null;
 
   @Prop({ required: true, type: PointGeoJSONSchema })
-  location: IPointGeoJSON;
+  location: POJOType<PointGeoJSON>;
 
   @Prop({ required: true, type: UserProfileSchema })
-  recipient: UserProfileInterface;
+  recipient: POJOType<UserProfile>;
 
   @Prop({
     default: ResolveStatus.VIRGIN,
@@ -81,7 +84,7 @@ export class Task extends Document implements TaskInterface {
   title: string;
 
   @Prop({ default: null, type: UserProfileSchema })
-  volunteer: UserProfileInterface;
+  volunteer: POJOType<UserProfile>;
 
   @Prop({
     default: ResolveStatus.VIRGIN,
