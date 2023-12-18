@@ -25,7 +25,9 @@ export class AuthService {
 
   async loginVK(dto: VKLoginDtoInterface) {
     const { code, redirectUrl } = dto;
-    const vkAuthUrl = `https://oauth.vk.com/access_token?client_id=51798618&client_secret=898A5ISDAGmscLIFz0JV&redirect_uri=${redirectUrl}&code=${code}`;
+    const clientId = this.configService.get<string>('vk.appId');
+    const clientSecret = this.configService.get<string>('vk.appSecret');
+    const vkAuthUrl = `https://oauth.vk.com/access_token?client_id=${clientId}&client_secret=${clientSecret}&redirect_uri=${redirectUrl}&code=${code}`;
     let vkId;
     let access_token: string;
     try {
