@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 // import { ScheduleModule } from '@nestjs/schedule';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AppService } from './app.service';
@@ -13,11 +13,16 @@ import { ConfidentialityPolicyModule } from './datalake/confidentiality-policy/c
 import { AuthApiModule } from './api/auth-api/auth-api.module';
 import { AuthModule } from './core/auth/auth.module';
 import { UsersModule } from './core/users/users.module';
+import { MongooseConfigService } from './config/database-config.service';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, load: [configuration] }),
-    MongooseModule.forRoot('mongodb://localhost:27017/ya-pomogau-db'),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useClass: MongooseConfigService,
+    }),
     HashModule,
     // ScheduleModule.forRoot(),
     TaskModule,
