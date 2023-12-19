@@ -1,4 +1,6 @@
-export default () => ({
+import { AppConfiguration } from '../common/types/system.types';
+
+export default (): AppConfiguration => ({
   server: {
     port: process.env.SERVER_PORT || 3001,
     cors_origins: process.env.CORS_ORIGINS,
