@@ -47,3 +47,17 @@ export interface UserProfileInterface {
   createdAt?: Date | string;
   updatedAt?: Date | string;
 }
+
+export interface UserInterface {
+  profile: UserProfileInterface;
+  vkId: string;
+  role: string;
+}
+
+export interface AdminUserInterface {
+  permissions: AdminPermission[];
+  login: string;
+  password: string;
+  vkID: string | null;
+  isRoot: boolean;
+}

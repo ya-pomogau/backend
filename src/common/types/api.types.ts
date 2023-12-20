@@ -21,6 +21,9 @@ interface VKResponseErrorInterface {
 
 export interface VKResponseInterface extends VKResponseOKInterface, VKResponseErrorInterface {}
 
+// TODO: Сделать более строгую типизацию после разъяснения ситуации с типизацией дискриминированных схем
+export type PayloadType = Record<string, unknown>;
+
 export interface VKNewUserProfileInterface {
   firstName: string;
   middleName?: string;
