@@ -1,40 +1,66 @@
 /* eslint-disable camelcase */
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { JwtService } from '@nestjs/jwt';
-import { UsersRepository } from '../../datalake/users/users.repository';
+import { AxiosError, AxiosResponse } from 'axios';
+import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../users/users.service';
 import { VKLoginDtoInterface, VKResponseInterface } from '../../common/types/api.types';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly usersRepo: UsersRepository,
     private readonly usersService: UsersService,
     private readonly httpService: HttpService,
-    private readonly
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService
   ) {}
 
   async authenticate(payload: Record<string, unknown>): Promise<string> {
-    // TODO: возвращаем шифрованный payload просто :)
+    return this.jwtService.signAsync(payload, {
+      secret: this.configService.get<string>('jwt.key'),
+      expiresIn: this.configService.get<string>('jwt.ttl'),
+    });
   }
 
-  async loginUser(dto: VKLoginDtoInterface) {
+  async loginVK(dto: VKLoginDtoInterface) {
     const { code, redirectUrl } = dto;
-    const vkAuthUrl = `https://oauth.vk.com/access_token?client_id=51798618&client_secret=898A5ISDAGmscLIFz0JV&redirect_uri=${redirectUrl}&code=${code}`;
-    const {
-      // eslint-disable-next-line camelcase
-      data: { user_id: vkId, expires_in, access_token },
-    } = await this.httpService.get<VKResponseInterface>(vkAuthUrl);
-    const vkUserUrl = `https://api.vk.com/method/users.get?access_token=${access_token}=5.131`;
-    const vkUser = await this.httpService.get(vkUserUrl);
-    const user = this.usersRepo.checkVKCredential(vkId);
+    const clientId = this.configService.get<string>('vk.appId');
+    const clientSecret = this.configService.get<string>('vk.appSecret');
+    const vkAuthUrl = `https://oauth.vk.com/access_token?client_id=${clientId}&client_secret=${clientSecret}&redirect_uri=${redirectUrl}&code=${code}`;
+    let vkId;
+    let access_token: string;
+    try {
+      const { data, status } = await this.httpService.axiosRef.get<
+        VKResponseInterface,
+        AxiosResponse<VKResponseInterface>
+      >(vkAuthUrl);
+      if (status === 200) {
+        ({ user_id: vkId, access_token } = data);
+      } else {
+        throw new InternalServerErrorException(data.error_description);
+      }
+    } catch (err) {
+      const {
+        response: { status, statusText },
+      } = err as AxiosError;
+      switch (status) {
+        case 401:
+          throw new UnauthorizedException(statusText);
+        default:
+          throw new InternalServerErrorException({
+            message: 'Произошла неизвестная ошибка при обращении на ВК',
+          });
+      }
+    }
+    const vkUserUrl = `https://api.vk.com/method/users.get?access_token=${access_token}&v=5.131`; //= 5.131
+    const { data: vkUser } = await this.httpService.axiosRef.get(vkUserUrl);
+    const user = await this.usersService.checkVKCredential(String(vkId));
     if (user) {
-      const token = this.authenticate(user);
+      const token = await this.authenticate(user);
       return { user, token };
     }
     // eslint-disable-next-line camelcase
-
     return { vkUser };
   }
 }

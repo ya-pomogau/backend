@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { UsersRepository } from '../../datalake/users/users.repository';
+import { UsersRepositoryModule } from '../../datalake/users/users-repository.module';
 
 @Module({
-  imports: [UsersRepository],
+  imports: [UsersRepositoryModule],
   providers: [UsersService],
   exports: [UsersService],
 })

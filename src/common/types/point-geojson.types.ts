@@ -1,10 +1,6 @@
-type GeoCoordinatesArray = [number, number];
-type GeoCoordinatesObject = {
-  latitude: number;
-  longitude: number;
-};
-export type GeoCoordinates = GeoCoordinatesArray | GeoCoordinatesObject;
+export type GeoCoordinates = [number, number];
+
 export interface PointGeoJSONInterface {
-  type: string;
+  type: 'Point';
   coordinates: GeoCoordinates;
 }

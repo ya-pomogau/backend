@@ -1,12 +1,11 @@
-import { AdminPermission, UserProfileInterface, UserRole, UserStatus } from '../types/user.types';
-import { PointGeoJSONInterface } from '../types/point-geojson.types';
+import { AdminPermission, UserProfileInterface, UserRole } from '../types/user.types';
+import { PointGeoJSON } from '../schemas/PointGeoJSON.schema';
 
 export type CreateUserDto = {
   profile: Partial<UserProfileInterface>;
   role: UserRole;
-  status?: UserStatus;
   vkId: string;
-  location?: PointGeoJSONInterface;
+  location: PointGeoJSON;
   keys?: boolean;
   score?: number;
 };
@@ -15,5 +14,4 @@ export type CreateAdminDto = CreateUserDto & {
   permissions: Array<AdminPermission>;
   login: string;
   password: string;
-  isRoot: false;
 };
