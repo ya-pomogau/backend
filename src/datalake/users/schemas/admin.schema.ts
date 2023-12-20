@@ -1,13 +1,13 @@
 /* eslint-disable func-names */
 /* eslint-disable no-use-before-define */
-import { Prop, SchemaFactory, Schema } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, SchemaTypes } from 'mongoose';
-import { AdminPermission } from '../../../common/types/user.types';
+import { AdminPermission, AdminUserInterface } from '../../../common/types/user.types';
 
 @Schema({
   timestamps: true,
 })
-export class Admin extends Document {
+export class Admin extends Document implements AdminUserInterface {
   @Prop({
     type: [{ type: SchemaTypes.String, enum: Object.values(AdminPermission) }],
     required: true,
@@ -15,11 +15,9 @@ export class Admin extends Document {
   })
   permissions: AdminPermission[];
 
-  @Prop({ type: SchemaTypes.String, unique: true, required: true })
-  login: string;
+  @Prop({ type: SchemaTypes.String, unique: true, required: true }) login: string;
 
-  @Prop({ type: SchemaTypes.String, select: false, required: true })
-  password: string;
+  @Prop({ type: SchemaTypes.String, select: false, required: true }) password: string;
 
   @Prop({
     required: false,

@@ -1,7 +1,7 @@
 /* eslint-disable no-use-before-define */
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, SchemaTypes } from 'mongoose';
-import { UserProfileInterface, UserRole } from '../../../common/types/user.types';
+import { UserInterface, UserProfileInterface, UserRole } from '../../../common/types/user.types';
 import { UserProfileSchema } from '../../../common/schemas/user-profile.schema';
 
 @Schema({
@@ -13,12 +13,10 @@ import { UserProfileSchema } from '../../../common/schemas/user-profile.schema';
     flattenObjectIds: true,
   },
 })
-export class User extends Document {
-  @Prop({ required: true, type: UserProfileSchema })
-  profile: UserProfileInterface;
+export class User extends Document implements UserInterface {
+  @Prop({ required: true, type: UserProfileSchema }) profile: UserProfileInterface;
 
-  @Prop({ required: true, unique: true, type: SchemaTypes.String })
-  vkId: string;
+  @Prop({ required: true, unique: true, type: SchemaTypes.String }) vkId: string;
 
   @Prop({
     type: SchemaTypes.String,

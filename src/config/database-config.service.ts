@@ -12,7 +12,7 @@ export class MongooseConfigService implements MongooseOptionsFactory {
       this.configService.get<DatabaseConfiguration>('database');
     const authUriPart = `${username}:${password}@`;
     const isAuthDB = !!username && !!password;
-    return `mongodb://${isAuthDB ? authUriPart : ''}${host}:${port}/${name};`;
+    return `mongodb://${isAuthDB ? authUriPart : ''}${host}:${port}/${name}`;
   }
 
   public createMongooseOptions(): MongooseModuleOptions {

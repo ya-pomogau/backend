@@ -32,3 +32,10 @@ export type AppConfiguration = {
   jwt: JWTConfiguration;
   password: CryptoConfiguration;
 };
+
+export interface MongooseIdAndTimestampsInterface {
+  _id: string;
+  id?: string;
+  createdAt: string;
+  updatedAt: string;
+}
