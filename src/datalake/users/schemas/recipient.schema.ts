@@ -1,14 +1,14 @@
 import { Prop, SchemaFactory, Schema } from '@nestjs/mongoose';
 import { Document, SchemaTypes } from 'mongoose';
-import { UserStatus } from '../../../users/types';
+import { UserStatus } from '../../../common/types/user.types';
 import { PointGeoJSON, PointGeoJSONSchema } from '../../../common/schemas/PointGeoJSON.schema';
 
 @Schema()
 export class Recipient extends Document {
   @Prop({
     required: true,
-    type: SchemaTypes.String,
-    enum: ['Unconfirmed', 'Confirmed', 'Verified', 'Activated'],
+    type: SchemaTypes.Number,
+    enum: [0, 1, 2, 3],
   })
   status: UserStatus;
 

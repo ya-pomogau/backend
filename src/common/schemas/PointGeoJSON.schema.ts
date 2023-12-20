@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { PointGeoJSONInterface } from '../types/point-geojson.types';
+import { Document } from 'mongoose';
+import { GeoCoordinates, PointGeoJSONInterface } from '../types/point-geojson.types';
 
 @Schema({
   timestamps: true,
@@ -14,12 +15,12 @@ import { PointGeoJSONInterface } from '../types/point-geojson.types';
     virtuals: true,
   },
 })
-export class PointGeoJSON implements PointGeoJSONInterface {
+export class PointGeoJSON extends Document implements PointGeoJSONInterface {
   @Prop({ required: true, enum: ['Point'] })
-  type: string;
+  type: 'Point';
 
   @Prop({ required: true, type: [Number] })
-  coordinates: number[];
+  coordinates: GeoCoordinates;
 }
 
 export const PointGeoJSONSchema = SchemaFactory.createForClass(PointGeoJSON);

@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { UserStatus } from '../../../users/types';
+import { UserStatus } from '../../../common/types/user.types';
 import { CategoryInterface } from '../../../common/types/category.types';
 
 @Schema({
