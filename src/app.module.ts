@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 // import { ScheduleModule } from '@nestjs/schedule';
 import { MongooseModule } from '@nestjs/mongoose';
-import { AppService } from './app.service';
+import { APP_GUARD } from '@nestjs/core';
 
 import configuration from './config/configuration';
 import { HashModule } from './common/hash/hash.module';
@@ -14,6 +14,7 @@ import { AuthApiModule } from './api/auth-api/auth-api.module';
 import { AuthModule } from './core/auth/auth.module';
 import { UsersModule } from './core/users/users.module';
 import { MongooseConfigService } from './config/database-config.service';
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 
 @Module({
   imports: [
@@ -33,6 +34,11 @@ import { MongooseConfigService } from './config/database-config.service';
     AuthModule,
     UsersModule,
   ],
-  providers: [AppService],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
 export class AppModule {}
