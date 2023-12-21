@@ -11,10 +11,10 @@ export class VkLoginDto implements VKLoginDtoInterface {
   @IsString()
   @IsNotEmpty()
   @ApiProperty()
-  state: string;
+  redirectUrl: string;
 
   @IsString()
   @IsNotEmpty()
   @ApiProperty()
-  redirectUrl: string;
+  state: string;
 }
