@@ -54,14 +54,14 @@ class VKNewUserProfileDto implements VKNewUserProfileInterface {
 
 export class VKNewUserDto implements VKNewUserInterface {
   @ApiProperty()
-  @ValidateNested({ each: true })
+  @ValidateNested()
   @Type(() => VKNewUserProfileDto)
   profile: VKNewUserProfileDto;
 
   @IsEnum(UserRole)
   role: UserRole;
 
-  @IsAlphanumeric()
+  @IsString()
   vkId: string;
 
   @ValidateNested({ each: true })
