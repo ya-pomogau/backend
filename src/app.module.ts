@@ -1,24 +1,44 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+// import { ScheduleModule } from '@nestjs/schedule';
+import { MongooseModule } from '@nestjs/mongoose';
+import { APP_GUARD } from '@nestjs/core';
+
 import configuration from './config/configuration';
-import { TypeOrmConfigService } from './config/database-config.factory';
-import { TasksModule } from './tasks/tasks.module';
-import { CategoriesModule } from './categories/categories.module';
+import { HashModule } from './common/hash/hash.module';
+import { UsersRepositoryModule } from './datalake/users/users-repository.module';
+import { CategoryModule } from './datalake/category/category.module';
+import { TaskModule } from './datalake/task/task.module';
+import { ConfidentialityPolicyModule } from './datalake/confidentiality-policy/confidentiality-policy.module';
+import { AuthApiModule } from './api/auth-api/auth-api.module';
+import { AuthModule } from './core/auth/auth.module';
+import { UsersModule } from './core/users/users.module';
+import { MongooseConfigService } from './config/database-config.service';
+import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, load: [configuration] }),
-    TypeOrmModule.forRootAsync({
-      imports: [],
-      useClass: TypeOrmConfigService,
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useClass: MongooseConfigService,
     }),
-    TasksModule,
-    CategoriesModule,
+    HashModule,
+    // ScheduleModule.forRoot(),
+    TaskModule,
+    UsersRepositoryModule,
+    CategoryModule,
+    ConfidentialityPolicyModule,
+    AuthApiModule,
+    AuthModule,
+    UsersModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
 export class AppModule {}
