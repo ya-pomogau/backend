@@ -1,5 +1,5 @@
 import { SetMetadata } from '@nestjs/common';
-import { AccessRightsType } from '../types/access-rights.types';
+import { AccessRightType } from '../types/access-rights.types';
 
-export const AccessRights = (accessRights: Array<AccessRightsType>) =>
+export const AccessRights = (accessRights: Array<AccessRightType>) =>
   SetMetadata('rights', accessRights);

@@ -1,3 +1,5 @@
+import { UserRole, UserStatus } from './user.types';
+
 export enum AccessRights {
   editAnyProfile = 'EDIT_PROFILE',
   editOwnProfile = 'EDIT_OWN_PROFILE',
@@ -30,4 +32,11 @@ export enum AccessRights {
   editContacts = 'CHANGE_CONTACTS_INFO',
 }
 
-export type AccessRightsType = `${AccessRights}`;
+export type AccessRightType = `${AccessRights}`;
+
+export type AccessRightsObject = {
+  role?: UserRole;
+  rights?: Array<AccessRights>;
+  level?: UserStatus;
+  isRoot?: boolean;
+};
