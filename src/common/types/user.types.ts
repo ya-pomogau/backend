@@ -1,13 +1,15 @@
-import { ObjectId } from 'mongoose';
+import { PointGeoJSONInterface } from './point-geojson.types';
+import { MongooseIdAndTimestampsInterface } from './system.types';
+import { AccessRights } from './access-rights.types';
 
-export type UserProfile = {
+/* export type UserProfile = {
   firstName: string;
   middleName: string;
   lastName: string;
   phone: string;
   avatar: string;
   address: string;
-};
+}; */
 
 export enum UserStatus {
   UNCONFIRMED = 0,
@@ -20,15 +22,18 @@ export enum UserRole {
   ADMIN = 'Admin',
   RECIPIENT = 'Recipient',
   VOLUNTEER = 'Volunteer',
+  USER = 'GeneralUser',
 }
 
+export type UserRoleType = `${UserRole}`;
+
 export enum AdminPermission {
-  CONFIRMATION = 'confirm users',
-  TASKS = 'create tasks',
-  KEYS = 'give keys',
-  CONFLICTS = 'resolve conflicts',
-  BLOG = 'write the blog',
-  CATEGORIES = 'change categories',
+  CONFIRMATION = AccessRights.confirmUser,
+  TASKS = AccessRights.createTask,
+  KEYS = AccessRights.giveKey,
+  CONFLICTS = AccessRights.resolveConflict,
+  BLOG = AccessRights.contentEditor,
+  CATEGORIES = AccessRights.categoryPoints,
 }
 export enum ResolveStatus {
   PENDING = 'pending',
@@ -36,28 +41,66 @@ export enum ResolveStatus {
   REJECTED = 'rejected',
 }
 
-export interface UserProfileInterface {
-  _id?: string | ObjectId;
+export type UserProfile = {
   firstName: string;
   middleName: string;
   lastName: string;
   phone: string;
   avatar: string;
   address: string;
-  createdAt?: Date | string;
-  updatedAt?: Date | string;
-}
+  _id: string;
+};
 
-export interface UserInterface {
-  profile: UserProfileInterface;
+export interface GenericUserModelInterface {
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  phone: string;
+  avatar: string;
+  address: string;
   vkId: string;
   role: string;
 }
 
-export interface AdminUserInterface {
+export interface VolunteerUserModelInterface {
+  score: number;
+  status: UserStatus;
+  location: PointGeoJSONInterface;
+  keys: boolean;
+}
+
+export interface RecipientUserModelInterface {
+  status: UserStatus;
+  location: PointGeoJSONInterface;
+}
+
+export interface AdminUserModelInterface {
   permissions: AdminPermission[];
   login: string;
   password: string;
-  vkID: string | null;
   isRoot: boolean;
 }
+
+export interface VolunteerInterface
+  extends GenericUserModelInterface,
+    VolunteerUserModelInterface,
+    MongooseIdAndTimestampsInterface {}
+export interface RecipientInterface
+  extends GenericUserModelInterface,
+    RecipientUserModelInterface,
+    MongooseIdAndTimestampsInterface {}
+export interface AdminInterface
+  extends GenericUserModelInterface,
+    AdminUserModelInterface,
+    MongooseIdAndTimestampsInterface {}
+
+export interface AnyUserModelInterface
+  extends GenericUserModelInterface,
+    VolunteerUserModelInterface,
+    RecipientUserModelInterface,
+    AdminUserModelInterface {}
+export interface AnyUserInterface
+  extends VolunteerInterface,
+    RecipientInterface,
+    AdminInterface,
+    MongooseIdAndTimestampsInterface {}

@@ -2,12 +2,17 @@
 /* eslint-disable no-use-before-define */
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, SchemaTypes } from 'mongoose';
-import { AdminPermission, AdminUserInterface } from '../../../common/types/user.types';
+import { AdminPermission, AdminUserModelInterface } from '../../../common/types/user.types';
 
 @Schema({
   timestamps: true,
+  toObject: {
+    versionKey: false,
+    virtuals: true,
+    flattenObjectIds: true,
+  },
 })
-export class Admin extends Document implements AdminUserInterface {
+export class Admin extends Document implements AdminUserModelInterface {
   @Prop({
     type: [{ type: SchemaTypes.String, enum: Object.values(AdminPermission) }],
     required: true,
@@ -15,9 +20,11 @@ export class Admin extends Document implements AdminUserInterface {
   })
   permissions: AdminPermission[];
 
-  @Prop({ type: SchemaTypes.String, unique: true, required: true }) login: string;
+  @Prop({ type: SchemaTypes.String, unique: true, required: true })
+  login: string;
 
-  @Prop({ type: SchemaTypes.String, select: false, required: true }) password: string;
+  @Prop({ type: SchemaTypes.String, select: false, required: true })
+  password: string;
 
   @Prop({
     required: false,
@@ -34,7 +41,7 @@ export class Admin extends Document implements AdminUserInterface {
   isRoot: boolean;
 }
 
-export const AdminUserSchema = SchemaFactory.createForClass(Admin);
+export const AdminUserSchema = SchemaFactory.createForClass<AdminUserModelInterface>(Admin);
 
 /*
 interface AdminModelStatics extends Model<AdminRole> {

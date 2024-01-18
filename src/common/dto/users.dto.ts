@@ -1,8 +1,8 @@
-import { AdminPermission, UserProfileInterface, UserRole, UserStatus } from '../types/user.types';
+import { AdminPermission, UserProfile, UserRole, UserStatus } from '../types/user.types';
 import { PointGeoJSONInterface } from '../types/point-geojson.types';
 
 export type CreateUserDto = {
-  profile: Partial<UserProfileInterface>;
+  profile: Partial<UserProfile>;
   role: UserRole;
   status?: UserStatus;
   vkId: string;

@@ -1,7 +1,7 @@
-import { UserProfileInterface } from './user.types';
+import { UserProfile } from './user.types';
 
 export interface BlogPostInterface {
-  author: UserProfileInterface;
+  author: UserProfile;
   title: string;
   text: string;
   files?: string[];

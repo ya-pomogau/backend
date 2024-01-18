@@ -1,7 +1,7 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+/* import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, ObjectId } from 'mongoose';
 import * as mongoose from 'mongoose';
-import { UserProfileInterface } from '../types/user.types';
+import { UserProfile } from '../types/user.types';
 
 @Schema({
   timestamps: false,
@@ -48,4 +48,4 @@ export class UserProfile extends Document implements UserProfileInterface {
   phone: string;
 }
 
-export const UserProfileSchema = SchemaFactory.createForClass<UserProfileInterface>(UserProfile);
+export const UserProfileSchema = SchemaFactory.createForClass<UserProfileInterface>(UserProfile); */

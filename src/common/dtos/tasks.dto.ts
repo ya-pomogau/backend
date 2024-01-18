@@ -1,18 +1,17 @@
-import { POJOType } from '../types/pojo.type';
-import { UserProfile } from '../schemas/user-profile.schema';
 import { PointGeoJSON } from '../schemas/PointGeoJSON.schema';
 import { Category } from '../../datalake/category/schemas/category.schema';
 import { ResolveStatus } from '../types/task.types';
+import { UserProfile } from '../types/user.types';
 
 export type TaskDto = {
-  recipient: POJOType<UserProfile>;
-  volunteer?: POJOType<UserProfile> | null;
+  recipient: UserProfile;
+  volunteer?: UserProfile | null;
   title: string;
   description?: string;
   date: Date | null;
   address: string;
-  location: POJOType<PointGeoJSON>;
-  category: POJOType<Category>;
+  location: PointGeoJSON;
+  category: Category;
   volunteerReport: ResolveStatus;
   recipientReport: ResolveStatus;
   adminResolve: ResolveStatus | null;

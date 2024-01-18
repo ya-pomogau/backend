@@ -1,14 +1,21 @@
 import { Prop, SchemaFactory, Schema } from '@nestjs/mongoose';
 import { Document, SchemaTypes } from 'mongoose';
-import { UserStatus } from '../../../common/types/user.types';
+import { RecipientUserModelInterface, UserStatus } from '../../../common/types/user.types';
 import { PointGeoJSON, PointGeoJSONSchema } from '../../../common/schemas/PointGeoJSON.schema';
 
-@Schema()
-export class Recipient extends Document {
+@Schema({
+  timestamps: true,
+  toObject: {
+    versionKey: false,
+    virtuals: true,
+    flattenObjectIds: true,
+  },
+})
+export class Recipient extends Document implements RecipientUserModelInterface {
   @Prop({
     required: true,
     type: SchemaTypes.Number,
-    enum: [0, 1, 2, 3],
+    enum: Object.values(UserStatus),
   })
   status: UserStatus;
 
@@ -20,4 +27,5 @@ export class Recipient extends Document {
   location: PointGeoJSON;
 }
 
-export const RecipientUserSchema = SchemaFactory.createForClass(Recipient);
+export const RecipientUserSchema =
+  SchemaFactory.createForClass<RecipientUserModelInterface>(Recipient);

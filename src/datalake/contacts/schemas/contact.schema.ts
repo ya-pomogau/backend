@@ -7,6 +7,7 @@ import { ContactsInterface } from '../../../common/types/contacts.types';
   toObject: {
     versionKey: false,
     virtuals: true,
+    flattenObjectIds: true,
   },
   statics: {
     async isContactsExist(): Promise<boolean> {
@@ -34,4 +35,4 @@ export class Contacts extends Document implements ContactsInterface {
   socialNetwork: string;
 }
 
-export const ContactSchema = SchemaFactory.createForClass(Contacts);
+export const ContactSchema = SchemaFactory.createForClass<ContactsInterface>(Contacts);
