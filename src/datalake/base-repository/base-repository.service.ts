@@ -1,17 +1,10 @@
+/* eslint-disable @typescript-eslint/ban-types */
 import { DeleteResult, UpdateResult } from 'mongodb';
-import {
-  Document,
-  FilterQuery,
-  HydratedDocument,
-  Model,
-  UpdateQuery,
-  type ObjectId,
-} from 'mongoose';
-
+import { Document, FilterQuery, Model, UpdateQuery, type ObjectId } from 'mongoose';
 import { POJOType } from '../../common/types/pojo.type';
 
-export abstract class BaseRepositoryService<T extends Document> {
-  constructor(protected readonly entityModel: Model<T>) {}
+export abstract class BaseRepositoryService<T extends Document, M = {}, V = {}> {
+  protected constructor(protected readonly entityModel: Model<T, {}, M, V>) {}
 
   async create(createEntityDto: Record<string, unknown>): Promise<POJOType<T>> {
     const entity = await this.entityModel.create(createEntityDto as T);
@@ -26,7 +19,6 @@ export abstract class BaseRepositoryService<T extends Document> {
     return this.entityModel.find(
       query,
       {
-        __v: false,
         ...projection,
       },
       options
@@ -42,7 +34,6 @@ export abstract class BaseRepositoryService<T extends Document> {
       .findOne(
         query,
         {
-          __v: false,
           ...projection,
         },
         options
@@ -55,11 +46,11 @@ export abstract class BaseRepositoryService<T extends Document> {
     query: FilterQuery<T>,
     updateDto: UpdateQuery<unknown>,
     options: Record<string, unknown>
-  ): Promise<POJOType<T>> {
+  ): Promise<T> {
     const res: UpdateResult = await this.entityModel.updateOne(query, updateDto, options);
     let doc: Document<T> | null = null;
     if (res.acknowledged) {
-      doc = await this.entityModel.findOne(query).exec();
+      doc = (await this.entityModel.findOne(query).exec()) as Document<T>;
     }
     return doc ? doc.toObject() : null;
   }
@@ -68,11 +59,11 @@ export abstract class BaseRepositoryService<T extends Document> {
     query: FilterQuery<T>,
     replaceDoc: T,
     options: Record<string, unknown>
-  ): Promise<POJOType<T>> {
+  ): Promise<T> {
     const res: UpdateResult = await this.entityModel.replaceOne(query, replaceDoc, options);
     let doc: Document<T> | null = null;
     if (res.acknowledged) {
-      doc = await this.entityModel.findOne(query).exec();
+      doc = (await this.entityModel.findOne(query).exec()) as Document<T>;
     }
     return doc ? doc.toObject() : null;
   }
@@ -85,7 +76,7 @@ export abstract class BaseRepositoryService<T extends Document> {
     query: FilterQuery<T>,
     updateDto: UpdateQuery<unknown>,
     options: Record<string, unknown>
-  ): Promise<POJOType<T>> {
+  ): Promise<T> {
     const doc: Document<T> = await this.entityModel.findOneAndUpdate(query, updateDto, {
       new: true,
       ...options,
@@ -97,7 +88,7 @@ export abstract class BaseRepositoryService<T extends Document> {
     query: FilterQuery<T>,
     replaceDoc: T,
     options: Record<string, unknown>
-  ): Promise<POJOType<T>> {
+  ): Promise<T> {
     const doc = await this.entityModel
       .findOneAndReplace(query, replaceDoc, {
         new: true,
@@ -107,10 +98,7 @@ export abstract class BaseRepositoryService<T extends Document> {
     return doc.toObject();
   }
 
-  async findOneAndDelete(
-    query: FilterQuery<T>,
-    options: Record<string, unknown>
-  ): Promise<POJOType<T>> {
+  async findOneAndDelete(query: FilterQuery<T>, options: Record<string, unknown>): Promise<T> {
     const doc = await this.entityModel.findOneAndDelete(query, options).exec();
     return doc.toObject();
   }
@@ -119,12 +107,11 @@ export abstract class BaseRepositoryService<T extends Document> {
     id: string | ObjectId,
     projection?: Record<string, unknown>,
     options?: Record<string, unknown>
-  ): Promise<POJOType<T>> {
+  ): Promise<T> {
     const doc = await this.entityModel
       .findById(
         id,
         {
-          __v: false,
           ...projection,
         },
         options
@@ -137,7 +124,7 @@ export abstract class BaseRepositoryService<T extends Document> {
     id: string | ObjectId,
     updateDto: UpdateQuery<unknown>,
     options: Record<string, unknown>
-  ): Promise<POJOType<T>> {
+  ): Promise<T> {
     const doc = await this.entityModel
       .findByIdAndUpdate(id, updateDto, {
         new: true,
@@ -147,34 +134,26 @@ export abstract class BaseRepositoryService<T extends Document> {
     return doc.toObject();
   }
 
-  async findByIdAndDelete(
-    id: string | ObjectId,
-    options?: Record<string, unknown>
-  ): Promise<POJOType<T>> {
+  async findByIdAndDelete(id: string | ObjectId, options?: Record<string, unknown>): Promise<T> {
     const doc = await this.entityModel.findByIdAndDelete(id, options).exec();
     return doc.toObject();
   }
 
-  async insertMany(
-    docs: Array<T>
-  ): Promise<Array<HydratedDocument<T, unknown, Record<string, unknown>>>> {
-    return this.entityModel.insertMany(docs);
+  async insertMany(docs: Array<T>): Promise<Array<Document<T>>> {
+    const insertedDocs = (await this.entityModel.insertMany(docs)) as Array<Document<T>>;
+    return !!insertedDocs && insertedDocs.length > 0
+      ? insertedDocs.map((doc) => doc.toObject())
+      : null;
   }
 
   async updateMany(
     query: FilterQuery<T>,
     updateDto: Record<string, unknown>,
     options?: Record<string, unknown>
-  ): Promise<Array<POJOType<T>>> {
+  ): Promise<Array<T>> {
     const res = await this.entityModel.updateMany(query, updateDto, options).exec();
     if (res.acknowledged) {
-      return this.entityModel.find(
-        query,
-        {
-          __v: false,
-        },
-        options
-      );
+      return this.entityModel.find(query, {}, options);
     }
     return null;
   }

@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, SchemaTypes } from 'mongoose';
 import { UserStatus } from '../../../common/types/user.types';
 import { CategoryInterface } from '../../../common/types/category.types';
 
@@ -8,17 +8,18 @@ import { CategoryInterface } from '../../../common/types/category.types';
   toObject: {
     versionKey: false,
     virtuals: true,
+    flattenObjectIds: true,
   },
 })
 export class Category extends Document implements CategoryInterface {
-  @Prop({ required: true, immutable: true })
+  @Prop({ required: true, immutable: true, type: SchemaTypes.String })
   title: string;
 
-  @Prop({ required: true, type: Number })
+  @Prop({ required: true, type: SchemaTypes.Number })
   points: number;
 
-  @Prop({ required: true, enum: Object.values(UserStatus), type: Number })
+  @Prop({ required: true, enum: Object.values(UserStatus), type: SchemaTypes.Number })
   accessLevel: number;
 }
 
-export const CategorySchema = SchemaFactory.createForClass(Category);
+export const CategorySchema = SchemaFactory.createForClass<CategoryInterface>(Category);

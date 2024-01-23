@@ -1,5 +1,10 @@
-import { UserProfileInterface, UserRole } from './user.types';
+import { UserRole } from './user.types';
 import { PointGeoJSONInterface } from './point-geojson.types';
+import { User } from '../../datalake/users/schemas/user.schema';
+import { Volunteer } from '../../datalake/users/schemas/volunteer.schema';
+import { Recipient } from '../../datalake/users/schemas/recipient.schema';
+import { Admin } from '../../datalake/users/schemas/admin.schema';
+import { AccessRights } from './access-rights.types';
 
 export interface VKLoginDtoInterface {
   code: string;
@@ -24,7 +29,7 @@ export interface VKResponseInterface extends VKResponseOKInterface, VKResponseEr
 // TODO: Сделать более строгую типизацию после разъяснения ситуации с типизацией дискриминированных схем
 export type PayloadType = Record<string, unknown>;
 
-export interface VKNewUserProfileInterface {
+export interface NewProfileInterface {
   firstName: string;
   middleName?: string;
   lastName: string;
@@ -33,9 +38,33 @@ export interface VKNewUserProfileInterface {
   address: string;
 }
 
-export interface VKNewUserInterface {
-  profile: Partial<UserProfileInterface>;
+export interface NewUserInterface {
+  firstName: string;
+  middleName?: string;
+  lastName: string;
+  phone: string;
+  avatar?: string;
+  address: string;
   role: UserRole;
   vkId: string;
+}
+
+export interface VKNewUserInterface extends NewUserInterface {
   location?: PointGeoJSONInterface;
+}
+
+export interface NewAdminInterface extends Omit<NewUserInterface, 'role'> {
+  login: string;
+  password: string;
+}
+
+export type jwtPayload = {
+  _id: string;
+  role: UserRole;
+  permissions: Array<AccessRights>;
+  isRoot: boolean;
+};
+
+export interface EnrichedRequest extends Request {
+  user?: User & (Volunteer | Recipient | Admin);
 }
