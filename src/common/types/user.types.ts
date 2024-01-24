@@ -104,3 +104,8 @@ export interface AnyUserInterface
     RecipientInterface,
     AdminInterface,
     MongooseIdAndTimestampsInterface {}
+
+export interface UserModelVirtuals {
+  fullName: string;
+  profile: UserProfile;
+}

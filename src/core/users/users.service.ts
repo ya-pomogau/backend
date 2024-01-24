@@ -1,47 +1,58 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { UsersRepository } from '../../datalake/users/users.repository';
 import { CreateAdminDto, CreateUserDto } from '../../common/dto/users.dto';
-import {
-  AdminUserInterface,
-  UserInterface,
-  UserRole,
-  UserStatus,
-} from '../../common/types/user.types';
-import { POJOType } from '../../common/types/pojo.type';
-import { Volunteer } from '../../datalake/users/schemas/volunteer.schema';
-import { Recipient } from '../../datalake/users/schemas/recipient.schema';
+import { UserRole, UserStatus } from '../../common/types/user.types';
 import { HashService } from '../../common/hash/hash.service';
 import { Admin } from '../../datalake/users/schemas/admin.schema';
-import { MongooseIdAndTimestampsInterface } from '../../common/types/system.types';
+import { POJOType } from '../../common/types/pojo.type';
+import { User } from '../../datalake/users/schemas/user.schema';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly usersRepo: UsersRepository) {}
+  constructor(
+    private readonly usersRepo: UsersRepository,
+    private readonly hashService: HashService
+  ) {}
 
-  private async create(dto: CreateUserDto | CreateAdminDto) {
+  private async create(dto: CreateUserDto | CreateAdminDto): Promise<POJOType<User>> {
     return this.usersRepo.create(dto);
   }
 
-  async checkVKCredential(vkId: string): Promise<POJOType<Volunteer | Recipient>> | null {
+  async checkVKCredential(vkId: string): Promise<POJOType<User>> | null {
     return this.usersRepo.findOne({
       vkId,
+      role: { $in: [UserRole.VOLUNTEER, UserRole.RECIPIENT] },
     });
   }
 
-  async checkAdminCredentials(login: string, password: string): Promise<POJOType<Admin>> | null {
-    const user = (await this.usersRepo.findOne(
+  async checkAdminCredentials(login: string, password: string): Promise<Admin> | null {
+    const user = await this.usersRepo.findOne(
       {
         role: UserRole.ADMIN,
         login,
       },
-      { password: true }
-    )) as unknown as UserInterface & AdminUserInterface & MongooseIdAndTimestampsInterface;
-    const isOk = HashService.compareHash(password, user.password);
-    return isOk ? user : null;
+      {
+        password: true,
+        permissions: true,
+        login: true,
+        vkId: true,
+        profile: true,
+        isRoot: true,
+        role: true,
+      }
+    );
+    const { password: passDb } = user as Admin;
+    const isOk = await HashService.compareHash(password, passDb);
+    return isOk ? Promise.resolve(user as Admin) : null;
   }
 
   async createUser(dto: CreateUserDto) {
-    let extras: Partial<CreateUserDto | CreateAdminDto> = {};
+    let extras: Partial<CreateUserDto> = {};
+    if (dto.role === UserRole.ADMIN) {
+      throw new InternalServerErrorException('Internal Server Error', {
+        cause: 'createUser() не создаёт администратора',
+      });
+    }
     if (dto.role === UserRole.VOLUNTEER) {
       extras = { keys: false, score: 0 };
     }
@@ -49,10 +60,21 @@ export class UsersService {
       status: UserStatus.UNCONFIRMED,
       ...dto,
       ...extras,
-    } as CreateUserDto);
+    });
   }
 
   async createAdmin(dto: CreateAdminDto) {
-    return this.create({ ...dto, isRoot: false, role: UserRole.ADMIN });
+    /*    if (dto.role !== UserRole.ADMIN) {
+      throw new InternalServerErrorException('Internal Server Error', {
+        cause: 'createAdmin() создаёт только администратора',
+      });
+    } */
+    return this.create({
+      ...dto,
+      password: await HashService.generateHash(dto.password),
+      isRoot: false,
+      status: UserStatus.UNCONFIRMED,
+      role: UserRole.ADMIN,
+    });
   }
 }
