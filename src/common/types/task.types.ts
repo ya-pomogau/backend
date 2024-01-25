@@ -1,7 +1,6 @@
-import { POJOType } from './pojo.type';
-import { Category } from '../../datalake/category/schemas/category.schema';
-import { PointGeoJSON } from '../schemas/PointGeoJSON.schema';
-import { UserProfile } from '../schemas/user-profile.schema';
+import { PointGeoJSONInterface } from './point-geojson.types';
+import { CategoryInterface } from './category.types';
+import { UserProfile } from './user.types';
 
 export enum TaskStatus {
   CREATED = 'created',
@@ -18,16 +17,22 @@ export enum ResolveStatus {
 }
 
 export interface TaskInterface {
-  recipient: POJOType<UserProfile>;
-  volunteer: POJOType<UserProfile>;
+  _id: string;
+  recipient: UserProfile;
+  volunteer: UserProfile | null;
   title: string;
   description?: string;
   date: Date | null;
   address: string;
-  location: POJOType<PointGeoJSON>;
-  category: POJOType<Category>;
+  location: PointGeoJSONInterface;
+  category: CategoryInterface;
   volunteerReport: ResolveStatus;
   recipientReport: ResolveStatus;
   adminResolve: ResolveStatus | null;
   isPendingChanges: boolean;
+  // findWithin: (center: GeoCoordinates, distance: number) => Promise<Array<TaskInterface>>;
+}
+
+export interface TaskModelVirtuals {
+  status: TaskStatus;
 }
