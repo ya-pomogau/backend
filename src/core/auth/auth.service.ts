@@ -6,6 +6,10 @@ import { AxiosError, AxiosResponse } from 'axios';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../users/users.service';
 import { VKLoginDtoInterface, VKResponseInterface } from '../../common/types/api.types';
+import { Volunteer } from '../../datalake/users/schemas/volunteer.schema';
+import { Recipient } from '../../datalake/users/schemas/recipient.schema';
+import { Admin } from '../../datalake/users/schemas/admin.schema';
+import { AnyUserInterface } from '../../common/types/user.types';
 
 @Injectable()
 export class AuthService {
@@ -16,14 +20,17 @@ export class AuthService {
     private readonly configService: ConfigService
   ) {}
 
-  async authenticate(payload: Record<string, unknown>): Promise<string> {
+  // TODO: сократить payload, после создания метода логина админа сделать приватным
+  public async authenticate(
+    payload: Record<string, unknown> | Volunteer | Recipient | Admin
+  ): Promise<string> {
     return this.jwtService.signAsync(payload, {
       secret: this.configService.get<string>('jwt.key'),
       expiresIn: this.configService.get<string>('jwt.ttl'),
     });
   }
 
-  async loginVK(dto: VKLoginDtoInterface) {
+  public async loginVK(dto: VKLoginDtoInterface) {
     const { code, redirectUrl } = dto;
     const clientId = this.configService.get<string>('vk.appId');
     const clientSecret = this.configService.get<string>('vk.appSecret');
@@ -63,4 +70,6 @@ export class AuthService {
     // eslint-disable-next-line camelcase
     return { vkUser };
   }
+
+  // TODO: публичный метод логина админа
 }

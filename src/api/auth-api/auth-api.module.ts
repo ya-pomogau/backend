@@ -7,10 +7,12 @@ import { UsersService } from '../../core/users/users.service';
 import { AuthModule } from '../../core/auth/auth.module';
 import { UsersModule } from '../../core/users/users.module';
 import { UsersRepositoryModule } from '../../datalake/users/users-repository.module';
+import { HashModule } from '../../common/hash/hash.module';
+import { HashService } from '../../common/hash/hash.service';
 
 @Module({
-  imports: [AuthModule, UsersModule, HttpModule, JwtModule, UsersRepositoryModule],
+  imports: [AuthModule, UsersModule, HttpModule, JwtModule, UsersRepositoryModule, HashModule],
   controllers: [AuthApiController],
-  providers: [AuthService, UsersService],
+  providers: [AuthService, UsersService, HashService],
 })
 export class AuthApiModule {}

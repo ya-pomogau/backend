@@ -28,7 +28,7 @@ export class AuthApiController {
   }
 
   @Public()
-  @Post('new')
+  @Post('vk')
   async register(@Body() dto: VKNewUserDto) {
     const user = await this.usersService.createUser(dto);
     if (user) {
@@ -38,10 +38,12 @@ export class AuthApiController {
     throw new InternalServerErrorException('Ошибка создания пользователя');
   }
 
+  @Public()
   @UseGuards(AdminLoginAuthGuard)
   @Post('administrative')
   async administrative(@Req() req: Express.Request) {
     if (req.user) {
+      // TODO: Вынести в сервис в core после решения проблемы с типизацией Users
       const token = await this.authService.authenticate(req.user as Record<string, unknown>);
       return { token, user: req.user };
     }
