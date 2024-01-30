@@ -10,6 +10,7 @@ import { CategoryInterface } from '../../../common/types/category.types';
     virtuals: true,
     flattenObjectIds: true,
   },
+  id: false,
 })
 
 export class Category extends Document implements CategoryInterface {

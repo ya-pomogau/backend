@@ -1,8 +1,8 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CategoryRepository } from '../../datalake/category/category.repository';
 import { CreateCategoryDto, UpdateCategoryDto } from '../../common/dto/category.dto';
 import {
-  AdminInterface,
+  AdminPermission,
   AnyUserInterface,
   UserRole,
   UserStatus,
@@ -14,6 +14,8 @@ import { HashService } from '../../common/hash/hash.service';
 import { Admin } from '../../datalake/users/schemas/admin.schema';
 import { MongooseIdAndTimestampsInterface } from '../../common/types/system.types';
 import exceptions from 'src/common/constants/exceptions';
+
+const options = {select: "_id title points accessLevel"};
 
 @Injectable()
 export class CategoriesService {
@@ -39,52 +41,69 @@ export class CategoriesService {
     return category;
   }
 
-  //TODO права??
-  async removeCategory(id) {
+  // Только root
+  async removeCategory(id: string, user: AnyUserInterface) {
     let res;
+    if (user.role !== UserRole.ADMIN || (user.role === UserRole.ADMIN && !user.isRoot)) {
+      throw new ForbiddenException(exceptions.category.notEnoughRights);
+    }
+
     try {
       res = await this.categoriesRepo.deleteOne({_id: id}, {});
     } catch (err) {
       throw new InternalServerErrorException(exceptions.category.castError)
     }
-
     if (!res.deletedCount) {
       throw new InternalServerErrorException(exceptions.category.nothingToDelete);
     }
     return res;
   }
 
-  //TODO если не найдена категория
-  async updateCategoryById(id, updateData: UpdateCategoryDto) {
-    console.log('update', updateData, id)
-    return this.categoriesRepo.findOneAndUpdate({_id: id}, updateData, {})
+  // Только админы с правами AdminPermission.CATEGORIES
+  async updateCategoryById(id: string, updateData: UpdateCategoryDto, user: AnyUserInterface) {
+    let res;
+
+    if (
+      user.role !== UserRole.ADMIN
+      || (user.role === UserRole.ADMIN && user.permissions.includes(AdminPermission.CATEGORIES))
+    ) {
+      throw new ForbiddenException(exceptions.category.notEnoughRights);
+    }
+
+    try {
+      res = await this.categoriesRepo.findOneAndUpdate({_id: id}, updateData, options)
+    } catch (err) {
+      throw new InternalServerErrorException(exceptions.category.castError)
+    }
+    if (!res) {
+      throw new NotFoundException(exceptions.category.notFound)
+    }
+
+    return res;
   }
 
-
-
-
-
-
-
-
-
-  //TODO кто может создавать категории? Только админ? Любой или только isRoot? administrative: 'CATEGORIES' - это значит, что может менять только поинты?
-  //TODO и все-таки, кто же создает?
-  async createCategory(data: CreateCategoryDto) {
-    //check rights
-
-    // let extras: Partial<CreateUserDto | CreateAdminDto> = {};
-    // if (dto.role === UserRole.VOLUNTEER) {
-    //   extras = { keys: false, score: 0 };
-    // }
-    console.log('service create', UserRole.ADMIN);
+  // Только root
+  async createCategory(data: CreateCategoryDto, user: AnyUserInterface) {
+    if (user.role !== UserRole.ADMIN || (user.role === UserRole.ADMIN && !user.isRoot)) {
+      throw new ForbiddenException(exceptions.category.notEnoughRights);
+    }
     return this.categoriesRepo.create(data);
   }
 
-
   // TODO как лучше апдейтить балком?
-  async updateCategories(query, updateData: UpdateCategoryDto) {
-    return this.categoriesRepo.updateMany(query, updateData, {})
+  async updateCategories(data: Record<string, number>[], user: AnyUserInterface) {
+    if (
+      user.role !== UserRole.ADMIN
+      || (user.role === UserRole.ADMIN && user.permissions.includes(AdminPermission.CATEGORIES))
+    ) {
+      throw new ForbiddenException(exceptions.category.notEnoughRights);
+    }
+
+
+
+
+
+    return {};
   }
 
 }
