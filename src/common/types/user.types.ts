@@ -12,6 +12,7 @@ import { AccessRights } from './access-rights.types';
 }; */
 
 export enum UserStatus {
+  BLOCKED = -1,
   UNCONFIRMED = 0,
   CONFIRMED = 1,
   VERIFIED = 2,
