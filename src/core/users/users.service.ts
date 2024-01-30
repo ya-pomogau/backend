@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { ForbiddenException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { UsersRepository } from '../../datalake/users/users.repository';
 import { CreateAdminDto, CreateUserDto } from '../../common/dto/users.dto';
 import { UserRole, UserStatus } from '../../common/types/user.types';
@@ -6,13 +6,12 @@ import { HashService } from '../../common/hash/hash.service';
 import { Admin } from '../../datalake/users/schemas/admin.schema';
 import { POJOType } from '../../common/types/pojo.type';
 import { User } from '../../datalake/users/schemas/user.schema';
+import { Volunteer } from '../../datalake/users/schemas/volunteer.schema';
+import { Recipient } from '../../datalake/users/schemas/recipient.schema';
 
 @Injectable()
 export class UsersService {
-  constructor(
-    private readonly usersRepo: UsersRepository,
-    private readonly hashService: HashService
-  ) {}
+  constructor(private readonly usersRepo: UsersRepository) {}
 
   private async create(dto: CreateUserDto | CreateAdminDto): Promise<POJOType<User>> {
     return this.usersRepo.create(dto);
@@ -76,5 +75,16 @@ export class UsersService {
       status: UserStatus.UNCONFIRMED,
       role: UserRole.ADMIN,
     });
+  }
+
+  async promoteUser(_id: string) {
+    const user = await this.usersRepo.findById(_id);
+    if (user instanceof Volunteer || user instanceof Recipient) {
+      if (user.status < UserStatus.ACTIVATED) {
+        return this.usersRepo.findByIdAndUpdate(_id, { status: user.status + 1 }, {});
+      }
+      return user;
+    }
+    throw new ForbiddenException('Повысить можно только волонтёра или реципиента');
   }
 }
