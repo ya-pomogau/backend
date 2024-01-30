@@ -1,7 +1,9 @@
+import { UserStatus } from "../types/user.types";
+
 export type CreateCategoryDto = {
   title: string;
   points: number;
-  Level: number;
+  accessLevel: UserStatus;
 };
 
 export type UpdateCategoryDto = Partial<CreateCategoryDto> & {

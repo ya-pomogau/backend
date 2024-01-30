@@ -1,6 +1,9 @@
 export default {
   category: {
     notFound: 'Категория не найдена',
+    internalError: 'Что-то пошло не так',
+    nothingToDelete: 'Не получилось найти категогию для удаления',
+    castError: 'Передано невалидное значение',
   },
   users: {
     notFound: 'Пользователь с таким id не найден или не передан id пользователя',
