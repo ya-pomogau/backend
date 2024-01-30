@@ -1,4 +1,9 @@
-import { ForbiddenException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common/exceptions';
 import { UsersRepository } from '../../datalake/users/users.repository';
 import { CreateAdminDto, CreateUserDto } from '../../common/dto/users.dto';
 import { UserRole, UserStatus } from '../../common/types/user.types';
@@ -77,14 +82,50 @@ export class UsersService {
     });
   }
 
-  async promoteUser(_id: string) {
-    const user = await this.usersRepo.findById(_id);
-    if (user instanceof Volunteer || user instanceof Recipient) {
-      if (user.status < UserStatus.ACTIVATED) {
-        return this.usersRepo.findByIdAndUpdate(_id, { status: user.status + 1 }, {});
+  async promote(_id: string) {
+    const user = (await this.usersRepo.findById(_id)) as User & (Recipient | Admin | Volunteer);
+    if (!user) {
+      throw new NotFoundException(`Пользователь с _id '${_id}' не найден<`);
+    }
+    if (user.role === UserRole.VOLUNTEER || user.role === UserRole.RECIPIENT) {
+      const { status } = user as Volunteer | Recipient;
+      if (status < UserStatus.ACTIVATED) {
+        return this.usersRepo.findByIdAndUpdate(_id, { status: status + 1 }, {});
       }
       return user;
     }
     throw new ForbiddenException('Повысить можно только волонтёра или реципиента');
+  }
+
+  async activate(_id: string) {
+    const user = (await this.usersRepo.findById(_id)) as User & (Recipient | Admin | Volunteer);
+    if (!user) {
+      throw new NotFoundException(`Пользователь с _id '${_id}' не найден!`);
+    }
+    if (user.role === UserRole.ADMIN) {
+      return this.usersRepo.findByIdAndUpdate(_id, { isActivated: true }, {});
+    }
+    throw new ForbiddenException('Можно активировать только администратора');
+  }
+
+  async block(_id: string) {
+    const user = (await this.usersRepo.findById(_id)) as User & (Recipient | Admin | Volunteer);
+    if (!user) {
+      throw new NotFoundException(`Пользователь с _id '${_id}' не найден!`);
+    }
+    if (user.role === UserRole.VOLUNTEER || user.role === UserRole.RECIPIENT) {
+      const { status } = user as Volunteer | Recipient;
+      if (status > UserStatus.BLOCKED) {
+        return this.usersRepo.findByIdAndUpdate(_id, { status: UserStatus.BLOCKED }, {});
+      }
+      throw new ForbiddenException('Нельзя заблокировать повторно!');
+    }
+    if (user.role === UserRole.ADMIN) {
+      return this.usersRepo.findByIdAndUpdate(_id, { isActivated: false }, {});
+    }
+
+    throw new InternalServerErrorException('Внутренняя ошибка сервера', {
+      cause: `Некорректный статус пользователя с _id '${_id}' `,
+    });
   }
 }
