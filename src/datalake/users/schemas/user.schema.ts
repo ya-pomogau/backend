@@ -11,14 +11,7 @@ import { GenericUserModelInterface, UserRole } from '../../../common/types/user.
     virtuals: true,
     flattenObjectIds: true,
   },
-  virtuals: {
-    fullName: {
-      get() {
-        return `${this.firstName ? this.firstName : ''} ${this.middleName ? this.firstName : ''}  ${
-          this.lastName ? this.lastName : ''
-        }`;
-      },
-    },
+  /* virtuals: {
     profile: {
       get() {
         return {
@@ -32,7 +25,7 @@ import { GenericUserModelInterface, UserRole } from '../../../common/types/user.
         };
       },
     },
-  },
+  }, */
 })
 export class User extends Document implements GenericUserModelInterface {
   @Prop({ required: true, type: mongoose.SchemaTypes.String })
@@ -42,13 +35,7 @@ export class User extends Document implements GenericUserModelInterface {
   avatar: string;
 
   @Prop({ required: true, type: mongoose.SchemaTypes.String })
-  firstName: string;
-
-  @Prop({ required: true, type: mongoose.SchemaTypes.String })
-  lastName: string;
-
-  @Prop({ required: true, type: mongoose.SchemaTypes.String })
-  middleName: string;
+  name: string;
 
   @Prop({ required: true, type: mongoose.SchemaTypes.String })
   phone: string;
