@@ -14,6 +14,7 @@ import { HashService } from '../../common/hash/hash.service';
 import { Admin } from '../../datalake/users/schemas/admin.schema';
 import { MongooseIdAndTimestampsInterface } from '../../common/types/system.types';
 import exceptions from 'src/common/constants/exceptions';
+import { CategoryInterface } from 'src/common/types/category.types';
 
 const options = {select: "_id title points accessLevel"};
 
@@ -90,8 +91,10 @@ export class CategoriesService {
     return this.categoriesRepo.create(data);
   }
 
-  // TODO как лучше апдейтить балком?
-  async updateCategories(data: Record<string, number>[], user: AnyUserInterface) {
+  // TODO проверка ошибок и откат изменений
+  async updateCategories(data: Record<string, number>, user: AnyUserInterface) {
+    console.log('updateCategories', data);
+    const repo = this.categoriesRepo;
     if (
       user.role !== UserRole.ADMIN
       || (user.role === UserRole.ADMIN && user.permissions.includes(AdminPermission.CATEGORIES))
@@ -99,6 +102,17 @@ export class CategoriesService {
       throw new ForbiddenException(exceptions.category.notEnoughRights);
     }
 
+    const methods = Object.keys(data).map((el) => ({
+      updateOne: {
+        filter: {_id: el},
+        update: {points: data[el]}
+      }
+    }))
+    this.categoriesRepo.bulkWrite(
+      methods,
+     {}).then(res => {
+     console.log('res bulkWrite', res);
+    });
 
 
 
