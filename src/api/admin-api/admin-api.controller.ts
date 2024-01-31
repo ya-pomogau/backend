@@ -64,7 +64,7 @@ export class AdminApiController {
 
   @Put('/:id/keys')
   @AccessControlList({ role: UserRole.ADMIN, rights: [AccessRights.giveKey] })
-  async cgrantKeys(@Param(':id') _id: string) {
+  async grantKeys(@Param(':id') _id: string) {
     return this.usersService.grantKeys(_id);
   }
 
