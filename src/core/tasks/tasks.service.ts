@@ -19,10 +19,6 @@ export class TasksService {
 
   public async create(dto: CreateTaskDto) {
     const { recipientId, categoryId, ...data } = dto;
-    /*   const [recipient, category] = Promise.all<
-      [(User & Recipient) | (User & Volunteer) | (User & Admin), Category]
-        >(
-    [this.usersRepo.findById(recipientId), this.categoryRepo.findById(categoryId)]); */
     const recipient = await this.usersRepo.findById(recipientId);
     const category = await this.categoryRepo.findById(categoryId);
     if (!(recipient instanceof Recipient || recipient instanceof Admin)) {
