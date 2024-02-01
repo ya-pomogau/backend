@@ -15,9 +15,9 @@ import { AuthModule } from './core/auth/auth.module';
 import { UsersModule } from './core/users/users.module';
 import { MongooseConfigService } from './config/database-config.service';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
-import { CategoriesApiModule } from './api/categories-api/categories-api.module';
 import { CategoryRepository } from './datalake/category/category.repository';
 import { CategoriesModule } from './core/categories/categories.module';
+import { AdminApiModule } from './api/admin-api/admin-api.module';
 
 @Module({
   imports: [
@@ -35,9 +35,9 @@ import { CategoriesModule } from './core/categories/categories.module';
     AuthApiModule,
     AuthModule,
     UsersModule,
-    CategoriesApiModule,
     CategoryRepositoryModule,
     CategoriesModule,
+    AdminApiModule,
   ],
   providers: [
     {

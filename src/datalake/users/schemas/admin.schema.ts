@@ -39,6 +39,13 @@ export class Admin extends Document implements AdminUserModelInterface {
     immutable: true,
   })
   isRoot: boolean;
+
+  @Prop({
+    required: true,
+    type: SchemaTypes.Boolean,
+    default: false,
+  })
+  isActive: boolean;
 }
 
 export const AdminUserSchema = SchemaFactory.createForClass<AdminUserModelInterface>(Admin);

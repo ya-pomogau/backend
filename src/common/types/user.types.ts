@@ -12,6 +12,7 @@ import { AccessRights } from './access-rights.types';
 }; */
 
 export enum UserStatus {
+  BLOCKED = -1,
   UNCONFIRMED = 0,
   CONFIRMED = 1,
   VERIFIED = 2,
@@ -42,9 +43,7 @@ export enum ResolveStatus {
 }
 
 export type UserProfile = {
-  firstName: string;
-  middleName: string;
-  lastName: string;
+  name: string;
   phone: string;
   avatar: string;
   address: string;
@@ -52,9 +51,7 @@ export type UserProfile = {
 };
 
 export interface GenericUserModelInterface {
-  firstName: string;
-  middleName: string;
-  lastName: string;
+  name: string;
   phone: string;
   avatar: string;
   address: string;
@@ -79,6 +76,7 @@ export interface AdminUserModelInterface {
   login: string;
   password: string;
   isRoot: boolean;
+  isActive: boolean;
 }
 
 export interface VolunteerInterface
