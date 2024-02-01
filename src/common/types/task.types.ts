@@ -16,18 +16,29 @@ export enum ResolveStatus {
   REJECTED = 'rejected',
 }
 
+export enum ReportStatus {
+  PENDING = 'pending',
+  REPORTED = 'reported',
+}
+
+export enum TaskReport {
+  FULFILLED = 'fulfilled',
+  REJECTED = 'rejected',
+}
+
 export interface TaskInterface {
   _id: string;
   recipient: UserProfile;
   volunteer: UserProfile | null;
+  status: TaskStatus;
   title: string;
   description?: string;
   date: Date | null;
   address: string;
   location: PointGeoJSONInterface;
   category: CategoryInterface;
-  volunteerReport: ResolveStatus;
-  recipientReport: ResolveStatus;
+  volunteerReport: TaskReport | null;
+  recipientReport: TaskReport | null;
   adminResolve: ResolveStatus | null;
   isPendingChanges: boolean;
   // findWithin: (center: GeoCoordinates, distance: number) => Promise<Array<TaskInterface>>;
