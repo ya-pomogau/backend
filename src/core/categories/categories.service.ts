@@ -1,26 +1,22 @@
-import { ForbiddenException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import mongoose from 'mongoose';
+import { ForbiddenException, Injectable, InternalServerErrorException, NotFoundException, Logger } from '@nestjs/common';
 import { CategoryRepository } from '../../datalake/category/category.repository';
 import { CreateCategoryDto, UpdateCategoryDto } from '../../common/dto/category.dto';
 import {
   AdminPermission,
   AnyUserInterface,
   UserRole,
-  UserStatus,
 } from '../../common/types/user.types';
-import { POJOType } from '../../common/types/pojo.type';
-import { Volunteer } from '../../datalake/users/schemas/volunteer.schema';
-import { Recipient } from '../../datalake/users/schemas/recipient.schema';
-import { HashService } from '../../common/hash/hash.service';
-import { Admin } from '../../datalake/users/schemas/admin.schema';
-import { MongooseIdAndTimestampsInterface } from '../../common/types/system.types';
 import exceptions from 'src/common/constants/exceptions';
-import { CategoryInterface } from 'src/common/types/category.types';
 
 const options = {select: "_id title points accessLevel"};
 
 @Injectable()
 export class CategoriesService {
-  constructor(private readonly categoriesRepo: CategoryRepository) {}
+  constructor(private readonly categoriesRepo: CategoryRepository) {
+    this.logger = new Logger(CategoriesService.name);
+  }
+  private logger: Logger;
 
   async getCategories() {
     return this.categoriesRepo.find({});
@@ -29,10 +25,11 @@ export class CategoriesService {
   //TODO вынести общую часть про castError отдельно
   async getCategoryById(id: string) {
     let category;
+
     try {
       category = await this.categoriesRepo.findOne({_id: id});
     } catch (err) {
-      throw new InternalServerErrorException(exceptions.category.castError)
+      throw new InternalServerErrorException(exceptions.category.internalError)
     }
 
     if (!category) {
@@ -52,8 +49,9 @@ export class CategoriesService {
     try {
       res = await this.categoriesRepo.deleteOne({_id: id}, {});
     } catch (err) {
-      throw new InternalServerErrorException(exceptions.category.castError)
+      throw new InternalServerErrorException(exceptions.category.internalError)
     }
+
     if (!res.deletedCount) {
       throw new InternalServerErrorException(exceptions.category.nothingToDelete);
     }
@@ -74,8 +72,9 @@ export class CategoriesService {
     try {
       res = await this.categoriesRepo.findOneAndUpdate({_id: id}, updateData, options)
     } catch (err) {
-      throw new InternalServerErrorException(exceptions.category.castError)
+      throw new InternalServerErrorException(exceptions.category.internalError)
     }
+
     if (!res) {
       throw new NotFoundException(exceptions.category.notFound)
     }
@@ -88,12 +87,12 @@ export class CategoriesService {
     if (user.role !== UserRole.ADMIN || (user.role === UserRole.ADMIN && !user.isRoot)) {
       throw new ForbiddenException(exceptions.category.notEnoughRights);
     }
+
     return this.categoriesRepo.create(data);
   }
 
-  // TODO проверка ошибок и откат изменений
+  // Только для админов с правами AdminPermission.CATEGORIES
   async updateCategories(data: Record<string, number>, user: AnyUserInterface) {
-    console.log('updateCategories', data);
     const repo = this.categoriesRepo;
     if (
       user.role !== UserRole.ADMIN
@@ -108,16 +107,19 @@ export class CategoriesService {
         update: {points: data[el]}
       }
     }))
-    this.categoriesRepo.bulkWrite(
+
+    return this.categoriesRepo.bulkWrite(
       methods,
-     {}).then(res => {
-     console.log('res bulkWrite', res);
+      {})
+    .then(res => {
+      if (res.modifiedCount < methods.length) {
+        this.logger.warn('Want to modify ' + methods.length +' categories, but found ' + res.modifiedCount);
+      }
+
+      return repo.find({_id: { $in: Object.keys(data) }});
+    })
+    .catch(err => {
+      throw new InternalServerErrorException(exceptions.category.internalError)
     });
-
-
-
-
-    return {};
   }
-
 }

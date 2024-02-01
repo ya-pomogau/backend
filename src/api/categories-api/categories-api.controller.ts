@@ -39,7 +39,7 @@ export class CategoriesApiController {
   }
 
   @Public()
-  @Post('new')
+  @Post()
   // @AccessControlList({ role: UserRole.ADMIN, permissions: AdminPermission.CATEGORIES})
   async create(@Body() dto: NewCategoryDto, @Req() req) {
     return this.categoriesService.createCategory(dto, req.user);

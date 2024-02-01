@@ -31,7 +31,6 @@ export abstract class BaseRepositoryService<T extends Document, M = {}, V = {}> 
     projection?: Record<string, unknown>,
     options?: Record<string, unknown>
   ): Promise<POJOType<T>> {
-    console.log('query', query);
     const doc = await this.entityModel
       .findOne(
         query,
@@ -79,12 +78,10 @@ export abstract class BaseRepositoryService<T extends Document, M = {}, V = {}> 
     updateDto: UpdateQuery<unknown>,
     options: Record<string, unknown>
   ): Promise<T> {
-    console.log('query', query, updateDto);
     const doc: Document<T> = await this.entityModel.findOneAndUpdate(query, updateDto, {
       new: true,
       ...options,
     });
-    console.log('findOneAndUpdate', doc);
     return doc ? doc.toObject() : null;
   }
 
