@@ -27,9 +27,12 @@ export class CategoriesService {
     let category;
 
     try {
-      category = await this.categoriesRepo.findOne({_id: id});
+      category = await this.categoriesRepo.findById(id);
     } catch (err) {
-      throw new InternalServerErrorException(exceptions.category.internalError)
+      throw new InternalServerErrorException(exceptions.category.internalError, 
+        {
+          cause: 'Ошибка в методе поиска категории findById: ' + err,
+        })
     }
 
     if (!category) {
@@ -49,7 +52,10 @@ export class CategoriesService {
     try {
       res = await this.categoriesRepo.deleteOne({_id: id}, {});
     } catch (err) {
-      throw new InternalServerErrorException(exceptions.category.internalError)
+      throw new InternalServerErrorException(exceptions.category.internalError,
+        {
+          cause: 'Ошибка в методе удаления категории deleteOne: ' + err,
+        })
     }
 
     if (!res.deletedCount) {
@@ -72,7 +78,10 @@ export class CategoriesService {
     try {
       res = await this.categoriesRepo.findOneAndUpdate({_id: id}, updateData, options)
     } catch (err) {
-      throw new InternalServerErrorException(exceptions.category.internalError)
+      throw new InternalServerErrorException(exceptions.category.internalError,
+        {
+          cause: 'Ошибка в методе обновления данных категории findOneAndUpdate: ' + err,
+        })
     }
 
     if (!res) {
@@ -119,7 +128,10 @@ export class CategoriesService {
       return repo.find({_id: { $in: Object.keys(data) }});
     })
     .catch(err => {
-      throw new InternalServerErrorException(exceptions.category.internalError)
+      throw new InternalServerErrorException(exceptions.category.internalError,
+        {
+          cause: 'Ошибка в методе обновления данных нескольких категории bulkWrite: ' + err,
+        })
     });
   }
 }
