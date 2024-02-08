@@ -39,7 +39,7 @@ export class TasksService {
     return this.tasksRepo.create(task);
   }
 
-  public async getNotAcceptedTasks(dto: GetTasksDto) {
+  public async getNotAcceptedTasks(dto: Record<string, string>) {
     const { location: center, distance, start, end, categoryId } = dto;
     const query: FilterQuery<Task> = {
       volunteer: null,
@@ -71,13 +71,7 @@ export class TasksService {
   }
 
   public async getAcceptedTasks(dto: GetTasksDto) {
-    const {
-      location: { coordinates: center },
-      distance,
-      start,
-      end,
-      categoryId,
-    } = dto;
+    const { location: center, distance, start, end, categoryId } = dto;
     const query: FilterQuery<Task> = {
       status: TaskStatus.ACCEPTED,
       location: {
