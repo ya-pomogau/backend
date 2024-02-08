@@ -18,17 +18,7 @@ export class NewAdminDto implements NewAdminInterface {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()
-  firstName: string;
-
-  @ApiProperty()
-  @IsString()
-  @IsNotEmpty()
-  lastName: string;
-
-  @ApiProperty()
-  @IsString()
-  @IsOptional()
-  middleName?: string;
+  name: string;
 
   @ApiProperty()
   @IsString()

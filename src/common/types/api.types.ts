@@ -39,9 +39,7 @@ export interface NewProfileInterface {
 }
 
 export interface NewUserInterface {
-  firstName: string;
-  middleName?: string;
-  lastName: string;
+  name: string;
   phone: string;
   avatar?: string;
   address: string;
