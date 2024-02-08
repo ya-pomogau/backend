@@ -1,17 +1,16 @@
-import { PointGeoJSONInterface } from '../types/point-geojson.types';
+import { GeoCoordinates } from '../types/point-geojson.types';
 
 export type CreateTaskDto = {
   recipientId: string;
-  title: string;
   description?: string;
   date: Date | null;
   address: string;
-  location: PointGeoJSONInterface;
+  location: GeoCoordinates;
   categoryId: string;
 };
 
 export type GetTasksDto = {
-  location: PointGeoJSONInterface;
+  location: GeoCoordinates;
   distance: number;
   categoryId?: string;
   start?: Date;

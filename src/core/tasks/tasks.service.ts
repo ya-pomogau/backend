@@ -3,11 +3,9 @@ import { FilterQuery } from 'mongoose';
 import { TasksRepository } from '../../datalake/task/task.repository';
 import { UsersRepository } from '../../datalake/users/users.repository';
 import { CreateTaskDto, GetTasksDto } from '../../common/dto/tasks.dto';
-import { Recipient } from '../../datalake/users/schemas/recipient.schema';
-import { Admin } from '../../datalake/users/schemas/admin.schema';
 import { CategoryRepository } from '../../datalake/category/category.repository';
 import { Task } from '../../datalake/task/schemas/task.schema';
-import { ResolveStatus, TaskStatus } from '../../common/types/task.types';
+import { TaskStatus } from '../../common/types/task.types';
 import { UserRole } from '../../common/types/user.types';
 import { Volunteer } from '../../datalake/users/schemas/volunteer.schema';
 import { User } from '../../datalake/users/schemas/user.schema';
@@ -24,10 +22,9 @@ export class TasksService {
     const { recipientId, categoryId, ...data } = dto;
     const recipient = await this.usersRepo.findById(recipientId);
     const category = await this.categoryRepo.findById(categoryId);
-    /* !(recipient instanceof Recipient || recipient instanceof Admin) */
     if (![`${UserRole.ADMIN}`, `${UserRole.RECIPIENT}`].includes(recipient.role)) {
       throw new ForbiddenException('Только реципиент или администратор могут создавать заявки', {
-        cause: `Попытка создать заявку пользователем с _id ${recipientId} и ролью волонтёра`,
+        cause: `Попытка создать заявку пользователем с _id ${recipientId} и ролью ${recipient.role}`,
       });
     }
     const { name, phone, avatar, address, _id } = recipient;
@@ -43,13 +40,7 @@ export class TasksService {
   }
 
   public async getNotAcceptedTasks(dto: GetTasksDto) {
-    const {
-      location: { coordinates: center },
-      distance,
-      start,
-      end,
-      categoryId,
-    } = dto;
+    const { location: center, distance, start, end, categoryId } = dto;
     const query: FilterQuery<Task> = {
       volunteer: null,
       location: {
