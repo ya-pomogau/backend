@@ -31,7 +31,6 @@ export interface TaskInterface {
   recipient: UserProfile;
   volunteer: UserProfile | null;
   status: TaskStatus;
-  title: string;
   description?: string;
   date: Date | null;
   address: string;

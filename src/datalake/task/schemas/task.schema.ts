@@ -58,9 +58,6 @@ export class Task extends Document implements TaskInterface {
   })
   recipientReport: TaskReport | null;
 
-  @Prop({ type: mongoose.SchemaTypes.String, required: true })
-  title: string;
-
   @Prop({ type: raw(rawUserProfile), required: true, immutable: true })
   volunteer: UserProfile;
 

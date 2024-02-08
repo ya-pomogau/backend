@@ -2,7 +2,6 @@ import { PointGeoJSONInterface } from '../types/point-geojson.types';
 
 export type CreateTaskDto = {
   recipientId: string;
-  title: string;
   description?: string;
   date: Date | null;
   address: string;
