@@ -25,15 +25,7 @@ export class NewProfileDto implements NewProfileInterface {
 
   @IsString()
   @IsNotEmpty()
-  firstName: string;
-
-  @IsString()
-  @IsNotEmpty()
-  lastName: string;
-
-  @IsString()
-  @IsOptional()
-  middleName?: string;
+  name: string;
 
   @IsString()
   @IsPhoneNumber('RU')
