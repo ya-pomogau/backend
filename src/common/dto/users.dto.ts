@@ -4,9 +4,7 @@ import { PointGeoJSONInterface } from '../types/point-geojson.types';
 export type CreateUserDto = {
   address: string;
   avatar?: string;
-  firstName: string;
-  lastName: string;
-  middleName?: string;
+  name: string;
   phone: string;
   vkId: string;
   role: UserRole;
