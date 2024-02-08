@@ -31,7 +31,6 @@ export interface TaskInterface {
   recipient: UserProfile;
   volunteer: UserProfile | null;
   status: TaskStatus;
-  title: string;
   description?: string;
   date: Date | null;
   address: string;
@@ -41,7 +40,6 @@ export interface TaskInterface {
   recipientReport: TaskReport | null;
   adminResolve: ResolveStatus | null;
   isPendingChanges: boolean;
-  // findWithin: (center: GeoCoordinates, distance: number) => Promise<Array<TaskInterface>>;
 }
 
 export interface TaskModelVirtuals {
