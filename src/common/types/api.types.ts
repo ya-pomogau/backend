@@ -30,19 +30,13 @@ export interface VKResponseInterface extends VKResponseOKInterface, VKResponseEr
 export type PayloadType = Record<string, unknown>;
 
 export interface NewProfileInterface {
-  firstName: string;
-  middleName?: string;
-  lastName: string;
+  name: string;
   phone: string;
   avatar?: string;
   address: string;
 }
 
-export interface NewUserInterface {
-  name: string;
-  phone: string;
-  avatar?: string;
-  address: string;
+export interface NewUserInterface extends NewProfileInterface {
   role: UserRole;
   vkId: string;
 }
