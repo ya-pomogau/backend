@@ -1,50 +1,18 @@
 import mongoose, { Document } from 'mongoose';
 import { Prop, raw, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { ResolveStatus, TaskInterface, TaskStatus } from '../../../common/types/task.types';
+import {
+  ResolveStatus,
+  TaskInterface,
+  TaskReport,
+  TaskStatus,
+} from '../../../common/types/task.types';
 import { PointGeoJSON, PointGeoJSONSchema } from '../../../common/schemas/PointGeoJSON.schema';
-import { Category } from '../../category/schemas/category.schema';
 import { UserProfile } from '../../../common/types/user.types';
 import { rawUserProfile } from '../../../common/constants/mongoose-fields-raw-definition';
+import { CategoryInterface } from '../../../common/types/category.types';
 
 @Schema({
   timestamps: true,
-  virtuals: {
-    status: {
-      get() {
-        if (!this.volunteer) {
-          return TaskStatus.CREATED;
-        }
-        if (
-          this.volunteerReport === ResolveStatus.PENDING &&
-          this.recipientReport === ResolveStatus.PENDING
-        ) {
-          return TaskStatus.ACCEPTED;
-        }
-        if (
-          (this.volunteerReport === ResolveStatus.FULFILLED &&
-            this.recipientReport === ResolveStatus.FULFILLED) ||
-          (this.volunteerReport === ResolveStatus.REJECTED &&
-            this.recipientReport === ResolveStatus.REJECTED) ||
-          (!!this.adminResolve && this.adminResolve !== ResolveStatus.PENDING)
-        ) {
-          return TaskStatus.COMPLETED;
-        }
-        return TaskStatus.CONFLICTED;
-      },
-    },
-  },
-  /* statics: {
-    findWithin(center: GeoCoordinates, distance: number) {
-      return this.find({
-        location: {
-          $near: {
-            $geometry: center,
-            $maxDistance: distance,
-          },
-        },
-      });
-    },
-  }, */
   toObject: {
     versionKey: false,
     virtuals: false,
@@ -59,13 +27,20 @@ export class Task extends Document implements TaskInterface {
   address: string;
 
   @Prop({
+    default: TaskStatus.CREATED,
+    type: mongoose.SchemaTypes.String,
+    enum: Object.values(TaskStatus),
+  })
+  status: TaskStatus;
+
+  @Prop({
     default: null,
     type: mongoose.SchemaTypes.String,
     enum: Object.values<string>(ResolveStatus),
   })
   adminResolve: ResolveStatus | null;
 
-  category: Category;
+  category: CategoryInterface;
 
   @Prop({ required: true, type: mongoose.SchemaTypes.Date })
   date: Date | null;
@@ -77,26 +52,23 @@ export class Task extends Document implements TaskInterface {
   recipient: UserProfile;
 
   @Prop({
-    default: ResolveStatus.VIRGIN,
+    default: null,
     type: mongoose.SchemaTypes.String,
-    enum: Object.values<string>(ResolveStatus),
+    enum: Object.values<string>(TaskReport),
   })
-  recipientReport: ResolveStatus;
-
-  @Prop({ type: mongoose.SchemaTypes.String, required: true })
-  title: string;
+  recipientReport: TaskReport | null;
 
   @Prop({ type: raw(rawUserProfile), required: true, immutable: true })
   volunteer: UserProfile;
 
   @Prop({
-    default: ResolveStatus.VIRGIN,
+    default: null,
     type: mongoose.SchemaTypes.String,
-    enum: Object.values<string>(ResolveStatus),
+    enum: Object.values<string>(TaskReport),
   })
-  volunteerReport: ResolveStatus;
+  volunteerReport: TaskReport | null;
 
-  @Prop({ type: mongoose.SchemaTypes.Boolean, required: true })
+  @Prop({ type: mongoose.SchemaTypes.Boolean, default: false })
   isPendingChanges: boolean;
 
   @Prop({ type: mongoose.SchemaTypes.String, required: true })
