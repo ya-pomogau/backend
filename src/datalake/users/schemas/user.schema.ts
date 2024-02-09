@@ -46,7 +46,7 @@ export class User extends Document implements GenericUserModelInterface {
   @Prop({
     type: SchemaTypes.String,
     required: true,
-    enum: Object.values(UserRole),
+    enum: ['GeneralUser', 'Admin', 'Recipient', 'Volunteer'],
   })
   role: string;
 }
