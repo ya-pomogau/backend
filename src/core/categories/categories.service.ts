@@ -1,5 +1,4 @@
-import mongoose from 'mongoose';
-import { ForbiddenException, Injectable, InternalServerErrorException, NotFoundException, Logger } from '@nestjs/common';
+import { ForbiddenException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CategoryRepository } from '../../datalake/category/category.repository';
 import { CreateCategoryDto, UpdateCategoryDto } from '../../common/dto/category.dto';
 import {
@@ -13,10 +12,7 @@ const options = {select: "_id title points accessLevel"};
 
 @Injectable()
 export class CategoriesService {
-  constructor(private readonly categoriesRepo: CategoryRepository) {
-    this.logger = new Logger(CategoriesService.name);
-  }
-  private logger: Logger;
+  constructor(private readonly categoriesRepo: CategoryRepository) {}
 
   async getCategories() {
     return this.categoriesRepo.find({});
@@ -121,8 +117,9 @@ export class CategoriesService {
       methods,
       {})
     .then(res => {
+      console.log(res);
       if (res.modifiedCount < methods.length) {
-        this.logger.warn('Want to modify ' + methods.length +' categories, but found ' + res.modifiedCount);
+        console.log('Want to modify ' + methods.length +' categories, but found ' + res.modifiedCount);
       }
 
       return repo.find({_id: { $in: Object.keys(data) }});
