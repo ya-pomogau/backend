@@ -28,7 +28,7 @@ export class AuthApiController {
   }
 
   @Public()
-  @Post('vk')
+  @Post('new')
   async register(@Body() dto: VKNewUserDto) {
     const user = await this.usersService.createUser(dto);
     if (user) {
