@@ -6,7 +6,6 @@ import {
   Post,
   Put,
   UseGuards,
-  Get,
   Patch,
   Request,
 } from '@nestjs/common';
@@ -18,7 +17,6 @@ import { AccessControlGuard } from '../../common/guards/access-control.guard';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { AccessControlList } from '../../common/decorators/access-control-list.decorator';
 import { AccessRights } from '../../common/types/access-rights.types';
-import { Public } from '../../common/decorators/public.decorator';
 import { PostDTO } from './dto/new-post.dto';
 import { BlogService } from '../../core/blog/blog.service';
 
@@ -93,26 +91,34 @@ export class AdminApiController {
   }
 
   @Post('blog')
-  @AccessControlList({ role: UserRole.ADMIN, rights: [AccessRights.createPost] })
+  @AccessControlList({
+    role: UserRole.ADMIN,
+    rights: [AccessRights.createPost, AccessRights.contentEditor],
+  })
   async createPost(@Request() req: Express.Request, @Body() dto: PostDTO) {
     return this.blogService.create(dto, req.user);
   }
 
   // TODO: перенести в SystemApi
-  @Get('blog')
-  @Public()
-  async getAllPosts() {
-    return this.blogService.getAllPosts();
-  }
+  // @Get('blog')
+  // async getAllPosts() {
+  //   return this.blogService.getAllPosts();
+  // }
 
   @Patch('blog/:id')
-  @AccessControlList({ role: UserRole.ADMIN, rights: [AccessRights.updatePost] })
+  @AccessControlList({
+    role: UserRole.ADMIN,
+    rights: [AccessRights.updatePost, AccessRights.contentEditor],
+  })
   async updatePost(@Request() req: Express.Request, @Param('id') id: string, @Body() dto: PostDTO) {
     return this.blogService.updatePost(id, dto, req.user);
   }
 
   @Delete('blog/:id')
-  @AccessControlList({ role: UserRole.ADMIN, rights: [AccessRights.deletePost] })
+  @AccessControlList({
+    role: UserRole.ADMIN,
+    rights: [AccessRights.deletePost, AccessRights.contentEditor],
+  })
   async deletePost(@Request() req: Express.Request, @Param('id') id: string) {
     return this.blogService.deletePost(id, req.user);
   }
