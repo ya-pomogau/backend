@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { BlogPostRepository } from './blog-post.repository';
+import { BlogPostRepository } from './blog.repository';
 import { BlogPost, BlogPostSchema } from './schema/blog-post.schema';
 
 @Module({
@@ -8,4 +8,4 @@ import { BlogPost, BlogPostSchema } from './schema/blog-post.schema';
   providers: [BlogPostRepository],
   exports: [BlogPostRepository],
 })
-export class BlogPostModule {}
+export class BlogRepositoryModule {}

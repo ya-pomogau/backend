@@ -16,6 +16,8 @@ import { UsersModule } from './core/users/users.module';
 import { MongooseConfigService } from './config/database-config.service';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { AdminApiModule } from './api/admin-api/admin-api.module';
+import { BlogApiModule } from './api/admin-api/blog-api.module';
+import { BlogModule } from './core/blog/blog.module';
 
 @Module({
   imports: [
@@ -35,6 +37,8 @@ import { AdminApiModule } from './api/admin-api/admin-api.module';
     AuthModule,
     UsersModule,
     AdminApiModule,
+    BlogApiModule,
+    BlogModule,
   ],
   providers: [
     {

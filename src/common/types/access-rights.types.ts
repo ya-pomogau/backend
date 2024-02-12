@@ -30,6 +30,9 @@ export enum AccessRights {
   alterPassword = 'CHANGE_ADMIN_PASSWORD',
   editLegislative = 'CHANGE_CONFIDENTIALITY_POLICY',
   editContacts = 'CHANGE_CONTACTS_INFO',
+  createPost = 'CREATE_POST',
+  updatePost = 'UPDATE_POST',
+  deletePost = 'DELETE_POST',
 }
 
 export type AccessRightType = `${AccessRights}`;
