@@ -1,4 +1,15 @@
-import { Body, Controller, Delete, Param, Post, Put, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Param,
+  Post,
+  Put,
+  UseGuards,
+  Get,
+  Patch,
+  Request,
+} from '@nestjs/common';
 import { MethodNotAllowedException } from '@nestjs/common/exceptions';
 import { UsersService } from '../../core/users/users.service';
 import { NewAdminDto } from './dto/new-admin.dto';
@@ -7,12 +18,18 @@ import { AccessControlGuard } from '../../common/guards/access-control.guard';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { AccessControlList } from '../../common/decorators/access-control-list.decorator';
 import { AccessRights } from '../../common/types/access-rights.types';
+import { Public } from '../../common/decorators/public.decorator';
+import { PostDTO } from './dto/new-post.dto';
+import { BlogService } from '../../core/blog/blog.service';
 
 @UseGuards(JwtAuthGuard)
 @UseGuards(AccessControlGuard)
 @Controller('admin')
 export class AdminApiController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly blogService: BlogService
+  ) {}
 
   @Post('create')
   @AccessControlList({ role: UserRole.ADMIN, isRoot: true })
@@ -73,5 +90,30 @@ export class AdminApiController {
   async revokeKeys(@Param(':id') _id: string) {
     throw new MethodNotAllowedException('Этот метод нельзя использовать здесь!');
     //  return this.usersService.revokeKeys(_id);
+  }
+
+  @Post('blog')
+  @AccessControlList({ role: UserRole.ADMIN, rights: [AccessRights.createPost] })
+  async createPost(@Request() req: Express.Request, @Body() dto: PostDTO) {
+    return this.blogService.create(dto, req.user);
+  }
+
+  // TODO: перенести в SystemApi
+  @Get('blog')
+  @Public()
+  async getAllPosts() {
+    return this.blogService.getAllPosts();
+  }
+
+  @Patch('blog/:id')
+  @AccessControlList({ role: UserRole.ADMIN, rights: [AccessRights.updatePost] })
+  async updatePost(@Request() req: Express.Request, @Param('id') id: string, @Body() dto: PostDTO) {
+    return this.blogService.updatePost(id, dto, req.user);
+  }
+
+  @Delete('blog/:id')
+  @AccessControlList({ role: UserRole.ADMIN, rights: [AccessRights.deletePost] })
+  async deletePost(@Request() req: Express.Request, @Param('id') id: string) {
+    return this.blogService.deletePost(id, req.user);
   }
 }

@@ -12,7 +12,7 @@ export class BlogService {
 
   async create(dto: Partial<PostDTO>, user) {
     const { name, phone, avatar, address, _id } = await this.userRepo.findById(user.id);
-    const newPost = await this.blogRepo.create({
+    return this.blogRepo.create({
       ...dto,
       author: {
         name,
@@ -22,26 +22,23 @@ export class BlogService {
         _id,
       },
     });
-    return newPost;
   }
 
-  async find() {
-    const posts = await this.blogRepo.find({});
-    return posts;
+  async getAllPosts() {
+    return this.blogRepo.find({});
   }
 
-  async findByIdAndUpdate(postId: string, updateDto: Partial<PostDTO>, user) {
+  async updatePost(postId: string, updateDto: PostDTO, user) {
     const { author } = await this.blogRepo.findById(postId);
 
     if (!user.isRoot && author._id !== user.id) {
       throw new BadRequestException('Вы не можете редактировать чужой пост');
     }
 
-    const post = await this.blogRepo.findByIdAndUpdate(postId, updateDto, {});
-    return post;
+    return this.blogRepo.findByIdAndUpdate(postId, updateDto, {});
   }
 
-  async findByIdAndDelete(postId: string, user) {
+  async deletePost(postId: string, user) {
     const { author } = await this.blogRepo.findById(postId);
 
     if (!user.isRoot && author._id !== user.id) {
