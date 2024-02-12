@@ -5,8 +5,8 @@ import { UsersRepository } from '../../datalake/users/users.repository';
 import { CreateTaskDto, GetTasksDto } from '../../common/dto/tasks.dto';
 import { CategoryRepository } from '../../datalake/category/category.repository';
 import { Task } from '../../datalake/task/schemas/task.schema';
-import { TaskStatus } from '../../common/types/task.types';
-import { UserRole } from '../../common/types/user.types';
+import { ResolveStatus, TaskReport, TaskStatus } from '../../common/types/task.types';
+import { UserRole, AnyUserInterface } from '../../common/types/user.types';
 import { Volunteer } from '../../datalake/users/schemas/volunteer.schema';
 import { User } from '../../datalake/users/schemas/user.schema';
 
@@ -39,10 +39,38 @@ export class TasksService {
     return this.tasksRepo.create(task);
   }
 
-  public async getNotAcceptedTasks(dto: Partial<GetTasksDto>) {
+  public async getTask(taskId: string) {
+    return this.tasksRepo.findById(taskId);
+  }
+
+  public async getVirginTasks() {
+    return this.tasksRepo.find({ status: TaskStatus.CREATED, volunteer: null });
+  }
+
+  public async updateTask(taskId: string, user: AnyUserInterface, dto: Partial<CreateTaskDto>) {
+    const { role, _id: userId } = user;
+    if (!(role === UserRole.RECIPIENT || role === UserRole.ADMIN)) {
+      throw new ForbiddenException(
+        'Вы не можете редактировать эту задачу: недостаточно полномочий',
+        {
+          cause: `Попытка редактировать задачу '${taskId} пользователем '${userId} с ролью '${role}'. `,
+        }
+      );
+    }
+    const query: FilterQuery<Task> = {
+      _id: taskId,
+      status: TaskStatus.CREATED,
+    };
+    if (role === UserRole.RECIPIENT) {
+      query.recipient._id = userId;
+    }
+    return this.tasksRepo.findOneAndUpdate(query, dto, { new: true });
+  }
+
+  public async getTasksByStatus(taskStatus: TaskStatus, dto: Partial<GetTasksDto>) {
     const { location: center, distance, start, end, categoryId } = dto;
     const query: FilterQuery<Task> = {
-      volunteer: null,
+      status: taskStatus,
       location: {
         $near: {
           $geometry: center,
@@ -70,17 +98,22 @@ export class TasksService {
     return this.tasksRepo.find(query);
   }
 
-  public async getAcceptedTasks(dto: GetTasksDto) {
+  public async getOwnTasks(user: AnyUserInterface, status: TaskStatus, dto?: GetTasksDto) {
     const { location: center, distance, start, end, categoryId } = dto;
+    const { _id, role } = user;
+    const roleIndex = role.toLowerCase();
     const query: FilterQuery<Task> = {
-      status: TaskStatus.ACCEPTED,
-      location: {
+      status,
+      [roleIndex]: { _id },
+    };
+    if (!!center && center.length === 2 && !!distance) {
+      query.location = {
         $near: {
           $geometry: center,
           $maxDistance: distance,
         },
-      },
-    };
+      };
+    }
     if (categoryId) {
       query.category._id = categoryId;
     }
@@ -101,7 +134,7 @@ export class TasksService {
     return this.tasksRepo.find(query);
   }
 
-  async acceptTask(taskId: string, volunteerId: string) {
+  public async acceptTask(taskId: string, volunteerId: string) {
     const volunteer = (await this.usersRepo.findById(volunteerId)) as User & Volunteer;
     if (![`${UserRole.ADMIN}`, `${UserRole.VOLUNTEER}`].includes(volunteer.role)) {
       throw new ForbiddenException('Только волонтёр или администратор могут создавать заявки', {
@@ -123,5 +156,40 @@ export class TasksService {
       { status: TaskStatus.ACCEPTED, volunteer: { name, phone, avatar, address, _id } },
       { new: true }
     );
+  }
+
+  public async reportTask(taskId: string, userId: string, userRole: UserRole, result: TaskReport) {
+    const myIndex = userRole === UserRole.VOLUNTEER ? 'volunteerReport' : 'recipientReport';
+    const counterpartyIndex =
+      userRole === UserRole.RECIPIENT ? 'volunteerReport' : 'recipientReport';
+    const task = await this.tasksRepo.findById(taskId);
+    if (task.status !== TaskStatus.ACCEPTED) {
+      throw new ForbiddenException('Нельзя отчитаться по не открытой задаче!', {
+        cause: `Попытка отчёта по задаче с _id '${task._id}' со статусом ${task.status} `,
+      });
+    }
+    if (task[counterpartyIndex]) {
+      this.tasksRepo.findByIdAndUpdate(
+        taskId,
+        {
+          ...task,
+          [myIndex]: result,
+          status: result === task[counterpartyIndex] ? TaskStatus.COMPLETED : TaskStatus.CONFLICTED,
+          adminResolve: result === task[counterpartyIndex] ? null : ResolveStatus.VIRGIN,
+          isPendingChanges: false,
+        },
+        { new: true }
+      );
+    } else {
+      this.tasksRepo.findByIdAndUpdate(
+        taskId,
+        {
+          ...task,
+          [myIndex]: result,
+          isPendingChanges: true,
+        },
+        { new: true }
+      );
+    }
   }
 }
