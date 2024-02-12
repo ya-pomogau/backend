@@ -36,11 +36,11 @@ export enum AdminPermission {
   BLOG = AccessRights.contentEditor,
   CATEGORIES = AccessRights.categoryPoints,
 }
-export enum ResolveStatus {
+/* export enum ResolveStatus {
   PENDING = 'pending',
   FULLFILLED = 'fullfilled',
   REJECTED = 'rejected',
-}
+} */
 
 export type UserProfile = {
   name: string;
