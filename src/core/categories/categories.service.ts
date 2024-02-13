@@ -95,6 +95,7 @@ export class CategoriesService {
   // Только для админов с правами AdminPermission.CATEGORIES
   async updatePoints(data: Record<string, number>, user: AdminInterface) {
     const repo = this.categoriesRepo;
+    let res;
     if (
       user.role !== UserRole.ADMIN ||
       (user.role === UserRole.ADMIN && !user.permissions.includes(AdminPermission.CATEGORIES))
@@ -102,16 +103,18 @@ export class CategoriesService {
       throw new ForbiddenException(exceptions.category.notEnoughRights);
     }
 
-    return Promise.all(
-      Object.keys(data).map((id) => {
-        return repo.findByIdAndUpdate(id, { points: data[id] }, {}).catch((err) => {
-          return new InternalServerErrorException(err.message);
-        });
-      })
-    )
-      .then((res) => res)
-      .catch((err) => {
-        throw new InternalServerErrorException(err.message);
-      });
+    try {
+      res = await Promise.all(
+        Object.keys(data).map((id) => {
+          return repo.findByIdAndUpdate(id, { points: data[id] }, {}).catch((err) => {
+            return new InternalServerErrorException(err.message);
+          });
+        })
+      );
+    } catch (err) {
+      throw new InternalServerErrorException(err.message);
+    }
+
+    return res;
   }
 }
