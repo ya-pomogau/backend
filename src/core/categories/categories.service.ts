@@ -7,7 +7,7 @@ import {
 import exceptions from '../../common/constants/exceptions';
 import { CategoryRepository } from '../../datalake/category/category.repository';
 import { CreateCategoryDto, UpdateCategoryDto } from '../../common/dto/category.dto';
-import { AdminPermission, AnyUserInterface, UserRole } from '../../common/types/user.types';
+import { AdminPermission, UserRole, AdminInterface } from '../../common/types/user.types';
 
 const options = { select: '_id title points accessLevel' };
 
@@ -39,7 +39,7 @@ export class CategoriesService {
   }
 
   // Только root
-  async removeCategory(id: string, user: AnyUserInterface) {
+  async removeCategory(id: string, user: AdminInterface) {
     let res;
     if (user.role !== UserRole.ADMIN || (user.role === UserRole.ADMIN && !user.isRoot)) {
       throw new ForbiddenException(exceptions.category.notEnoughRights);
@@ -60,12 +60,12 @@ export class CategoriesService {
   }
 
   // Только админы с правами AdminPermission.CATEGORIES
-  async updateCategoryById(id: string, updateData: UpdateCategoryDto, user: AnyUserInterface) {
+  async updateCategoryById(id: string, updateData: UpdateCategoryDto, user: AdminInterface) {
     let res;
 
     if (
       user.role !== UserRole.ADMIN ||
-      (user.role === UserRole.ADMIN && user.permissions.includes(AdminPermission.CATEGORIES))
+      (user.role === UserRole.ADMIN && !user.permissions.includes(AdminPermission.CATEGORIES))
     ) {
       throw new ForbiddenException(exceptions.category.notEnoughRights);
     }
@@ -86,7 +86,7 @@ export class CategoriesService {
   }
 
   // Только root
-  async createCategory(data: CreateCategoryDto, user: AnyUserInterface) {
+  async createCategory(data: CreateCategoryDto, user: AdminInterface) {
     if (user.role !== UserRole.ADMIN || (user.role === UserRole.ADMIN && !user.isRoot)) {
       throw new ForbiddenException(exceptions.category.notEnoughRights);
     }
@@ -95,11 +95,11 @@ export class CategoriesService {
   }
 
   // Только для админов с правами AdminPermission.CATEGORIES
-  async updateCategories(data: Record<string, number>, user: AnyUserInterface) {
+  async updatePoints(data: Record<string, number>, user: AdminInterface) {
     const repo = this.categoriesRepo;
     if (
       user.role !== UserRole.ADMIN ||
-      (user.role === UserRole.ADMIN && user.permissions.includes(AdminPermission.CATEGORIES))
+      (user.role === UserRole.ADMIN && !user.permissions.includes(AdminPermission.CATEGORIES))
     ) {
       throw new ForbiddenException(exceptions.category.notEnoughRights);
     }
