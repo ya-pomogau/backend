@@ -21,7 +21,7 @@ import { TaskReport, TaskStatus } from '../../common/types/task.types';
 
 @UseGuards(JwtAuthGuard)
 @UseGuards(AccessControlGuard)
-@Controller('volunteer')
+@Controller('recipient')
 export class RecipientApiController {
   constructor(private readonly tasksService: TasksService) {}
 
