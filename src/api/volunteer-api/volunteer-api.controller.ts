@@ -6,6 +6,7 @@ import { TasksService } from '../../core/tasks/tasks.service';
 import { AccessControlList } from '../../common/decorators/access-control-list.decorator';
 import { UserRole, UserStatus } from '../../common/types/user.types';
 import { GetTasksSearchDto } from '../recipient-api/dto/get-tasks-query.dto';
+import { TaskReport, TaskStatus } from '../../common/types/task.types';
 
 @UseGuards(JwtAuthGuard)
 @UseGuards(AccessControlGuard)
@@ -19,12 +20,36 @@ export class VolunteerApiController {
   @AccessControlList({ role: UserRole.VOLUNTEER, level: UserStatus.CONFIRMED })
   @Get('tasks/virgin')
   public async getNewTasks(@Query() query: GetTasksSearchDto) {
-    return this.tasksService.getNotAcceptedTasks(query);
+    return this.tasksService.getTasksByStatus(TaskStatus.ACCEPTED, query);
   }
 
   @AccessControlList({ role: UserRole.VOLUNTEER, level: UserStatus.CONFIRMED })
   @Put('tasks/:id/accept')
   public async accept(@Req() { user: { _id: volunteerId } }, @Param(':id') taskId: string) {
     return this.tasksService.acceptTask(taskId, volunteerId);
+  }
+
+  @Put('/tasks/:id/fulfill')
+  @AccessControlList({ role: UserRole.VOLUNTEER, level: UserStatus.CONFIRMED })
+  public async fulfillTask(@Param(':id') id: string, @Req() { user: { _id: userId } }) {
+    return this.tasksService.reportTask(id, userId, UserRole.VOLUNTEER, TaskReport.FULFILLED);
+  }
+
+  @Put('/tasks/:id/reject')
+  @AccessControlList({ role: UserRole.VOLUNTEER, level: UserStatus.CONFIRMED })
+  public async rejectTask(@Param(':id') id: string, @Req() { user: { _id: userId } }) {
+    return this.tasksService.reportTask(id, userId, UserRole.VOLUNTEER, TaskReport.REJECTED);
+  }
+
+  @Get('/tasks/accepted')
+  @AccessControlList({ role: UserRole.VOLUNTEER, level: UserStatus.CONFIRMED })
+  public async getAcceptedTasks(@Query() query: GetTasksSearchDto, @Req() { user }) {
+    return this.tasksService.getOwnTasks(user, TaskStatus.ACCEPTED, query);
+  }
+
+  @Get('/tasks/completed')
+  @AccessControlList({ role: UserRole.VOLUNTEER, level: UserStatus.CONFIRMED })
+  public async getCompletedTasks(@Query() query: GetTasksSearchDto, @Req() { user }) {
+    return this.tasksService.getOwnTasks(user, TaskStatus.COMPLETED, query);
   }
 }
