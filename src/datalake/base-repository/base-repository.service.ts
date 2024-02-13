@@ -159,6 +159,10 @@ export abstract class BaseRepositoryService<T extends Document, M = {}, V = {}> 
     return null;
   }
 
+  async bulkWrite(docs: any, options: Record<string, unknown>): Promise<any> {
+    return await this.entityModel.bulkWrite(docs, options);
+  }
+
   async deleteMany(entityFilterQuery: FilterQuery<T>): Promise<DeleteResult> {
     return this.entityModel.deleteMany(entityFilterQuery);
   }

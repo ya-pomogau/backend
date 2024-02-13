@@ -13,7 +13,7 @@ export class Volunteer extends Document implements VolunteerUserModelInterface {
   @Prop({
     type: SchemaTypes.Number,
     required: true,
-    enum: Object.values(UserStatus),
+    enum: [-1, 0, 1, 2, 3],
   })
   status: UserStatus;
 

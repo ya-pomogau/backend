@@ -18,6 +18,7 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { CategoryRepository } from './datalake/category/category.repository';
 import { CategoriesModule } from './core/categories/categories.module';
 import { AdminApiModule } from './api/admin-api/admin-api.module';
+import { BlogModule } from './core/blog/blog.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { AdminApiModule } from './api/admin-api/admin-api.module';
     CategoryRepositoryModule,
     CategoriesModule,
     AdminApiModule,
+    BlogModule,
   ],
   providers: [
     {

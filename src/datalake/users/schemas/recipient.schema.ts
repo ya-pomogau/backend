@@ -15,7 +15,7 @@ export class Recipient extends Document implements RecipientUserModelInterface {
   @Prop({
     required: true,
     type: SchemaTypes.Number,
-    enum: Object.values(UserStatus),
+    enum: [-1, 0, 1, 2, 3],
   })
   status: UserStatus;
 
