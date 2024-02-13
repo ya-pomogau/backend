@@ -5,11 +5,7 @@ export const rawUserProfile = {
 
   avatar: { default: '', type: mongoose.SchemaTypes.String },
 
-  firstName: { required: true, type: mongoose.SchemaTypes.String },
-
-  lastName: { required: true, type: mongoose.SchemaTypes.String },
-
-  middleName: { default: '', type: mongoose.SchemaTypes.String },
+  name: { required: true, type: mongoose.SchemaTypes.String },
 
   phone: { required: true, type: mongoose.SchemaTypes.String },
 

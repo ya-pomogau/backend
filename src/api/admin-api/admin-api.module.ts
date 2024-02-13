@@ -6,9 +6,10 @@ import { HashModule } from '../../common/hash/hash.module';
 import { UsersRepositoryModule } from '../../datalake/users/users-repository.module';
 import { JwtStrategy } from '../../core/auth/strategies/jwt.strategy';
 import { LocalStrategy } from '../../core/auth/strategies/local.strategy';
+import { BlogModule } from '../../core/blog/blog.module';
 
 @Module({
-  imports: [HashModule, UsersRepositoryModule, UsersModule],
+  imports: [HashModule, UsersRepositoryModule, UsersModule, BlogModule],
   controllers: [AdminApiController],
   providers: [UsersService, JwtStrategy, LocalStrategy],
 })

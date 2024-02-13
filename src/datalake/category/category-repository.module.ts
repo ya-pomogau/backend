@@ -8,4 +8,4 @@ import { CategoryRepository } from './category.repository';
   providers: [CategoryRepository],
   exports: [CategoryRepository],
 })
-export class CategoryModule {}
+export class CategoryRepositoryModule {}
