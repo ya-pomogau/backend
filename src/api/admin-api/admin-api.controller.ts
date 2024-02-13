@@ -99,12 +99,6 @@ export class AdminApiController {
     return this.blogService.create(dto, req.user);
   }
 
-  // TODO: перенести в SystemApi
-  // @Get('blog')
-  // async getAllPosts() {
-  //   return this.blogService.getAllPosts();
-  // }
-
   @Patch('blog/:id')
   @AccessControlList({
     role: UserRole.ADMIN,
