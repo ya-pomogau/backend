@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
+import { CategoryRepositoryModule } from '../../datalake/category/category-repository.module';
 import { CategoriesService } from './categories.service';
-import { CategoryRepositoryModule } from 'src/datalake/category/category-repository.module';
 
 @Module({
   imports: [CategoryRepositoryModule],
