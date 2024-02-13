@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import { DeleteResult, UpdateResult } from 'mongodb';
+import { DeleteResult, UpdateResult, BulkWriteResult } from 'mongodb';
 import { Document, FilterQuery, Model, UpdateQuery, type ObjectId } from 'mongoose';
+import { AnyError } from 'typeorm';
 import { POJOType } from '../../common/types/pojo.type';
 
 export abstract class BaseRepositoryService<T extends Document, M = {}, V = {}> {
@@ -81,7 +82,7 @@ export abstract class BaseRepositoryService<T extends Document, M = {}, V = {}> 
       new: true,
       ...options,
     });
-    return doc.toObject();
+    return doc ? doc.toObject() : null;
   }
 
   async findOneAndReplace(
@@ -95,12 +96,12 @@ export abstract class BaseRepositoryService<T extends Document, M = {}, V = {}> 
         ...options,
       })
       .exec();
-    return doc.toObject();
+    return doc ? doc.toObject() : null;
   }
 
   async findOneAndDelete(query: FilterQuery<T>, options: Record<string, unknown>): Promise<T> {
     const doc = await this.entityModel.findOneAndDelete(query, options).exec();
-    return doc.toObject();
+    return doc ? doc.toObject() : null;
   }
 
   async findById(
@@ -156,6 +157,10 @@ export abstract class BaseRepositoryService<T extends Document, M = {}, V = {}> 
       return this.entityModel.find(query, {}, options);
     }
     return null;
+  }
+
+  async bulkWrite(docs: any, options: Record<string, unknown>): Promise<any> {
+    return await this.entityModel.bulkWrite(docs, options);
   }
 
   async deleteMany(entityFilterQuery: FilterQuery<T>): Promise<DeleteResult> {

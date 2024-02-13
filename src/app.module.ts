@@ -7,7 +7,7 @@ import { APP_GUARD } from '@nestjs/core';
 import configuration from './config/configuration';
 import { HashModule } from './common/hash/hash.module';
 import { UsersRepositoryModule } from './datalake/users/users-repository.module';
-import { CategoryModule } from './datalake/category/category.module';
+import { CategoryRepositoryModule } from './datalake/category/category-repository.module';
 import { TaskModule } from './datalake/task/task.module';
 import { ConfidentialityPolicyModule } from './datalake/confidentiality-policy/confidentiality-policy.module';
 import { AuthApiModule } from './api/auth-api/auth-api.module';
@@ -15,6 +15,8 @@ import { AuthModule } from './core/auth/auth.module';
 import { UsersModule } from './core/users/users.module';
 import { MongooseConfigService } from './config/database-config.service';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
+import { CategoryRepository } from './datalake/category/category.repository';
+import { CategoriesModule } from './core/categories/categories.module';
 import { AdminApiModule } from './api/admin-api/admin-api.module';
 import { BlogModule } from './core/blog/blog.module';
 
@@ -30,11 +32,12 @@ import { BlogModule } from './core/blog/blog.module';
     // ScheduleModule.forRoot(),
     TaskModule,
     UsersRepositoryModule,
-    CategoryModule,
     ConfidentialityPolicyModule,
     AuthApiModule,
     AuthModule,
     UsersModule,
+    CategoryRepositoryModule,
+    CategoriesModule,
     AdminApiModule,
     BlogModule,
   ],
