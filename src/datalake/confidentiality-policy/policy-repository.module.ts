@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ConfidentialityPolicyRepository } from './confidentiality-policy.repository';
+import { PolicyRepository } from './policy.repository';
 import {
   ConfidentialityPolicy,
   ConfidentialityPolicySchema,
@@ -12,7 +12,7 @@ import {
       { name: ConfidentialityPolicy.name, schema: ConfidentialityPolicySchema },
     ]),
   ],
-  providers: [ConfidentialityPolicyRepository],
-  exports: [ConfidentialityPolicyRepository],
+  providers: [PolicyRepository],
+  exports: [PolicyRepository],
 })
-export class ConfidentialityPolicyModule {}
+export class PolicyRepositoryModule {}
