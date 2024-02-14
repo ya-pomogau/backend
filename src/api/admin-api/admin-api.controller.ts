@@ -8,17 +8,20 @@ import {
   UseGuards,
   Patch,
   Request,
+  Req,
 } from '@nestjs/common';
 import { MethodNotAllowedException } from '@nestjs/common/exceptions';
 import { UsersService } from '../../core/users/users.service';
 import { NewAdminDto } from './dto/new-admin.dto';
-import { UserRole } from '../../common/types/user.types';
+import { AnyUserInterface, UserRole } from '../../common/types/user.types';
 import { AccessControlGuard } from '../../common/guards/access-control.guard';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { AccessControlList } from '../../common/decorators/access-control-list.decorator';
 import { AccessRights } from '../../common/types/access-rights.types';
 import { PostDTO } from './dto/new-post.dto';
 import { BlogService } from '../../core/blog/blog.service';
+import { ApiCreateCategoryDto } from './dto/new-category.dro';
+import { CategoriesService } from '../../core/categories/categories.service';
 
 @UseGuards(JwtAuthGuard)
 @UseGuards(AccessControlGuard)
@@ -26,7 +29,8 @@ import { BlogService } from '../../core/blog/blog.service';
 export class AdminApiController {
   constructor(
     private readonly usersService: UsersService,
-    private readonly blogService: BlogService
+    private readonly blogService: BlogService,
+    private readonly categoryService: CategoriesService
   ) {}
 
   @Post('create')
@@ -121,5 +125,15 @@ export class AdminApiController {
   })
   async deletePost(@Request() req: Express.Request, @Param('id') id: string) {
     return this.blogService.deletePost(id, req.user);
+  }
+
+  @Post('category')
+  @AccessControlList({
+    role: UserRole.ADMIN,
+    isRoot: true,
+    rights: [AccessRights.categoryPoints],
+  })
+  public async createCategory(@Body() dto: ApiCreateCategoryDto, @Req() req: Express.Request) {
+    return this.categoryService.createCategory(dto, req.user as AnyUserInterface);
   }
 }

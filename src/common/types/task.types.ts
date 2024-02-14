@@ -27,7 +27,6 @@ export enum TaskReport {
 }
 
 export interface TaskInterface {
-  _id: string;
   recipient: UserProfile;
   volunteer: UserProfile | null;
   status: TaskStatus;

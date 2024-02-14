@@ -19,7 +19,7 @@ export class TasksService {
   ) {}
 
   public async create(dto: CreateTaskDto) {
-    const { recipientId, categoryId, ...data } = dto;
+    const { recipientId, categoryId, location, ...data } = dto;
     const recipient = await this.usersRepo.findById(recipientId);
     const category = await this.categoryRepo.findById(categoryId);
     if (![`${UserRole.ADMIN}`, `${UserRole.RECIPIENT}`].includes(recipient.role)) {
@@ -35,6 +35,7 @@ export class TasksService {
       status: TaskStatus.CREATED,
       category,
       isPendingChanges: false,
+      location: { type: 'Point', coordinates: location },
     };
     return this.tasksRepo.create(task);
   }

@@ -20,9 +20,6 @@ import { CategoryInterface } from '../../../common/types/category.types';
   },
 })
 export class Task extends Document implements TaskInterface {
-  @Prop({ type: mongoose.SchemaTypes.ObjectId, required: true })
-  _id: string;
-
   @Prop({ type: mongoose.SchemaTypes.String, required: true })
   address: string;
 
@@ -36,13 +33,14 @@ export class Task extends Document implements TaskInterface {
   @Prop({
     default: null,
     type: mongoose.SchemaTypes.String,
-    enum: Object.values<string>(ResolveStatus),
+    enum: [...Object.values<string>(ResolveStatus), null],
+    required: false,
   })
   adminResolve: ResolveStatus | null;
 
   category: CategoryInterface;
 
-  @Prop({ required: true, type: mongoose.SchemaTypes.Date })
+  @Prop({ required: false, type: mongoose.SchemaTypes.Date })
   date: Date | null;
 
   @Prop({ required: true, type: PointGeoJSONSchema })
@@ -54,17 +52,19 @@ export class Task extends Document implements TaskInterface {
   @Prop({
     default: null,
     type: mongoose.SchemaTypes.String,
-    enum: Object.values<string>(TaskReport),
+    enum: [...Object.values<string>(TaskReport), null],
+    required: false,
   })
   recipientReport: TaskReport | null;
 
-  @Prop({ type: raw(rawUserProfile), required: true, immutable: true })
+  @Prop({ type: raw(rawUserProfile), required: false, immutable: true })
   volunteer: UserProfile;
 
   @Prop({
     default: null,
     type: mongoose.SchemaTypes.String,
-    enum: Object.values<string>(TaskReport),
+    enum: [...Object.values<string>(TaskReport), null],
+    required: false,
   })
   volunteerReport: TaskReport | null;
 

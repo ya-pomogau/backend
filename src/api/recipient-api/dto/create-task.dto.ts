@@ -3,7 +3,7 @@ import {
   ArrayMaxSize,
   ArrayMinSize,
   IsArray,
-  IsDate,
+  IsDateString,
   IsDefined,
   IsNotEmpty,
   IsNumber,
@@ -29,7 +29,7 @@ export class ApiCreateTaskDto implements Omit<CreateTaskDto, 'recipientId'> {
 
   @ApiProperty()
   @IsOptional()
-  @IsDate()
+  @IsDateString()
   date: Date | null;
 
   @ApiProperty()
