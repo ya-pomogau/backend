@@ -69,12 +69,15 @@ export class TasksService {
   }
 
   public async getTasksByStatus(taskStatus: TaskStatus, dto: Partial<GetTasksDto>) {
+    console.log(`TaskStatus: '${taskStatus}', dto:`);
+    console.dir(dto);
     const { location: center, distance, start, end, categoryId } = dto;
+    console.dir(center);
     const query: FilterQuery<Task> = {
       status: taskStatus,
       location: {
         $near: {
-          $geometry: center,
+          $geometry: { type: 'Point', coordinates: center },
           $maxDistance: distance,
         },
       },

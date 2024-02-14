@@ -6,7 +6,7 @@ import { UsersRepositoryModule } from '../../datalake/users/users-repository.mod
 import { CategoryRepositoryModule } from '../../datalake/category/category-repository.module';
 import { UsersModule } from '../../core/users/users.module';
 import { CategoriesModule } from '../../core/categories/categories.module';
-import { RecipientApiController } from '../recipient-api/recipient-api.controller';
+import { VolunteerApiController } from './volunteer-api.controller';
 
 @Module({
   imports: [
@@ -17,7 +17,7 @@ import { RecipientApiController } from '../recipient-api/recipient-api.controlle
     UsersModule,
     CategoriesModule,
   ],
-  controllers: [RecipientApiController],
+  controllers: [VolunteerApiController],
   providers: [TasksService],
 })
 export class VolunteerApiModule {}

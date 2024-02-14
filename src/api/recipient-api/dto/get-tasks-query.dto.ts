@@ -56,11 +56,25 @@ export class GetTasksSearchDto implements Partial<GetTasksDto> {
   distance: number;
 
   @ApiProperty()
+  @ValidateIf((obj) => obj.location !== undefined)
+  @IsDefined()
+  @IsNumber()
+  @IsOptional()
+  longitude: number;
+
+  @ApiProperty()
+  @ValidateIf((obj) => obj.location !== undefined)
+  @IsDefined()
+  @IsNumber()
+  @IsOptional()
+  latitude: number;
+
+  @ApiProperty()
   @IsOptional()
   @IsDate()
   end: Date;
 
-  @ApiProperty()
+  /* @ApiProperty()
   @ValidateIf((obj) => obj.distance !== undefined)
   @IsDefined()
   @IsOptional()
@@ -68,7 +82,7 @@ export class GetTasksSearchDto implements Partial<GetTasksDto> {
   @ArrayMinSize(2)
   @ArrayMaxSize(2)
   @IsNumber({}, { each: true })
-  location: GeoCoordinates;
+  location: GeoCoordinates; */
 
   @ApiProperty()
   @IsOptional()

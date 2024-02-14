@@ -43,7 +43,7 @@ export class Task extends Document implements TaskInterface {
   @Prop({ required: false, type: mongoose.SchemaTypes.Date })
   date: Date | null;
 
-  @Prop({ required: true, type: PointGeoJSONSchema })
+  @Prop({ required: true, type: PointGeoJSONSchema, index: '2dsphere' })
   location: PointGeoJSON;
 
   @Prop({ type: raw(rawUserProfile), required: true, immutable: true })

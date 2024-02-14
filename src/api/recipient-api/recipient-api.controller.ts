@@ -68,12 +68,20 @@ export class RecipientApiController {
   @Get('/tasks/accepted')
   @AccessControlList({ role: UserRole.RECIPIENT, level: UserStatus.CONFIRMED })
   public async getAcceptedTasks(@Query() query: GetTasksSearchDto, @Req() { user }) {
-    return this.tasksService.getOwnTasks(user, TaskStatus.ACCEPTED, query);
+    const { latitude, longitude, ...data } = query;
+    return this.tasksService.getOwnTasks(user, TaskStatus.ACCEPTED, {
+      ...data,
+      location: [longitude, latitude],
+    });
   }
 
   @Get('/tasks/completed')
   @AccessControlList({ role: UserRole.RECIPIENT, level: UserStatus.CONFIRMED })
   public async getCompletedTasks(@Query() query: GetTasksSearchDto, @Req() { user }) {
-    return this.tasksService.getOwnTasks(user, TaskStatus.COMPLETED, query);
+    const { latitude, longitude, ...data } = query;
+    return this.tasksService.getOwnTasks(user, TaskStatus.COMPLETED, {
+      ...data,
+      location: [longitude, latitude],
+    });
   }
 }

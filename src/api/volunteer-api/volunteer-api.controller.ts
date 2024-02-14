@@ -20,7 +20,14 @@ export class VolunteerApiController {
   @AccessControlList({ role: UserRole.VOLUNTEER, level: UserStatus.CONFIRMED })
   @Get('tasks/virgin')
   public async getNewTasks(@Query() query: GetTasksSearchDto) {
-    return this.tasksService.getTasksByStatus(TaskStatus.ACCEPTED, query);
+    console.log('query in controller:');
+    console.dir(query);
+    const { latitude, longitude, distance, ...data } = query;
+    return this.tasksService.getTasksByStatus(TaskStatus.CREATED, {
+      ...data,
+      location: [Number(longitude), Number(latitude)],
+      distance: Number(distance),
+    });
   }
 
   @AccessControlList({ role: UserRole.VOLUNTEER, level: UserStatus.CONFIRMED })
@@ -44,12 +51,20 @@ export class VolunteerApiController {
   @Get('/tasks/accepted')
   @AccessControlList({ role: UserRole.VOLUNTEER, level: UserStatus.CONFIRMED })
   public async getAcceptedTasks(@Query() query: GetTasksSearchDto, @Req() { user }) {
-    return this.tasksService.getOwnTasks(user, TaskStatus.ACCEPTED, query);
+    const { latitude, longitude, ...data } = query;
+    return this.tasksService.getOwnTasks(user, TaskStatus.ACCEPTED, {
+      ...data,
+      location: [longitude, latitude],
+    });
   }
 
   @Get('/tasks/completed')
   @AccessControlList({ role: UserRole.VOLUNTEER, level: UserStatus.CONFIRMED })
   public async getCompletedTasks(@Query() query: GetTasksSearchDto, @Req() { user }) {
-    return this.tasksService.getOwnTasks(user, TaskStatus.COMPLETED, query);
+    const { latitude, longitude, ...data } = query;
+    return this.tasksService.getOwnTasks(user, TaskStatus.COMPLETED, {
+      ...data,
+      location: [longitude, latitude],
+    });
   }
 }
