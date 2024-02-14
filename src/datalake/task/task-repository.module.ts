@@ -7,4 +7,4 @@ import { Task, TaskSchema } from './schemas/task.schema';
   imports: [MongooseModule.forFeature([{ name: Task.name, schema: TaskSchema }])],
   providers: [TasksRepository],
 })
-export class TaskModule {}
+export class TaskRepositoryModule {}

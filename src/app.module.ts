@@ -8,17 +8,19 @@ import configuration from './config/configuration';
 import { HashModule } from './common/hash/hash.module';
 import { UsersRepositoryModule } from './datalake/users/users-repository.module';
 import { CategoryRepositoryModule } from './datalake/category/category-repository.module';
-import { TaskModule } from './datalake/task/task.module';
+import { TaskRepositoryModule } from './datalake/task/task-repository.module';
 import { ConfidentialityPolicyModule } from './datalake/confidentiality-policy/confidentiality-policy.module';
 import { AuthApiModule } from './api/auth-api/auth-api.module';
 import { AuthModule } from './core/auth/auth.module';
 import { UsersModule } from './core/users/users.module';
 import { MongooseConfigService } from './config/database-config.service';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
-import { CategoryRepository } from './datalake/category/category.repository';
 import { CategoriesModule } from './core/categories/categories.module';
 import { AdminApiModule } from './api/admin-api/admin-api.module';
 import { BlogModule } from './core/blog/blog.module';
+import { ContactsRepositoryModule } from './datalake/contacts/contacts-repository.module';
+import { ContactsModule } from './core/contacts/contacts.module';
+import { TasksModule } from './core/tasks/tasks.module';
 
 @Module({
   imports: [
@@ -30,7 +32,7 @@ import { BlogModule } from './core/blog/blog.module';
     }),
     HashModule,
     // ScheduleModule.forRoot(),
-    TaskModule,
+    TaskRepositoryModule,
     UsersRepositoryModule,
     ConfidentialityPolicyModule,
     AuthApiModule,
@@ -40,6 +42,9 @@ import { BlogModule } from './core/blog/blog.module';
     CategoriesModule,
     AdminApiModule,
     BlogModule,
+    ContactsRepositoryModule,
+    ContactsModule,
+    TasksModule,
   ],
   providers: [
     {
