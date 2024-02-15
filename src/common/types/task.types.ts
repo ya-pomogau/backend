@@ -40,6 +40,7 @@ export interface TaskInterface {
   volunteerReport: TaskReport | null;
   recipientReport: TaskReport | null;
   adminResolve: ResolveStatus | null;
+  moderator: UserProfile | null;
   isPendingChanges: boolean;
 }
 
