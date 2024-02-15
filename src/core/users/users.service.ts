@@ -7,7 +7,7 @@ import {
 import { InternalServerErrorException, NotFoundException } from '@nestjs/common/exceptions';
 import { UsersRepository } from '../../datalake/users/users.repository';
 import { CreateAdminDto, CreateUserDto } from '../../common/dto/users.dto';
-import { UserRole, UserStatus } from '../../common/types/user.types';
+import { AdminPermission, UserRole, UserStatus } from '../../common/types/user.types';
 import { HashService } from '../../common/hash/hash.service';
 import { Admin } from '../../datalake/users/schemas/admin.schema';
 import { POJOType } from '../../common/types/pojo.type';
@@ -178,7 +178,7 @@ export class UsersService {
       throw new NotFoundException(`Пользователь с _id '${_id}' не найден!`);
     }
     if (user.role === UserRole.ADMIN) {
-      return this.usersRepo.findByIdAndUpdate(_id, { isActivated: true }, {});
+      return this.usersRepo.findOneAndUpdate({ _id, role: UserRole.ADMIN }, { isActive: true }, {});
     }
     throw new BadRequestException('Можно активировать только администратора');
   }
@@ -215,5 +215,43 @@ export class UsersService {
     throw new InternalServerErrorException('Внутренняя ошибка сервера', {
       cause: `Некорректная роль пользователя с _id '${_id}' `,
     });
+  }
+
+  public async grantPrivileges(userId: string, privileges: Array<AdminPermission>) {
+    const user = await this.usersRepo.findById(userId);
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден!', {
+        cause: `Пользователь с _id '${userId}' не найден`,
+      });
+    }
+    if (user.role !== UserRole.ADMIN) {
+      throw new BadRequestException('Пользователь должен быть администратором', {
+        cause: `Попытка дать права  ${privileges} пользователю с _id '${userId}' и ролью '${user.role}'`,
+      });
+    }
+    return this.usersRepo.findOneAndUpdate(
+      { _id: userId, role: UserRole.ADMIN },
+      { $addToSet: { permissions: { $each: privileges } } },
+      {}
+    );
+  }
+
+  public async revokePrivileges(userId: string, privileges: Array<AdminPermission>) {
+    const user = await this.usersRepo.findById(userId);
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден!', {
+        cause: `Пользователь с _id '${userId}' не найден`,
+      });
+    }
+    if (user.role !== UserRole.ADMIN) {
+      throw new BadRequestException('Пользователь должен быть администратором', {
+        cause: `Попытка дать права  ${privileges} пользователю с _id '${userId}' и ролью '${user.role}'`,
+      });
+    }
+    return this.usersRepo.findByIdAndUpdate(
+      userId,
+      { $pull: { permissions: { $in: privileges } } },
+      {}
+    );
   }
 }

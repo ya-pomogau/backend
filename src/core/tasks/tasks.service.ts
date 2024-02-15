@@ -5,7 +5,12 @@ import { UsersRepository } from '../../datalake/users/users.repository';
 import { CreateTaskDto, GetTasksDto } from '../../common/dto/tasks.dto';
 import { CategoryRepository } from '../../datalake/category/category.repository';
 import { Task } from '../../datalake/task/schemas/task.schema';
-import { ResolveStatus, TaskReport, TaskStatus } from '../../common/types/task.types';
+import {
+  ResolveResult,
+  ResolveStatus,
+  TaskReport,
+  TaskStatus,
+} from '../../common/types/task.types';
 import { AnyUserInterface, UserRole } from '../../common/types/user.types';
 import { Volunteer } from '../../datalake/users/schemas/volunteer.schema';
 import { User } from '../../datalake/users/schemas/user.schema';
@@ -45,8 +50,59 @@ export class TasksService {
     return this.tasksRepo.findById(taskId);
   }
 
-  public async getVirginTasks() {
-    return this.tasksRepo.find({ status: TaskStatus.CREATED, volunteer: null });
+  public async getVirginConflictTasks() {
+    return this.tasksRepo.find({
+      status: TaskStatus.CONFLICTED,
+      adminResolve: ResolveStatus.VIRGIN,
+    });
+  }
+
+  public async startModeration(taskId: string, moderator: AnyUserInterface) {
+    const { _id, role, address, avatar, name, phone } = moderator;
+    const task = await this.tasksRepo.findById(taskId);
+    if (moderator.role !== UserRole.ADMIN) {
+      throw new ForbiddenException('Только администратор может разрешать конфликты', {
+        cause: `Попытка взять на модерацию задачу пользователем с _id '${moderator._id}' и ролью '${moderator.role}'`,
+      });
+    }
+    if (
+      task.status !== TaskStatus.CONFLICTED ||
+      task.adminResolve !== ResolveStatus.VIRGIN ||
+      !!task.moderator
+    ) {
+      throw new ForbiddenException('Задача не является конфликтной или конфликт уже модерируется', {
+        cause: `Попытка администратора с _id '${_id}' взять на модерирование задачу с _id '${taskId}', у которой status = '${
+          task.status
+        }, adminResolve = '${task.adminResolve}', а moderator ${
+          task.moderator ? 'не' : ''
+        } равен null.`,
+      });
+    }
+    return this.tasksRepo.findOneAndUpdate(
+      { _id: taskId, status: TaskStatus.CONFLICTED, adminResolve: ResolveStatus.VIRGIN },
+      {
+        adminResolve: ResolveStatus.PENDING,
+        moderator: { _id, role, address, avatar, name, phone },
+      },
+      {}
+    );
+  }
+
+  public async resolveConflict(taskId: string, outcome: ResolveResult) {
+    return this.tasksRepo.findOneAndUpdate(
+      { _id: taskId, status: TaskStatus.CONFLICTED, adminResolve: ResolveStatus.PENDING },
+      { status: TaskStatus.COMPLETED, adminResolve: outcome },
+      {}
+    );
+  }
+
+  public async getModeratedTasks(moderator: AnyUserInterface) {
+    const { _id, role, address, avatar, name, phone } = moderator;
+    return this.tasksRepo.find({
+      status: TaskStatus.CONFLICTED,
+      adminResolve: ResolveStatus.PENDING,
+      moderator: { _id, role, address, avatar, name, phone },
+    });
   }
 
   public async updateTask(taskId: string, user: AnyUserInterface, dto: Partial<CreateTaskDto>) {

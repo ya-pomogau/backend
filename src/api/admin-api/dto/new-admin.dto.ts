@@ -1,42 +1,41 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional, IsPhoneNumber, IsString, IsUrl } from 'class-validator';
-import { Type } from 'class-transformer';
 import { NewAdminInterface } from '../../../common/types/api.types';
-import { NewProfileDto } from '../../../common/dto/api.dto';
 
 export class NewAdminDto implements NewAdminInterface {
   @ApiProperty()
-  @IsString()
   @IsNotEmpty()
+  @IsString()
   address: string;
 
   @ApiProperty()
-  @IsUrl()
   @IsOptional()
+  @IsUrl()
   avatar?: string;
 
   @ApiProperty()
-  @IsString()
   @IsNotEmpty()
+  @IsString()
   name: string;
 
   @ApiProperty()
+  @IsNotEmpty()
   @IsString()
   @IsPhoneNumber('RU')
   phone: string;
 
   @ApiProperty()
-  @IsString()
   @IsOptional()
+  @IsString()
   vkId: string;
 
   @ApiProperty()
-  @IsString()
   @IsNotEmpty()
+  @IsString()
   login: string;
 
   @ApiProperty()
-  @IsString()
   @IsNotEmpty()
+  @IsString()
   password: string;
 }

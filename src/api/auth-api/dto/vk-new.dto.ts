@@ -16,18 +16,18 @@ import { PointGeoJSONDto } from '../../../common/dto/api.dto';
 
 export class VKNewUserDto implements VKNewUserInterface {
   @ApiProperty()
-  @IsString()
   @IsNotEmpty()
+  @IsString()
   address: string;
 
   @ApiProperty()
-  @IsUrl()
   @IsOptional()
+  @IsUrl()
   avatar?: string;
 
   @ApiProperty()
-  @IsString()
   @IsNotEmpty()
+  @IsString()
   name: string;
 
   @ApiProperty()

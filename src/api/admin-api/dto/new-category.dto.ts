@@ -5,19 +5,19 @@ import { UserStatus } from '../../../common/types/user.types';
 
 export class ApiCreateCategoryDto implements CreateCategoryDto {
   @ApiProperty()
-  @IsNumber()
   @IsNotEmpty()
+  @IsNumber()
   @Max(UserStatus.VERIFIED)
   @Min(UserStatus.CONFIRMED)
   accessLevel: UserStatus;
 
   @ApiProperty()
-  @IsNumber()
   @IsNotEmpty()
+  @IsNumber()
   points: number;
 
   @ApiProperty()
-  @IsString()
   @IsNotEmpty()
+  @IsString()
   title: string;
 }

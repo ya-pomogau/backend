@@ -2,13 +2,14 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Param,
+  Patch,
   Post,
   Put,
-  UseGuards,
-  Patch,
-  Request,
   Req,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
 import { MethodNotAllowedException } from '@nestjs/common/exceptions';
 import { UsersService } from '../../core/users/users.service';
@@ -22,6 +23,9 @@ import { PostDTO } from './dto/new-post.dto';
 import { BlogService } from '../../core/blog/blog.service';
 import { ApiCreateCategoryDto } from './dto/new-category.dto';
 import { CategoriesService } from '../../core/categories/categories.service';
+import { TasksService } from '../../core/tasks/tasks.service';
+import { TaskStatus } from '../../common/types/task.types';
+import { ApiPrivilegesDto } from './dto/privileges.dto';
 
 @UseGuards(JwtAuthGuard)
 @UseGuards(AccessControlGuard)
@@ -30,7 +34,8 @@ export class AdminApiController {
   constructor(
     private readonly usersService: UsersService,
     private readonly blogService: BlogService,
-    private readonly categoryService: CategoriesService
+    private readonly categoryService: CategoriesService,
+    private readonly tasksService: TasksService
   ) {}
 
   @Post('create')
@@ -56,38 +61,52 @@ export class AdminApiController {
     return this.usersService.deactivate(_id);
   }
 
-  @Put('/:id/confirm')
+  @Put(':id/privileges')
+  @AccessControlList({ role: UserRole.ADMIN, isRoot: true })
+  public async grantPrivileges(@Param('id') userId, @Body() dto: ApiPrivilegesDto) {
+    const { privileges } = dto;
+    return this.usersService.grantPrivileges(userId, privileges);
+  }
+
+  @Delete(':id/privileges')
+  @AccessControlList({ role: UserRole.ADMIN, isRoot: true })
+  public async revokePrivileges(@Param('id') userId, @Body() dto: ApiPrivilegesDto) {
+    const { privileges } = dto;
+    return this.usersService.revokePrivileges(userId, privileges);
+  }
+
+  @Put('users/:id/confirm')
   @AccessControlList({ role: UserRole.ADMIN, rights: [AccessRights.confirmUser] })
   async confirm(@Param('id') _id: string) {
     return this.usersService.confirm(_id);
   }
 
-  @Delete('/:id/confirm')
+  @Delete('users/:id/confirm')
   @AccessControlList({ role: UserRole.ADMIN, rights: [AccessRights.blockUser] })
   async block(@Param('id') _id: string) {
     return this.usersService.block(_id);
   }
 
-  @Put('/:id/promote')
+  @Put('users/:id/promote')
   @AccessControlList({ role: UserRole.ADMIN, rights: [AccessRights.promoteUser] })
   async upgrade(@Param('id') _id: string) {
     return this.usersService.upgrade(_id);
   }
 
-  @Delete('/:id/promote')
+  @Delete('users/:id/promote')
   @AccessControlList({ role: UserRole.ADMIN, isRoot: true })
   async downgrade(@Param('id') _id: string) {
     throw new MethodNotAllowedException('Этот метод нельзя использовать здесь!');
     // return this.usersService.downgrade(_id);
   }
 
-  @Put('/:id/keys')
+  @Put('users/:id/keys')
   @AccessControlList({ role: UserRole.ADMIN, rights: [AccessRights.giveKey] })
   async grantKeys(@Param('id') _id: string) {
     return this.usersService.grantKeys(_id);
   }
 
-  @Delete('/:id/keys')
+  @Delete('users/:id/keys')
   @AccessControlList({ role: UserRole.ADMIN, isRoot: true })
   async revokeKeys(@Param('id') _id: string) {
     throw new MethodNotAllowedException('Этот метод нельзя использовать здесь!');
@@ -135,5 +154,14 @@ export class AdminApiController {
   })
   public async createCategory(@Body() dto: ApiCreateCategoryDto, @Req() req: Express.Request) {
     return this.categoryService.createCategory(dto, req.user as AnyUserInterface);
+  }
+
+  @Get('tasks/conflicted')
+  @AccessControlList({
+    role: UserRole.ADMIN,
+    rights: [AccessRights.resolveConflict],
+  })
+  public async getConflictedTasks() {
+    return this.tasksService.getTasksByStatus(TaskStatus.CONFLICTED, {});
   }
 }

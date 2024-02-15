@@ -31,27 +31,21 @@ export class VolunteerApiController {
   @AccessControlList({ role: UserRole.VOLUNTEER, level: UserStatus.CONFIRMED })
   @Put('tasks/:id/accept')
   public async accept(@Req() req: Express.Request, @Param('id') taskId: string) {
-    const {
-      user: { _id: volunteerId },
-    } = req;
+    const { _id: volunteerId } = req.user as AnyUserInterface;
     return this.tasksService.acceptTask(taskId, volunteerId);
   }
 
   @Put('/tasks/:id/fulfill')
   @AccessControlList({ role: UserRole.VOLUNTEER, level: UserStatus.CONFIRMED })
   public async fulfillTask(@Param('id') id: string, @Req() req: Express.Request) {
-    const {
-      user: { _id: userId },
-    } = req;
+    const { _id: userId } = req.user as AnyUserInterface;
     return this.tasksService.reportTask(id, userId, UserRole.VOLUNTEER, TaskReport.FULFILLED);
   }
 
   @Put('/tasks/:id/reject')
   @AccessControlList({ role: UserRole.VOLUNTEER, level: UserStatus.CONFIRMED })
   public async rejectTask(@Param('id') id: string, @Req() req: Express.Request) {
-    const {
-      user: { _id: userId },
-    } = req;
+    const { _id: userId } = req.user as AnyUserInterface;
     return this.tasksService.reportTask(id, userId, UserRole.VOLUNTEER, TaskReport.REJECTED);
   }
 

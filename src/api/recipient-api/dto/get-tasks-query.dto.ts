@@ -1,9 +1,9 @@
 /* eslint-disable max-classes-per-file */
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  IsDate,
   IsDateString,
   IsDefined,
+  IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
@@ -14,11 +14,13 @@ import { GetTasksDto } from '../../../common/dto/tasks.dto';
 
 export class GetTasksQueryDto implements Partial<GetTasksDto> {
   @ApiProperty()
-  @IsString()
   @IsOptional()
+  @IsString()
   categoryId: string;
 
   @ApiProperty({ required: true })
+  @IsDefined()
+  @IsNotEmpty()
   @Transform(({ value }) => Number(value))
   @IsNumber()
   distance: number;
@@ -29,11 +31,15 @@ export class GetTasksQueryDto implements Partial<GetTasksDto> {
   end: Date;
 
   @ApiProperty({ required: true })
+  @IsDefined()
+  @IsNotEmpty()
   @Transform(({ value }) => Number(value))
   @IsNumber()
   longitude: number;
 
   @ApiProperty({ required: true })
+  @IsDefined()
+  @IsNotEmpty()
   @Transform(({ value }) => Number(value))
   @IsNumber()
   latitude: number;
@@ -46,8 +52,8 @@ export class GetTasksQueryDto implements Partial<GetTasksDto> {
 
 export class GetTasksSearchDto implements Partial<GetTasksDto> {
   @ApiProperty()
-  @IsString()
   @IsOptional()
+  @IsString()
   categoryId: string;
 
   @ApiProperty()

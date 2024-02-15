@@ -8,9 +8,17 @@ import { JwtStrategy } from '../../core/auth/strategies/jwt.strategy';
 import { LocalStrategy } from '../../core/auth/strategies/local.strategy';
 import { BlogModule } from '../../core/blog/blog.module';
 import { CategoriesModule } from '../../core/categories/categories.module';
+import { TasksModule } from '../../core/tasks/tasks.module';
 
 @Module({
-  imports: [HashModule, UsersRepositoryModule, UsersModule, BlogModule, CategoriesModule],
+  imports: [
+    HashModule,
+    UsersRepositoryModule,
+    UsersModule,
+    BlogModule,
+    CategoriesModule,
+    TasksModule,
+  ],
   controllers: [AdminApiController],
   providers: [UsersService, JwtStrategy, LocalStrategy],
 })

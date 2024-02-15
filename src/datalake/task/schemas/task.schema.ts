@@ -41,7 +41,10 @@ export class Task extends Document implements TaskInterface {
   })
   adminResolve: ResolveStatus | null;
 
-  @Prop({ type: raw(rawCategory), required: false, immutable: true })
+  @Prop({ type: raw(rawUserProfile), required: false, default: null })
+  moderator: UserProfile | null;
+
+  @Prop({ type: raw(rawCategory), required: true, immutable: true })
   category: CategoryInterface;
 
   @Prop({ required: false, type: mongoose.SchemaTypes.Date })

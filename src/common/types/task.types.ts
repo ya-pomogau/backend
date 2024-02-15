@@ -16,6 +16,8 @@ export enum ResolveStatus {
   REJECTED = 'rejected',
 }
 
+export type ResolveResult = ResolveStatus.FULFILLED & ResolveStatus.REJECTED;
+
 export enum ReportStatus {
   PENDING = 'pending',
   REPORTED = 'reported',

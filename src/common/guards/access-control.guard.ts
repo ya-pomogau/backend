@@ -26,6 +26,9 @@ export class AccessControlGuard implements CanActivate {
       level: this.reflector.get<UserStatus>('level', context.getHandler()),
       isRoot: this.reflector.get<boolean>('root', context.getHandler()) ?? false,
     }; */
+    if (!accessControl) {
+      return false;
+    }
     const { user } = context.switchToHttp().getRequest();
     if (accessControl.isRoot) {
       return (!!user.role && user.role === UserRole.ADMIN && user.isRoot) ?? false;
@@ -40,6 +43,7 @@ export class AccessControlGuard implements CanActivate {
       !!user.role &&
       user.role === UserRole.ADMIN &&
       !!user.permissions &&
+      !!accessControl.rights &&
       accessControl.rights.every((grant) => user.permissions.includes(grant))
     );
   }
