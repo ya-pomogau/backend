@@ -184,14 +184,30 @@ export class TasksService {
     const myIndex = userRole === UserRole.VOLUNTEER ? 'volunteerReport' : 'recipientReport';
     const counterpartyIndex =
       userRole === UserRole.RECIPIENT ? 'volunteerReport' : 'recipientReport';
+    console.log(
+      `reportTask(taskId = '${taskId}', userId = '${userId}', userRole = '${userRole}', result = '${result}').\nmyIndex = '${myIndex}', counterpartyIndex = '${counterpartyIndex}'.\nTask:`
+    );
     const task = await this.tasksRepo.findById(taskId);
-    if (task.status !== TaskStatus.ACCEPTED) {
+    console.dir(task);
+    console.log('task[myIndex]:');
+    console.dir(task[myIndex]);
+    console.log('task[counterpartyIndex]:');
+    console.dir(task[counterpartyIndex]);
+    if (task.status === TaskStatus.CREATED) {
       throw new ForbiddenException('Нельзя отчитаться по не открытой задаче!', {
         cause: `Попытка отчёта по задаче с _id '${task._id}' со статусом ${task.status} `,
       });
+    } else if (
+      task.status === TaskStatus.COMPLETED ||
+      task.status === TaskStatus.CONFLICTED ||
+      !!task[myIndex]
+    ) {
+      throw new ConflictException('Нельзя повторно отчитаться по задаче!', {
+        cause: `Попытка повторного  отчёта по задаче с _id '${task._id}' со статусом ${task.status} `,
+      });
     }
     if (task[counterpartyIndex]) {
-      this.tasksRepo.findByIdAndUpdate(
+      return this.tasksRepo.findByIdAndUpdate(
         taskId,
         {
           ...task,
@@ -202,16 +218,15 @@ export class TasksService {
         },
         { new: true }
       );
-    } else {
-      this.tasksRepo.findByIdAndUpdate(
-        taskId,
-        {
-          ...task,
-          [myIndex]: result,
-          isPendingChanges: true,
-        },
-        { new: true }
-      );
     }
+    return this.tasksRepo.findByIdAndUpdate(
+      taskId,
+      {
+        ...task,
+        [myIndex]: result,
+        isPendingChanges: true,
+      },
+      { new: true }
+    );
   }
 }
