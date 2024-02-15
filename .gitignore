@@ -38,5 +38,7 @@ lerna-debug.log*
 /vault
 /obsolete
 
+obsolete/
+
 # Environment
 .env
