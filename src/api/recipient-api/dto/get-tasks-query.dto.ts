@@ -1,17 +1,15 @@
 /* eslint-disable max-classes-per-file */
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  ArrayMaxSize,
-  ArrayMinSize,
-  IsArray,
   IsDate,
+  IsDateString,
   IsDefined,
   IsNumber,
   IsOptional,
   IsString,
   ValidateIf,
 } from 'class-validator';
-import { GeoCoordinates } from '../../../common/types/point-geojson.types';
+import { Transform } from 'class-transformer';
 import { GetTasksDto } from '../../../common/dto/tasks.dto';
 
 export class GetTasksQueryDto implements Partial<GetTasksDto> {
@@ -21,24 +19,28 @@ export class GetTasksQueryDto implements Partial<GetTasksDto> {
   categoryId: string;
 
   @ApiProperty({ required: true })
+  @Transform(({ value }) => Number(value))
   @IsNumber()
   distance: number;
 
   @ApiProperty()
   @IsOptional()
-  @IsDate()
+  @IsDateString()
   end: Date;
 
   @ApiProperty({ required: true })
-  @IsArray()
-  @ArrayMinSize(2)
-  @ArrayMaxSize(2)
-  @IsNumber({}, { each: true })
-  location: GeoCoordinates;
+  @Transform(({ value }) => Number(value))
+  @IsNumber()
+  longitude: number;
+
+  @ApiProperty({ required: true })
+  @Transform(({ value }) => Number(value))
+  @IsNumber()
+  latitude: number;
 
   @ApiProperty()
   @IsOptional()
-  @IsDate()
+  @IsDateString()
   start: Date;
 }
 
@@ -49,21 +51,24 @@ export class GetTasksSearchDto implements Partial<GetTasksDto> {
   categoryId: string;
 
   @ApiProperty()
-  @ValidateIf((obj) => obj.location !== undefined)
+  @Transform(({ value }) => Number(value))
+  @ValidateIf((obj) => obj.longitude !== undefined && obj.latitude !== undefined)
   @IsDefined()
   @IsNumber()
   @IsOptional()
   distance: number;
 
   @ApiProperty()
-  @ValidateIf((obj) => obj.location !== undefined)
+  @Transform(({ value }) => Number(value))
+  @ValidateIf((obj) => obj.distance !== undefined && obj.latitude !== undefined)
   @IsDefined()
   @IsNumber()
   @IsOptional()
   longitude: number;
 
   @ApiProperty()
-  @ValidateIf((obj) => obj.location !== undefined)
+  @Transform(({ value }) => Number(value))
+  @ValidateIf((obj) => obj.distance !== undefined && obj.longitude !== undefined)
   @IsDefined()
   @IsNumber()
   @IsOptional()
@@ -71,21 +76,11 @@ export class GetTasksSearchDto implements Partial<GetTasksDto> {
 
   @ApiProperty()
   @IsOptional()
-  @IsDate()
+  @IsDateString()
   end: Date;
-
-  /* @ApiProperty()
-  @ValidateIf((obj) => obj.distance !== undefined)
-  @IsDefined()
-  @IsOptional()
-  @IsArray()
-  @ArrayMinSize(2)
-  @ArrayMaxSize(2)
-  @IsNumber({}, { each: true })
-  location: GeoCoordinates; */
 
   @ApiProperty()
   @IsOptional()
-  @IsDate()
+  @IsDateString()
   start: Date;
 }

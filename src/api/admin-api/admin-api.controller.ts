@@ -20,7 +20,7 @@ import { AccessControlList } from '../../common/decorators/access-control-list.d
 import { AccessRights } from '../../common/types/access-rights.types';
 import { PostDTO } from './dto/new-post.dto';
 import { BlogService } from '../../core/blog/blog.service';
-import { ApiCreateCategoryDto } from './dto/new-category.dro';
+import { ApiCreateCategoryDto } from './dto/new-category.dto';
 import { CategoriesService } from '../../core/categories/categories.service';
 
 @UseGuards(JwtAuthGuard)

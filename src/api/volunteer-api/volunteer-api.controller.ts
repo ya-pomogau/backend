@@ -25,8 +25,8 @@ export class VolunteerApiController {
     const { latitude, longitude, distance, ...data } = query;
     return this.tasksService.getTasksByStatus(TaskStatus.CREATED, {
       ...data,
-      location: [Number(longitude), Number(latitude)],
-      distance: Number(distance),
+      location: [longitude, latitude],
+      distance,
     });
   }
 
