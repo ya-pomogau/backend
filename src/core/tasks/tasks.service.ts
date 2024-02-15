@@ -101,7 +101,7 @@ export class TasksService {
   }
 
   public async getOwnTasks(user: AnyUserInterface, status: TaskStatus, dto?: GetTasksDto) {
-    const { location: center, distance, start, end, categoryId } = dto;
+    const { location: center, distance, start, end, categoryId } = dto ?? {};
     const { _id, role, address, avatar, name, phone } = user;
     const roleIndex = role.toLowerCase();
     const query: FilterQuery<Task> = {
