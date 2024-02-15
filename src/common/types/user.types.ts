@@ -42,14 +42,6 @@ export enum AdminPermission {
   REJECTED = 'rejected',
 } */
 
-export type UserProfile = {
-  name: string;
-  phone: string;
-  avatar: string;
-  address: string;
-  _id: string;
-};
-
 export interface GenericUserModelInterface {
   name: string;
   phone: string;
@@ -57,6 +49,10 @@ export interface GenericUserModelInterface {
   address: string;
   vkId: string;
   role: string;
+}
+
+export interface UserProfile extends GenericUserModelInterface {
+  _id: string;
 }
 
 export interface VolunteerUserModelInterface {
