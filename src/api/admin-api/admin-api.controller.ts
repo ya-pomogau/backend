@@ -46,50 +46,50 @@ export class AdminApiController {
 
   @Put(':id/activate')
   @AccessControlList({ role: UserRole.ADMIN, isRoot: true })
-  async activate(@Param(':id') _id: string) {
+  async activate(@Param('id') _id: string) {
     return this.usersService.activate(_id);
   }
 
   @Delete(':id/activate')
   @AccessControlList({ role: UserRole.ADMIN, isRoot: true })
-  async deactivate(@Param(':id') _id: string) {
+  async deactivate(@Param('id') _id: string) {
     return this.usersService.deactivate(_id);
   }
 
   @Put('/:id/confirm')
   @AccessControlList({ role: UserRole.ADMIN, rights: [AccessRights.confirmUser] })
-  async confirm(@Param(':id') _id: string) {
+  async confirm(@Param('id') _id: string) {
     return this.usersService.confirm(_id);
   }
 
   @Delete('/:id/confirm')
   @AccessControlList({ role: UserRole.ADMIN, rights: [AccessRights.blockUser] })
-  async block(@Param(':id') _id: string) {
+  async block(@Param('id') _id: string) {
     return this.usersService.block(_id);
   }
 
   @Put('/:id/promote')
   @AccessControlList({ role: UserRole.ADMIN, rights: [AccessRights.promoteUser] })
-  async upgrade(@Param(':id') _id: string) {
+  async upgrade(@Param('id') _id: string) {
     return this.usersService.upgrade(_id);
   }
 
   @Delete('/:id/promote')
   @AccessControlList({ role: UserRole.ADMIN, isRoot: true })
-  async downgrade(@Param(':id') _id: string) {
+  async downgrade(@Param('id') _id: string) {
     throw new MethodNotAllowedException('Этот метод нельзя использовать здесь!');
     // return this.usersService.downgrade(_id);
   }
 
   @Put('/:id/keys')
   @AccessControlList({ role: UserRole.ADMIN, rights: [AccessRights.giveKey] })
-  async grantKeys(@Param(':id') _id: string) {
+  async grantKeys(@Param('id') _id: string) {
     return this.usersService.grantKeys(_id);
   }
 
   @Delete('/:id/keys')
   @AccessControlList({ role: UserRole.ADMIN, isRoot: true })
-  async revokeKeys(@Param(':id') _id: string) {
+  async revokeKeys(@Param('id') _id: string) {
     throw new MethodNotAllowedException('Этот метод нельзя использовать здесь!');
     //  return this.usersService.revokeKeys(_id);
   }

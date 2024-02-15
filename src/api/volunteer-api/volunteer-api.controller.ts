@@ -39,13 +39,14 @@ export class VolunteerApiController {
 
   @Put('/tasks/:id/fulfill')
   @AccessControlList({ role: UserRole.VOLUNTEER, level: UserStatus.CONFIRMED })
-  public async fulfillTask(@Param(':id') id: string, @Req() { user: { _id: userId } }) {
+  public async fulfillTask(@Param('id') id: string, @Req() { user: { _id: userId } }) {
+    console.log(`PUT /tasks/${id}/fulfill`);
     return this.tasksService.reportTask(id, userId, UserRole.VOLUNTEER, TaskReport.FULFILLED);
   }
 
   @Put('/tasks/:id/reject')
   @AccessControlList({ role: UserRole.VOLUNTEER, level: UserStatus.CONFIRMED })
-  public async rejectTask(@Param(':id') id: string, @Req() { user: { _id: userId } }) {
+  public async rejectTask(@Param('id') id: string, @Req() { user: { _id: userId } }) {
     return this.tasksService.reportTask(id, userId, UserRole.VOLUNTEER, TaskReport.REJECTED);
   }
 

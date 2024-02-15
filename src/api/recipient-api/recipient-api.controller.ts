@@ -39,14 +39,14 @@ export class RecipientApiController {
 
   @Get('/tasks/:id')
   @AccessControlList({ role: UserRole.RECIPIENT, level: UserStatus.CONFIRMED })
-  public async getTaskById(@Param(':id') id: string) {
+  public async getTaskById(@Param('id') id: string) {
     return this.tasksService.getTask(id);
   }
 
   @Patch('/tasks/:id')
   @AccessControlList({ role: UserRole.RECIPIENT, level: UserStatus.CONFIRMED })
   public async updateTask(
-    @Param(':id') id: string,
+    @Param('id') id: string,
     @Req() { user },
     @Body() dto: Partial<ApiCreateTaskDto>
   ) {
@@ -55,13 +55,13 @@ export class RecipientApiController {
 
   @Put('/tasks/:id/fulfill')
   @AccessControlList({ role: UserRole.RECIPIENT, level: UserStatus.CONFIRMED })
-  public async fulfillTask(@Param(':id') id: string, @Req() { user: { _id: userId } }) {
+  public async fulfillTask(@Param('id') id: string, @Req() { user: { _id: userId } }) {
     return this.tasksService.reportTask(id, userId, UserRole.RECIPIENT, TaskReport.FULFILLED);
   }
 
   @Put('/tasks/:id/reject')
   @AccessControlList({ role: UserRole.RECIPIENT, level: UserStatus.CONFIRMED })
-  public async rejectTask(@Param(':id') id: string, @Req() { user: { _id: userId } }) {
+  public async rejectTask(@Param('id') id: string, @Req() { user: { _id: userId } }) {
     return this.tasksService.reportTask(id, userId, UserRole.RECIPIENT, TaskReport.REJECTED);
   }
 
