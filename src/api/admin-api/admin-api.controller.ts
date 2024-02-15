@@ -12,6 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { MethodNotAllowedException } from '@nestjs/common/exceptions';
+import { ApiTags } from '@nestjs/swagger';
 import { UsersService } from '../../core/users/users.service';
 import { NewAdminDto } from './dto/new-admin.dto';
 import { AnyUserInterface, UserRole } from '../../common/types/user.types';
@@ -30,6 +31,7 @@ import { ApiPrivilegesDto } from './dto/privileges.dto';
 @UseGuards(JwtAuthGuard)
 @UseGuards(AccessControlGuard)
 @Controller('admin')
+@ApiTags('Administrative API. Guarded.')
 export class AdminApiController {
   constructor(
     private readonly usersService: UsersService,
@@ -39,6 +41,7 @@ export class AdminApiController {
   ) {}
 
   @Post('create')
+  @ApiTags('Create an administrative user. Root only.')
   @AccessControlList({ role: UserRole.ADMIN, isRoot: true })
   async create(@Body() dto: NewAdminDto) {
     return this.usersService.createAdmin({
@@ -50,18 +53,21 @@ export class AdminApiController {
   }
 
   @Put(':id/activate')
+  @ApiTags('Activate an administrator. Root only.')
   @AccessControlList({ role: UserRole.ADMIN, isRoot: true })
   async activate(@Param('id') _id: string) {
     return this.usersService.activate(_id);
   }
 
   @Delete(':id/activate')
+  @ApiTags('Block (deactivate) an administrator. Root only.')
   @AccessControlList({ role: UserRole.ADMIN, isRoot: true })
   async deactivate(@Param('id') _id: string) {
     return this.usersService.deactivate(_id);
   }
 
   @Put(':id/privileges')
+  @ApiTags('Grant administrator privileges. Root only.')
   @AccessControlList({ role: UserRole.ADMIN, isRoot: true })
   public async grantPrivileges(@Param('id') userId, @Body() dto: ApiPrivilegesDto) {
     const { privileges } = dto;
@@ -69,6 +75,7 @@ export class AdminApiController {
   }
 
   @Delete(':id/privileges')
+  @ApiTags('Revoke administrator privileges. Root only.')
   @AccessControlList({ role: UserRole.ADMIN, isRoot: true })
   public async revokePrivileges(@Param('id') userId, @Body() dto: ApiPrivilegesDto) {
     const { privileges } = dto;
@@ -76,24 +83,28 @@ export class AdminApiController {
   }
 
   @Put('users/:id/confirm')
+  @ApiTags('Confirm regular user. Limited access.')
   @AccessControlList({ role: UserRole.ADMIN, rights: [AccessRights.confirmUser] })
   async confirm(@Param('id') _id: string) {
     return this.usersService.confirm(_id);
   }
 
   @Delete('users/:id/confirm')
+  @ApiTags('Block regular user. Limited access.')
   @AccessControlList({ role: UserRole.ADMIN, rights: [AccessRights.blockUser] })
   async block(@Param('id') _id: string) {
     return this.usersService.block(_id);
   }
 
   @Put('users/:id/promote')
+  @ApiTags('Promote regular user (raise status). Limited access.')
   @AccessControlList({ role: UserRole.ADMIN, rights: [AccessRights.promoteUser] })
   async upgrade(@Param('id') _id: string) {
     return this.usersService.upgrade(_id);
   }
 
   @Delete('users/:id/promote')
+  @ApiTags('Downgrade regular user (lower status). Limited access.')
   @AccessControlList({ role: UserRole.ADMIN, isRoot: true })
   async downgrade(@Param('id') _id: string) {
     throw new MethodNotAllowedException('Этот метод нельзя использовать здесь!');
@@ -101,6 +112,7 @@ export class AdminApiController {
   }
 
   @Put('users/:id/keys')
+  @ApiTags('Grant keys to regular user. Limited access.')
   @AccessControlList({ role: UserRole.ADMIN, rights: [AccessRights.giveKey] })
   async grantKeys(@Param('id') _id: string) {
     return this.usersService.grantKeys(_id);
@@ -108,12 +120,14 @@ export class AdminApiController {
 
   @Delete('users/:id/keys')
   @AccessControlList({ role: UserRole.ADMIN, isRoot: true })
+  @ApiTags('Revoke keys from regular user. Limited access.')
   async revokeKeys(@Param('id') _id: string) {
     throw new MethodNotAllowedException('Этот метод нельзя использовать здесь!');
     //  return this.usersService.revokeKeys(_id);
   }
 
   @Post('blog')
+  @ApiTags('Write a blog post. Limited access.')
   @AccessControlList({
     role: UserRole.ADMIN,
     rights: [AccessRights.createPost, AccessRights.contentEditor],
@@ -129,6 +143,7 @@ export class AdminApiController {
   // }
 
   @Patch('blog/:id')
+  @ApiTags('Edit a blog post. Limited access.')
   @AccessControlList({
     role: UserRole.ADMIN,
     rights: [AccessRights.updatePost, AccessRights.contentEditor],
@@ -138,6 +153,7 @@ export class AdminApiController {
   }
 
   @Delete('blog/:id')
+  @ApiTags('Delete a blog post. Limited access.')
   @AccessControlList({
     role: UserRole.ADMIN,
     rights: [AccessRights.deletePost, AccessRights.contentEditor],
@@ -147,6 +163,7 @@ export class AdminApiController {
   }
 
   @Post('category')
+  @ApiTags('Create a category. Root only.')
   @AccessControlList({
     role: UserRole.ADMIN,
     isRoot: true,
@@ -157,6 +174,7 @@ export class AdminApiController {
   }
 
   @Get('tasks/conflicted')
+  @ApiTags('Get a list of conflicted tasks. Limited access.')
   @AccessControlList({
     role: UserRole.ADMIN,
     rights: [AccessRights.resolveConflict],
