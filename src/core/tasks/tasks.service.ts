@@ -23,7 +23,6 @@ export class TasksService {
     const recipient = await this.usersRepo.findById(recipientId);
     const category = await this.categoryRepo.findById(categoryId);
     const { points, accessLevel, title } = category;
-    console.dir(category);
     if (![`${UserRole.ADMIN}`, `${UserRole.RECIPIENT}`].includes(recipient.role)) {
       throw new ForbiddenException('Только реципиент или администратор могут создавать заявки', {
         cause: `Попытка создать заявку пользователем с _id ${recipientId} и ролью ${recipient.role}`,
@@ -39,8 +38,6 @@ export class TasksService {
       isPendingChanges: false,
       location: { type: 'Point', coordinates: location },
     };
-    console.log(task);
-    console.dir(task);
     return this.tasksRepo.create(task);
   }
 
@@ -53,7 +50,7 @@ export class TasksService {
   }
 
   public async updateTask(taskId: string, user: AnyUserInterface, dto: Partial<CreateTaskDto>) {
-    const { role, _id: userId } = user;
+    const { _id: userId, role, address, avatar, name, phone } = user;
     if (!(role === UserRole.RECIPIENT || role === UserRole.ADMIN)) {
       throw new ForbiddenException(
         'Вы не можете редактировать эту задачу: недостаточно полномочий',
@@ -67,16 +64,13 @@ export class TasksService {
       status: TaskStatus.CREATED,
     };
     if (role === UserRole.RECIPIENT) {
-      query.recipient._id = userId;
+      query.recipient = { _id: userId, address, avatar, name, phone };
     }
     return this.tasksRepo.findOneAndUpdate(query, dto, { new: true });
   }
 
   public async getTasksByStatus(taskStatus: TaskStatus, dto: Partial<GetTasksDto>) {
-    console.log(`TaskStatus: '${taskStatus}', dto:`);
-    console.dir(dto);
     const { location: center, distance, start, end, categoryId } = dto;
-    console.dir(center);
     const query: FilterQuery<Task> = {
       status: taskStatus,
       location: {
@@ -108,11 +102,11 @@ export class TasksService {
 
   public async getOwnTasks(user: AnyUserInterface, status: TaskStatus, dto?: GetTasksDto) {
     const { location: center, distance, start, end, categoryId } = dto;
-    const { _id, role } = user;
+    const { _id, role, address, avatar, name, phone } = user;
     const roleIndex = role.toLowerCase();
     const query: FilterQuery<Task> = {
       status,
-      [roleIndex]: { _id },
+      [roleIndex]: { _id, address, avatar, name, phone },
     };
     if (!!center && center.length === 2 && !!distance) {
       query.location = {
@@ -144,16 +138,12 @@ export class TasksService {
 
   public async acceptTask(taskId: string, volunteerId: string) {
     const volunteer = (await this.usersRepo.findById(volunteerId)) as User & Volunteer;
-    console.log('acceptTask(). Volunteer:');
-    console.dir(volunteer);
     if (![`${UserRole.ADMIN}`, `${UserRole.VOLUNTEER}`].includes(volunteer.role)) {
       throw new ForbiddenException('Только волонтёр или администратор могут создавать заявки', {
         cause: `Попытка создать заявку пользователем с _id '${volunteerId}' и ролью '${volunteer.role}'`,
       });
     }
     const task = await this.tasksRepo.findById(taskId);
-    console.log('Task:');
-    console.dir(task);
     if (task.volunteer) {
       throw new ConflictException('Эта заявка уже взята другим волонтёром', {
         cause: `Попытка повторно взять заявку с _id '${taskId}' пользователем с _id '${volunteerId}' и ролью '${volunteer.role}'`,
@@ -184,15 +174,7 @@ export class TasksService {
     const myIndex = userRole === UserRole.VOLUNTEER ? 'volunteerReport' : 'recipientReport';
     const counterpartyIndex =
       userRole === UserRole.RECIPIENT ? 'volunteerReport' : 'recipientReport';
-    console.log(
-      `reportTask(taskId = '${taskId}', userId = '${userId}', userRole = '${userRole}', result = '${result}').\nmyIndex = '${myIndex}', counterpartyIndex = '${counterpartyIndex}'.\nTask:`
-    );
     const task = await this.tasksRepo.findById(taskId);
-    console.dir(task);
-    console.log('task[myIndex]:');
-    console.dir(task[myIndex]);
-    console.log('task[counterpartyIndex]:');
-    console.dir(task[counterpartyIndex]);
     if (task.status === TaskStatus.CREATED) {
       throw new ForbiddenException('Нельзя отчитаться по не открытой задаче!', {
         cause: `Попытка отчёта по задаче с _id '${task._id}' со статусом ${task.status} `,
