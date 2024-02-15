@@ -32,7 +32,8 @@ export class VolunteerApiController {
 
   @AccessControlList({ role: UserRole.VOLUNTEER, level: UserStatus.CONFIRMED })
   @Put('tasks/:id/accept')
-  public async accept(@Req() { user: { _id: volunteerId } }, @Param(':id') taskId: string) {
+  public async accept(@Req() { user: { _id: volunteerId } }, @Param('id') taskId: string) {
+    console.log(`taskId: '${taskId}'`);
     return this.tasksService.acceptTask(taskId, volunteerId);
   }
 

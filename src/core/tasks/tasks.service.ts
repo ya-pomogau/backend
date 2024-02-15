@@ -6,7 +6,7 @@ import { CreateTaskDto, GetTasksDto } from '../../common/dto/tasks.dto';
 import { CategoryRepository } from '../../datalake/category/category.repository';
 import { Task } from '../../datalake/task/schemas/task.schema';
 import { ResolveStatus, TaskReport, TaskStatus } from '../../common/types/task.types';
-import { UserRole, AnyUserInterface } from '../../common/types/user.types';
+import { AnyUserInterface, UserRole } from '../../common/types/user.types';
 import { Volunteer } from '../../datalake/users/schemas/volunteer.schema';
 import { User } from '../../datalake/users/schemas/user.schema';
 
@@ -22,6 +22,8 @@ export class TasksService {
     const { recipientId, categoryId, location, ...data } = dto;
     const recipient = await this.usersRepo.findById(recipientId);
     const category = await this.categoryRepo.findById(categoryId);
+    const { points, accessLevel, title } = category;
+    console.dir(category);
     if (![`${UserRole.ADMIN}`, `${UserRole.RECIPIENT}`].includes(recipient.role)) {
       throw new ForbiddenException('Только реципиент или администратор могут создавать заявки', {
         cause: `Попытка создать заявку пользователем с _id ${recipientId} и ролью ${recipient.role}`,
@@ -33,10 +35,12 @@ export class TasksService {
       recipient: { name, phone, avatar, address, _id },
       volunteer: null,
       status: TaskStatus.CREATED,
-      category,
+      category: { points, accessLevel, title, _id: categoryId },
       isPendingChanges: false,
       location: { type: 'Point', coordinates: location },
     };
+    console.log(task);
+    console.dir(task);
     return this.tasksRepo.create(task);
   }
 
@@ -140,16 +144,30 @@ export class TasksService {
 
   public async acceptTask(taskId: string, volunteerId: string) {
     const volunteer = (await this.usersRepo.findById(volunteerId)) as User & Volunteer;
+    console.log('acceptTask(). Volunteer:');
+    console.dir(volunteer);
     if (![`${UserRole.ADMIN}`, `${UserRole.VOLUNTEER}`].includes(volunteer.role)) {
       throw new ForbiddenException('Только волонтёр или администратор могут создавать заявки', {
         cause: `Попытка создать заявку пользователем с _id '${volunteerId}' и ролью '${volunteer.role}'`,
       });
     }
     const task = await this.tasksRepo.findById(taskId);
+    console.log('Task:');
+    console.dir(task);
     if (task.volunteer) {
       throw new ConflictException('Эта заявка уже взята другим волонтёром', {
         cause: `Попытка повторно взять заявку с _id '${taskId}' пользователем с _id '${volunteerId}' и ролью '${volunteer.role}'`,
       });
+    }
+    if (task.status !== TaskStatus.CREATED) {
+      throw new ConflictException(
+        `Нельзя повторно принять уже ${
+          task.status === TaskStatus.COMPLETED ? 'завершённое' : 'исполняемое'
+        } задание`,
+        {
+          cause: `Попытка взять заявку со статусом '${task.status}' !=== '${TaskStatus.CREATED}' пользователем с _id '${volunteerId}' и ролью '${volunteer.role}'`,
+        }
+      );
     }
     if (volunteer.status < task.category.accessLevel) {
       throw new ForbiddenException('Вам нельзя брать задачи из этой категории!');

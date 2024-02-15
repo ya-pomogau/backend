@@ -8,7 +8,10 @@ import {
 } from '../../../common/types/task.types';
 import { PointGeoJSON, PointGeoJSONSchema } from '../../../common/schemas/PointGeoJSON.schema';
 import { UserProfile } from '../../../common/types/user.types';
-import { rawUserProfile } from '../../../common/constants/mongoose-fields-raw-definition';
+import {
+  rawCategory,
+  rawUserProfile,
+} from '../../../common/constants/mongoose-fields-raw-definition';
 import { CategoryInterface } from '../../../common/types/category.types';
 
 @Schema({
@@ -38,6 +41,7 @@ export class Task extends Document implements TaskInterface {
   })
   adminResolve: ResolveStatus | null;
 
+  @Prop({ type: raw(rawCategory), required: false, immutable: true })
   category: CategoryInterface;
 
   @Prop({ required: false, type: mongoose.SchemaTypes.Date })
@@ -57,7 +61,7 @@ export class Task extends Document implements TaskInterface {
   })
   recipientReport: TaskReport | null;
 
-  @Prop({ type: raw(rawUserProfile), required: false, immutable: true })
+  @Prop({ type: raw(rawUserProfile), required: false })
   volunteer: UserProfile;
 
   @Prop({
