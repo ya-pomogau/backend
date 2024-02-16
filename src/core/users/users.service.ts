@@ -7,7 +7,7 @@ import {
 import { InternalServerErrorException, NotFoundException } from '@nestjs/common/exceptions';
 import { UsersRepository } from '../../datalake/users/users.repository';
 import { CreateAdminDto, CreateUserDto } from '../../common/dto/users.dto';
-import { AdminPermission, UserRole, UserStatus } from '../../common/types/user.types';
+import { AdminInterface, AdminPermission, AdminUserModelInterface, UserRole, UserStatus } from '../../common/types/user.types';
 import { HashService } from '../../common/hash/hash.service';
 import { Admin } from '../../datalake/users/schemas/admin.schema';
 import { POJOType } from '../../common/types/pojo.type';
@@ -30,7 +30,7 @@ export class UsersService {
     });
   }
 
-  async checkAdminCredentials(login: string, password: string): Promise<Admin> | null {
+  async checkAdminCredentials(login: string, password: string): Promise<AdminInterface> | null {
     const user = await this.usersRepo.findOne(
       {
         role: UserRole.ADMIN,
@@ -41,14 +41,18 @@ export class UsersService {
         permissions: true,
         login: true,
         vkId: true,
-        profile: true,
         isRoot: true,
         role: true,
+        address: true,
+        avatar: true,
+        phone: true,
+        name: true,
+        isActive: true,
       }
     );
-    const { password: passDb } = user as Admin;
+    const { password: passDb, ...data } = user as AdminInterface;
     const isOk = await HashService.compareHash(password, passDb);
-    return isOk ? Promise.resolve(user as Admin) : null;
+    return isOk ? Promise.resolve(data as AdminInterface) : null;
   }
 
   async createUser(dto: CreateUserDto) {
