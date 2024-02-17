@@ -33,10 +33,10 @@ export class TasksService {
         cause: `Попытка создать заявку пользователем с _id ${recipientId} и ролью ${recipient.role}`,
       });
     }
-    const { name, phone, avatar, address, _id } = recipient;
+    const { name, phone, avatar, address, _id, vkId, role } = recipient;
     const task = {
       ...data,
-      recipient: { name, phone, avatar, address, _id },
+      recipient: { name, phone, avatar, address, _id, vkId, role },
       volunteer: null,
       status: TaskStatus.CREATED,
       category: { points, accessLevel, title, _id: categoryId },
@@ -58,7 +58,7 @@ export class TasksService {
   }
 
   public async startModeration(taskId: string, moderator: AnyUserInterface) {
-    const { _id, role, address, avatar, name, phone } = moderator;
+    const { name, phone, avatar, address, _id, vkId, role } = moderator;
     const task = await this.tasksRepo.findById(taskId);
     if (moderator.role !== UserRole.ADMIN) {
       throw new ForbiddenException('Только администратор может разрешать конфликты', {
@@ -82,7 +82,7 @@ export class TasksService {
       { _id: taskId, status: TaskStatus.CONFLICTED, adminResolve: ResolveStatus.VIRGIN },
       {
         adminResolve: ResolveStatus.PENDING,
-        moderator: { _id, role, address, avatar, name, phone },
+        moderator: { name, phone, avatar, address, _id, vkId, role },
       },
       {}
     );
@@ -218,10 +218,10 @@ export class TasksService {
     if (volunteer.status < task.category.accessLevel) {
       throw new ForbiddenException('Вам нельзя брать задачи из этой категории!');
     }
-    const { name, phone, avatar, address, _id } = volunteer;
+    const { name, phone, avatar, address, _id, vkId, role } = volunteer;
     return this.tasksRepo.findByIdAndUpdate(
       taskId,
-      { status: TaskStatus.ACCEPTED, volunteer: { name, phone, avatar, address, _id } },
+      { status: TaskStatus.ACCEPTED, volunteer: { name, phone, avatar, address, _id, vkId, role } },
       { new: true }
     );
   }
