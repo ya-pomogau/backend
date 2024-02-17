@@ -124,7 +124,12 @@ export class UsersService {
           );
         }
         case UserStatus.UNCONFIRMED: {
-          return this.usersRepo.findByIdAndUpdate(_id, { status: UserStatus.CONFIRMED }, {});
+          const { name, phone, avatar, address, _id, vkId, role } = user;
+          return this.usersRepo.findOneAndUpdate(
+            { name, phone, avatar, address, _id, vkId, role },
+            { status: UserStatus.CONFIRMED },
+            {}
+          );
         }
         case UserStatus.CONFIRMED: {
           return user;
@@ -304,7 +309,6 @@ export class UsersService {
   }
 
   public async updateProfile(userId: string, dto: Partial<UserProfile>) {
-    console.dir(dto);
     return this.usersRepo.findByIdAndUpdate(userId, dto, { new: true });
   }
 }
