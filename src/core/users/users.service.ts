@@ -304,6 +304,7 @@ export class UsersService {
   }
 
   public async updateProfile(userId: string, dto: Partial<UserProfile>) {
+    console.dir(dto);
     return this.usersRepo.findByIdAndUpdate(userId, dto, { new: true });
   }
 }
