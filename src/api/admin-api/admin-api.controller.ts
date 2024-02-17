@@ -143,12 +143,6 @@ export class AdminApiController {
     return this.blogService.create(dto, req.user);
   }
 
-  // TODO: перенести в SystemApi
-  // @Get('blog')
-  // async getAllPosts() {
-  //   return this.blogService.getAllPosts();
-  // }
-
   @Patch('blog/:id')
   @ApiTags('Edit a blog post. Limited access.')
   @AccessControlList({

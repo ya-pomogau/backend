@@ -29,6 +29,10 @@ export class BlogService {
     return this.blogRepo.find({});
   }
 
+  async getPost(postId: string) {
+    return this.blogRepo.findById(postId);
+  }
+
   async updatePost(postId: string, updateDto: PostDTO, user) {
     const { author } = await this.blogRepo.findById(postId);
 
