@@ -57,6 +57,20 @@ export class TasksService {
     });
   }
 
+  public async getAllVirginTasks(dto: Partial<GetTasksDto>) {
+    const { location: center, distance } = dto;
+    const query: FilterQuery<Task> = {
+      status: TaskStatus.CREATED,
+      location: {
+        $near: {
+          $geometry: { type: 'Point', coordinates: center },
+          $maxDistance: distance,
+        },
+      },
+    };
+    return this.tasksRepo.find(query);
+  }
+
   public async startModeration(taskId: string, moderator: AnyUserInterface) {
     const { name, phone, avatar, address, _id, vkId, role } = moderator;
     const task = await this.tasksRepo.findById(taskId);
