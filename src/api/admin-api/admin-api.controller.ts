@@ -40,6 +40,13 @@ export class AdminApiController {
     private readonly tasksService: TasksService
   ) {}
 
+  @Get('all')
+  @ApiTags('Get a list of volunteers')
+  @AccessControlList({ role: UserRole.ADMIN, rights: [AccessRights.confirmUser] })
+  public async getAdministrators() {
+    return this.usersService.getAdministrators();
+  }
+
   @Post('create')
   @ApiTags('Create an administrative user. Root only.')
   @AccessControlList({ role: UserRole.ADMIN, isRoot: true })
@@ -182,4 +189,27 @@ export class AdminApiController {
   public async getConflictedTasks() {
     return this.tasksService.getTasksByStatus(TaskStatus.CONFLICTED, {});
   }
+
+  @Get('users/volunteers')
+  @ApiTags('Get a list of volunteers')
+  @AccessControlList({ role: UserRole.ADMIN, rights: [AccessRights.confirmUser] })
+  public async getVolunteers() {
+    return this.usersService.getUsersByRole(UserRole.VOLUNTEER);
+  }
+
+  @Get('users/recipients')
+  @ApiTags('Get a list of volunteers')
+  @AccessControlList({ role: UserRole.ADMIN, rights: [AccessRights.confirmUser] })
+  public async getRecipients() {
+    return this.usersService.getUsersByRole(UserRole.RECIPIENT);
+  }
+
+  @Get('users/unconfirmed')
+  @ApiTags('Get a list of volunteers')
+  @AccessControlList({ role: UserRole.ADMIN, rights: [AccessRights.confirmUser] })
+  public async getUnconfirmed() {
+    return this.usersService.getUnconfirmedUsers();
+  }
+
+  // TODO: списки пользователей по ролям? и статусам?
 }

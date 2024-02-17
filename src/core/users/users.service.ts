@@ -7,19 +7,41 @@ import {
 import { InternalServerErrorException, NotFoundException } from '@nestjs/common/exceptions';
 import { UsersRepository } from '../../datalake/users/users.repository';
 import { CreateAdminDto, CreateUserDto } from '../../common/dto/users.dto';
-import { AdminInterface, AdminPermission, AdminUserModelInterface, UserRole, UserStatus } from '../../common/types/user.types';
+import {
+  AdminInterface,
+  AdminPermission,
+  UserRole,
+  UserStatus,
+} from '../../common/types/user.types';
 import { HashService } from '../../common/hash/hash.service';
 import { Admin } from '../../datalake/users/schemas/admin.schema';
 import { POJOType } from '../../common/types/pojo.type';
 import { User } from '../../datalake/users/schemas/user.schema';
 import { Volunteer } from '../../datalake/users/schemas/volunteer.schema';
 import { Recipient } from '../../datalake/users/schemas/recipient.schema';
+import { PointGeoJSONInterface } from '../../common/types/point-geojson.types';
 
 @Injectable()
 export class UsersService {
   constructor(private readonly usersRepo: UsersRepository) {}
 
-  private async create(dto: CreateUserDto | CreateAdminDto): Promise<POJOType<User>> {
+  private async create(dto: {
+    address: string;
+    role: UserRole;
+    isRoot?: boolean;
+    keys?: boolean;
+    vkId: string;
+    avatar?: string;
+    login?: string;
+    isActive?: boolean;
+    score?: number;
+    password?: string;
+    phone: string;
+    permissions?: Array<AdminPermission>;
+    name: string;
+    location?: PointGeoJSONInterface;
+    status?: UserStatus;
+  }): Promise<POJOType<User>> {
     return this.usersRepo.create(dto);
   }
 
@@ -82,7 +104,7 @@ export class UsersService {
       ...dto,
       password: await HashService.generateHash(dto.password),
       isRoot: false,
-      status: UserStatus.UNCONFIRMED,
+      isActive: true,
       role: UserRole.ADMIN,
     });
   }
@@ -257,5 +279,22 @@ export class UsersService {
       { $pull: { permissions: { $in: privileges } } },
       {}
     );
+  }
+
+  public async getUsersByRole(role: UserRole) {
+    return this.usersRepo.find({
+      status: { $ne: UserStatus.UNCONFIRMED },
+      role,
+    });
+  }
+
+  public async getUnconfirmedUsers() {
+    return this.usersRepo.find({
+      status: UserStatus.UNCONFIRMED,
+    });
+  }
+
+  public async getAdministrators() {
+    return this.usersRepo.find({ role: UserRole.ADMIN, isActive: true });
   }
 }
