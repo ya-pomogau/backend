@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   InternalServerErrorException,
   Post,
   Req,
@@ -13,6 +14,11 @@ import { VKNewUserDto } from './dto/vk-new.dto';
 import { UsersService } from '../../core/users/users.service';
 import { Public } from '../../common/decorators/public.decorator';
 import { AdminLoginAuthGuard } from '../../common/guards/local-auth.guard';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+
+type mockLoginDto = {
+  vkId: string;
+};
 
 @Controller('auth')
 export class AuthApiController {
@@ -48,5 +54,24 @@ export class AuthApiController {
       return { token, user: req.user };
     }
     throw new UnauthorizedException('Неверное имя пользователя или пароль');
+  }
+
+  @Public()
+  @Post('mock')
+  public async mockLogin(@Body() dto: mockLoginDto) {
+    const { vkId: mockId } = dto;
+    const user = await this.usersService.checkVKCredential(mockId);
+    if (user) {
+      // TODO: Вынести в сервис в core после решения проблемы с типизацией Users
+      const token = await this.authService.authenticate(user as Record<string, unknown>);
+      return { token, user };
+    }
+    throw new UnauthorizedException('Неверное имя пользователя или пароль');
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('token')
+  public async checkToken(@Req() req: Express.Request) {
+    return req.user;
   }
 }

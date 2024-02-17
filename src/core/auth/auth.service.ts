@@ -9,7 +9,6 @@ import { VKLoginDtoInterface, VKResponseInterface } from '../../common/types/api
 import { Volunteer } from '../../datalake/users/schemas/volunteer.schema';
 import { Recipient } from '../../datalake/users/schemas/recipient.schema';
 import { Admin } from '../../datalake/users/schemas/admin.schema';
-import { AnyUserInterface } from '../../common/types/user.types';
 
 @Injectable()
 export class AuthService {
@@ -45,7 +44,9 @@ export class AuthService {
       if (status === 200) {
         ({ user_id: vkId, access_token } = data);
       } else {
-        throw new InternalServerErrorException(data.error_description);
+        throw new UnauthorizedException('Ошибка логина через ВК', {
+          cause: data.error_description,
+        });
       }
     } catch (err) {
       const {
@@ -55,8 +56,8 @@ export class AuthService {
         case 401:
           throw new UnauthorizedException(statusText);
         default:
-          throw new InternalServerErrorException({
-            message: 'Произошла неизвестная ошибка при обращении на ВК',
+          throw new InternalServerErrorException('Ошибка логина через ВК', {
+            cause: `Произошла неизвестная ошибка при обращении на ВК, status: ${status}, message: '${statusText}'.`,
           });
       }
     }
