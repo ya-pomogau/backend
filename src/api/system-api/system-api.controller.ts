@@ -1,16 +1,21 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Query, Req, UseGuards } from '@nestjs/common';
 import { BlogService } from '../../core/blog/blog.service';
 import { Public } from '../../common/decorators/public.decorator';
 import { CategoriesService } from '../../core/categories/categories.service';
 import { TasksService } from '../../core/tasks/tasks.service';
 import { GetTasksQueryDto } from '../recipient-api/dto/get-tasks-query.dto';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { UsersService } from '../../core/users/users.service';
+import { AnyUserInterface } from '../../common/types/user.types';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 
 @Controller('system')
 export class SystemApiController {
   constructor(
     private readonly blogService: BlogService,
     private readonly categoriesService: CategoriesService,
-    private readonly taskService: TasksService
+    private readonly taskService: TasksService,
+    private readonly userService: UsersService
   ) {}
 
   @Get('posts')
@@ -45,5 +50,19 @@ export class SystemApiController {
       ...data,
       location: [longitude, latitude],
     });
+  }
+
+  @Get('profile')
+  @UseGuards(JwtAuthGuard)
+  public async getProfile(@Req() req: Express.Request) {
+    const { _id } = req.user as AnyUserInterface;
+    return this.userService.getProfile(_id);
+  }
+
+  @Patch('profile')
+  @UseGuards(JwtAuthGuard)
+  public async updateProfile(@Req() req: Express.Request, @Body() dto: UpdateProfileDto) {
+    const { _id } = req.user as AnyUserInterface;
+    return this.userService.updateProfile(_id, dto);
   }
 }
