@@ -10,6 +10,7 @@ import { CreateAdminDto, CreateUserDto } from '../../common/dto/users.dto';
 import {
   AdminInterface,
   AdminPermission,
+  UserProfile,
   UserRole,
   UserStatus,
 } from '../../common/types/user.types';
@@ -296,5 +297,13 @@ export class UsersService {
 
   public async getAdministrators() {
     return this.usersRepo.find({ role: UserRole.ADMIN, isActive: true });
+  }
+
+  public async getProfile(userId: string) {
+    return this.usersRepo.findById(userId);
+  }
+
+  public async updateProfile(userId: string, dto: Partial<UserProfile>) {
+    return this.usersRepo.findByIdAndUpdate(userId, dto, { new: true });
   }
 }
