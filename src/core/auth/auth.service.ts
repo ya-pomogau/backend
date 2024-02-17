@@ -29,6 +29,12 @@ export class AuthService {
     });
   }
 
+  public async checkJWT(jwt: string) {
+    return this.jwtService.verifyAsync(jwt, {
+      secret: this.configService.get<string>('jwt.key'),
+    });
+  }
+
   public async loginVK(dto: VKLoginDtoInterface) {
     const { code, redirectUrl } = dto;
     const clientId = this.configService.get<string>('vk.appId');

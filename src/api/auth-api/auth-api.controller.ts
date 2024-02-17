@@ -7,6 +7,7 @@ import {
   Req,
   UnauthorizedException,
   UseGuards,
+  Headers,
 } from '@nestjs/common';
 import { VkLoginDto } from './dto/vk-login.dto';
 import { AuthService } from '../../core/auth/auth.service';
@@ -14,7 +15,6 @@ import { VKNewUserDto } from './dto/vk-new.dto';
 import { UsersService } from '../../core/users/users.service';
 import { Public } from '../../common/decorators/public.decorator';
 import { AdminLoginAuthGuard } from '../../common/guards/local-auth.guard';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 
 type mockLoginDto = {
   vkId: string;
@@ -69,9 +69,17 @@ export class AuthApiController {
     throw new UnauthorizedException('Неверное имя пользователя или пароль');
   }
 
-  @UseGuards(JwtAuthGuard)
+  @Public()
   @Get('token')
-  public async checkToken(@Req() req: Express.Request) {
-    return req.user;
+  public async checkToken(@Headers() headers: Record<string, string>) {
+    const { authorization } = headers;
+    if (!!authorization && authorization.startsWith('Bearer')) {
+      const jwt = authorization.slice(7, authorization.length);
+      const user = await this.authService.checkJWT(jwt);
+      if (user) {
+        return user;
+      }
+    }
+    throw new UnauthorizedException('Токен не подходит');
   }
 }
