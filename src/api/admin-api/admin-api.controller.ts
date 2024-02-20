@@ -209,7 +209,7 @@ export class AdminApiController {
   @ApiTags('Start moderation')
   @AccessControlList({ role: UserRole.ADMIN, rights: [AccessRights.resolveConflict] })
   public async startModeration(@Param('id') taskId: string, @Req() req: Express.Request) {
-    return this.tasksService.startModeration(taskId, req.user);
+    return this.tasksService.startModeration(taskId, req.user as AnyUserInterface);
   }
 
   @Put('tasks/:id/resolve/fulfill')
@@ -225,4 +225,9 @@ export class AdminApiController {
   public async resolveRejected(@Param('id') taskId: string) {
     return this.tasksService.resolveConflict(taskId, ResolveResult.REJECTED);
   }
+
+  /* @Get('/tasks/moderated')
+  @ApiTags('Get moderated by admin')
+  @AccessControlList({ role: UserRole.ADMIN, rights: [AccessRights.resolveConflict] })
+  public */
 }
