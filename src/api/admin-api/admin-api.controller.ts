@@ -26,6 +26,7 @@ import { ApiCreateCategoryDto } from './dto/new-category.dto';
 import { CategoriesService } from '../../core/categories/categories.service';
 import { TasksService } from '../../core/tasks/tasks.service';
 import { ApiPrivilegesDto } from './dto/privileges.dto';
+import { ResolveResult } from '../../common/types/task.types';
 
 @UseGuards(JwtAuthGuard)
 @UseGuards(AccessControlGuard)
@@ -204,11 +205,24 @@ export class AdminApiController {
     return this.usersService.getUnconfirmedUsers();
   }
 
-  @Put('tasks/:id/moderate')
+  @Put('tasks/:id/resolve')
   @ApiTags('Start moderation')
   @AccessControlList({ role: UserRole.ADMIN, rights: [AccessRights.resolveConflict] })
   public async startModeration(@Param('id') taskId: string, @Req() req: Express.Request) {
     return this.tasksService.startModeration(taskId, req.user);
   }
-  // TODO: списки пользователей по ролям? и статусам?
+
+  @Put('tasks/:id/resolve/fulfill')
+  @ApiTags('Resolve conflict as fulfilled')
+  @AccessControlList({ role: UserRole.ADMIN, rights: [AccessRights.resolveConflict] })
+  public async resolveFulfilled(@Param('id') taskId: string) {
+    return this.tasksService.resolveConflict(taskId, ResolveResult.FULFILLED);
+  }
+
+  @Put('tasks/:id/resolve/reject')
+  @ApiTags('Resolve conflict as rejected')
+  @AccessControlList({ role: UserRole.ADMIN, rights: [AccessRights.resolveConflict] })
+  public async resolveRejected(@Param('id') taskId: string) {
+    return this.tasksService.resolveConflict(taskId, ResolveResult.REJECTED);
+  }
 }
