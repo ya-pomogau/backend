@@ -204,5 +204,11 @@ export class AdminApiController {
     return this.usersService.getUnconfirmedUsers();
   }
 
+  @Put('tasks/:id/moderate')
+  @ApiTags('Start moderation')
+  @AccessControlList({ role: UserRole.ADMIN, rights: [AccessRights.resolveConflict] })
+  public async startModeration(@Param('id') taskId: string, @Req() req: Express.Request) {
+    return this.tasksService.startModeration(taskId, req.user);
+  }
   // TODO: списки пользователей по ролям? и статусам?
 }
