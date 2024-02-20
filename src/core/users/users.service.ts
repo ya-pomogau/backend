@@ -301,7 +301,7 @@ export class UsersService {
   }
 
   public async getAdministrators() {
-    return this.usersRepo.find({ role: UserRole.ADMIN, isActive: true });
+    return this.usersRepo.find({ role: UserRole.ADMIN, isRoot: false, isActive: true });
   }
 
   public async getProfile(userId: string) {
