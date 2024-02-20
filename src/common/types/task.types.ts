@@ -16,7 +16,10 @@ export enum ResolveStatus {
   REJECTED = 'rejected',
 }
 
-export type ResolveResult = ResolveStatus.FULFILLED & ResolveStatus.REJECTED;
+export enum ResolveResult {
+  FULFILLED = ResolveStatus.FULFILLED,
+  REJECTED = ResolveStatus.REJECTED,
+}
 
 export enum ReportStatus {
   PENDING = 'pending',

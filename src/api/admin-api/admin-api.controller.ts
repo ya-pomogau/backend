@@ -226,8 +226,10 @@ export class AdminApiController {
     return this.tasksService.resolveConflict(taskId, ResolveResult.REJECTED);
   }
 
-  /* @Get('/tasks/moderated')
+  @Get('/tasks/moderated')
   @ApiTags('Get moderated by admin')
   @AccessControlList({ role: UserRole.ADMIN, rights: [AccessRights.resolveConflict] })
-  public */
+  public async getModeratedTasks(@Req() req: Express.Request) {
+    return this.tasksService.getModeratedTasks(req.user as AnyUserInterface);
+  }
 }
