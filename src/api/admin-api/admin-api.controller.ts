@@ -25,7 +25,6 @@ import { BlogService } from '../../core/blog/blog.service';
 import { ApiCreateCategoryDto } from './dto/new-category.dto';
 import { CategoriesService } from '../../core/categories/categories.service';
 import { TasksService } from '../../core/tasks/tasks.service';
-import { TaskStatus } from '../../common/types/task.types';
 import { ApiPrivilegesDto } from './dto/privileges.dto';
 
 @UseGuards(JwtAuthGuard)
@@ -181,7 +180,7 @@ export class AdminApiController {
     rights: [AccessRights.resolveConflict],
   })
   public async getConflictedTasks() {
-    return this.tasksService.getTasksByStatus(TaskStatus.CONFLICTED, {});
+    return this.tasksService.getVirginConflictTasks();
   }
 
   @Get('users/volunteers')
