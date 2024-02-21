@@ -5,11 +5,14 @@ import { JwtService } from '@nestjs/jwt';
 import { AxiosError, AxiosResponse } from 'axios';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../users/users.service';
-import { VKLoginDtoInterface, VKResponseInterface } from '../../common/types/api.types';
+import {
+  VKLoginDtoInterface,
+  VKResponseInterface,
+  VKResponseOKInterface,
+} from '../../common/types/api.types';
 import { Volunteer } from '../../datalake/users/schemas/volunteer.schema';
 import { Recipient } from '../../datalake/users/schemas/recipient.schema';
 import { Admin } from '../../datalake/users/schemas/admin.schema';
-import { AnyUserInterface } from '../../common/types/user.types';
 
 @Injectable()
 export class AuthService {
@@ -37,13 +40,14 @@ export class AuthService {
     const vkAuthUrl = `https://oauth.vk.com/access_token?client_id=${clientId}&client_secret=${clientSecret}&redirect_uri=${redirectUrl}&code=${code}`;
     let vkId;
     let access_token: string;
+    let email;
     try {
       const { data, status } = await this.httpService.axiosRef.get<
         VKResponseInterface,
         AxiosResponse<VKResponseInterface>
       >(vkAuthUrl);
       if (status === 200) {
-        ({ user_id: vkId, access_token } = data);
+        ({ user_id: vkId, access_token, email } = data as VKResponseOKInterface);
       } else {
         throw new InternalServerErrorException(data.error_description);
       }
@@ -60,15 +64,19 @@ export class AuthService {
           });
       }
     }
-    const vkUserUrl = `https://api.vk.com/method/users.get?access_token=${access_token}&v=5.131`; //= 5.131
-    const { data: vkUser } = await this.httpService.axiosRef.get(vkUserUrl);
+    const vkUserUrl = `https://api.vk.com/method/users.get?access_token=${access_token}&user_ids=${vkId}&fields=photo_max_orig,first_name,last_name,mobile_phone,email&v=5.81`; //= 5.131
+    const {
+      data: {
+        response: [vkUser],
+      },
+    } = await this.httpService.axiosRef.get(vkUserUrl);
     const user = await this.usersService.checkVKCredential(String(vkId));
     if (user) {
       const token = await this.authenticate(user);
       return { user, token };
     }
     // eslint-disable-next-line camelcase
-    return { vkUser };
+    return { vkUser: { ...vkUser, email } };
   }
 
   // TODO: публичный метод логина админа

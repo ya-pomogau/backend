@@ -12,14 +12,14 @@ export interface VKLoginDtoInterface {
   state?: string;
 }
 
-interface VKResponseOKInterface {
+export interface VKResponseOKInterface {
   access_token: string;
   user_id: number;
   expires_in: number;
   email: string;
 }
 
-interface VKResponseErrorInterface {
+export interface VKResponseErrorInterface {
   error: string;
   error_description: string;
 }
