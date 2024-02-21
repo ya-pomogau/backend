@@ -8,13 +8,17 @@ import {
   UnauthorizedException,
   UseGuards,
   Headers,
+  HttpCode,
 } from '@nestjs/common';
+import { constants } from 'http2';
 import { VkLoginDto } from './dto/vk-login.dto';
 import { AuthService } from '../../core/auth/auth.service';
 import { VKNewUserDto } from './dto/vk-new.dto';
 import { UsersService } from '../../core/users/users.service';
 import { Public } from '../../common/decorators/public.decorator';
 import { AdminLoginAuthGuard } from '../../common/guards/local-auth.guard';
+
+const { HTTP_STATUS_OK, HTTP_STATUS_CREATED } = constants;
 
 type mockLoginDto = {
   vkId: string;
@@ -29,12 +33,14 @@ export class AuthApiController {
 
   @Public()
   @Post('vk')
+  @HttpCode(HTTP_STATUS_OK)
   async vkLogin(@Body() dto: VkLoginDto) {
     return this.authService.loginVK(dto);
   }
 
   @Public()
   @Post('new')
+  @HttpCode(HTTP_STATUS_CREATED)
   async register(@Body() dto: VKNewUserDto) {
     const user = await this.usersService.createUser(dto);
     if (user) {
@@ -47,6 +53,7 @@ export class AuthApiController {
   @Public()
   @UseGuards(AdminLoginAuthGuard)
   @Post('administrative')
+  @HttpCode(HTTP_STATUS_OK)
   async administrative(@Req() req: Express.Request) {
     if (req.user) {
       // TODO: Вынести в сервис в core после решения проблемы с типизацией Users
@@ -58,6 +65,7 @@ export class AuthApiController {
 
   @Public()
   @Post('mock')
+  @HttpCode(HTTP_STATUS_OK)
   public async mockLogin(@Body() dto: mockLoginDto) {
     const { vkId: mockId } = dto;
     const user = await this.usersService.checkVKCredential(mockId);
@@ -71,6 +79,7 @@ export class AuthApiController {
 
   @Public()
   @Get('token')
+  @HttpCode(HTTP_STATUS_OK)
   public async checkToken(@Headers() headers: Record<string, string>) {
     const { authorization } = headers;
     if (!!authorization && authorization.startsWith('Bearer')) {
