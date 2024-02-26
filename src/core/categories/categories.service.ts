@@ -1,14 +1,15 @@
-import { ForbiddenException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
+import exceptions from 'src/common/constants/exceptions';
 import { CategoryRepository } from '../../datalake/category/category.repository';
 import { CreateCategoryDto, UpdateCategoryDto } from '../../common/dto/category.dto';
-import {
-  AdminPermission,
-  AnyUserInterface,
-  UserRole,
-} from '../../common/types/user.types';
-import exceptions from 'src/common/constants/exceptions';
+import { AdminPermission, AnyUserInterface, UserRole } from '../../common/types/user.types';
 
-const options = {select: "_id title points accessLevel"};
+const options = { select: '_id title points accessLevel' };
 
 @Injectable()
 export class CategoriesService {
@@ -18,17 +19,16 @@ export class CategoriesService {
     return this.categoriesRepo.find({});
   }
 
-  //TODO вынести общую часть про castError отдельно
+  // TODO вынести общую часть про castError отдельно
   async getCategoryById(id: string) {
     let category;
 
     try {
       category = await this.categoriesRepo.findById(id);
     } catch (err) {
-      throw new InternalServerErrorException(exceptions.category.internalError, 
-        {
-          cause: 'Ошибка в методе поиска категории findById: ' + err,
-        })
+      throw new InternalServerErrorException(exceptions.category.internalError, {
+        cause: `Ошибка в методе поиска категории findById: ${err}`,
+      });
     }
 
     if (!category) {
@@ -46,12 +46,11 @@ export class CategoriesService {
     }
 
     try {
-      res = await this.categoriesRepo.deleteOne({_id: id}, {});
+      res = await this.categoriesRepo.deleteOne({ _id: id }, {});
     } catch (err) {
-      throw new InternalServerErrorException(exceptions.category.internalError,
-        {
-          cause: 'Ошибка в методе удаления категории deleteOne: ' + err,
-        })
+      throw new InternalServerErrorException(exceptions.category.internalError, {
+        cause: `Ошибка в методе удаления категории deleteOne: ${err}`,
+      });
     }
 
     if (!res.deletedCount) {
@@ -65,23 +64,22 @@ export class CategoriesService {
     let res;
 
     if (
-      user.role !== UserRole.ADMIN
-      || (user.role === UserRole.ADMIN && user.permissions.includes(AdminPermission.CATEGORIES))
+      user.role !== UserRole.ADMIN ||
+      (user.role === UserRole.ADMIN && user.permissions.includes(AdminPermission.CATEGORIES))
     ) {
       throw new ForbiddenException(exceptions.category.notEnoughRights);
     }
 
     try {
-      res = await this.categoriesRepo.findOneAndUpdate({_id: id}, updateData, options)
+      res = await this.categoriesRepo.findOneAndUpdate({ _id: id }, updateData, options);
     } catch (err) {
-      throw new InternalServerErrorException(exceptions.category.internalError,
-        {
-          cause: 'Ошибка в методе обновления данных категории findOneAndUpdate: ' + err,
-        })
+      throw new InternalServerErrorException(exceptions.category.internalError, {
+        cause: `Ошибка в методе обновления данных категории findOneAndUpdate: ${err}`,
+      });
     }
 
     if (!res) {
-      throw new NotFoundException(exceptions.category.notFound)
+      throw new NotFoundException(exceptions.category.notFound);
     }
 
     return res;
@@ -100,35 +98,35 @@ export class CategoriesService {
   async updateCategories(data: Record<string, number>, user: AnyUserInterface) {
     const repo = this.categoriesRepo;
     if (
-      user.role !== UserRole.ADMIN
-      || (user.role === UserRole.ADMIN && user.permissions.includes(AdminPermission.CATEGORIES))
+      user.role !== UserRole.ADMIN ||
+      (user.role === UserRole.ADMIN && user.permissions.includes(AdminPermission.CATEGORIES))
     ) {
       throw new ForbiddenException(exceptions.category.notEnoughRights);
     }
 
     const methods = Object.keys(data).map((el) => ({
       updateOne: {
-        filter: {_id: el},
-        update: {points: data[el]}
-      }
-    }))
+        filter: { _id: el },
+        update: { points: data[el] },
+      },
+    }));
 
-    return this.categoriesRepo.bulkWrite(
-      methods,
-      {})
-    .then(res => {
-      console.log(res);
-      if (res.modifiedCount < methods.length) {
-        console.log('Want to modify ' + methods.length +' categories, but found ' + res.modifiedCount);
-      }
+    return this.categoriesRepo
+      .bulkWrite(methods, {})
+      .then((res) => {
+        console.log(res);
+        if (res.modifiedCount < methods.length) {
+          console.log(
+            `Want to modify ${methods.length} categories, but found ${res.modifiedCount}`
+          );
+        }
 
-      return repo.find({_id: { $in: Object.keys(data) }});
-    })
-    .catch(err => {
-      throw new InternalServerErrorException(exceptions.category.internalError,
-        {
-          cause: 'Ошибка в методе обновления данных нескольких категории bulkWrite: ' + err,
-        })
-    });
+        return repo.find({ _id: { $in: Object.keys(data) } });
+      })
+      .catch((err) => {
+        throw new InternalServerErrorException(exceptions.category.internalError, {
+          cause: `Ошибка в методе обновления данных нескольких категории bulkWrite: ${err}`,
+        });
+      });
   }
 }

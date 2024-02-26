@@ -5,6 +5,12 @@ import { PointGeoJSON, PointGeoJSONSchema } from '../../../common/schemas/PointG
 
 @Schema({
   timestamps: true,
+  toObject: {
+    versionKey: false,
+    virtuals: true,
+    flattenObjectIds: true,
+  },
+  id: false,
 })
 export class Volunteer extends Document implements VolunteerUserModelInterface {
   @Prop({ default: 0, type: SchemaTypes.Number })
