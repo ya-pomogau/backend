@@ -8,6 +8,7 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { UsersService } from '../../core/users/users.service';
 import { AnyUserInterface } from '../../common/types/user.types';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { PolicyService } from '../../core/policy/policy.service';
 
 @Controller('system')
 export class SystemApiController {
@@ -15,7 +16,8 @@ export class SystemApiController {
     private readonly blogService: BlogService,
     private readonly categoriesService: CategoriesService,
     private readonly taskService: TasksService,
-    private readonly userService: UsersService
+    private readonly userService: UsersService,
+    private readonly policyService: PolicyService
   ) {}
 
   @Get('posts')
@@ -64,5 +66,11 @@ export class SystemApiController {
   public async updateProfile(@Req() req: Express.Request, @Body() dto: UpdateProfileDto) {
     const { _id } = req.user as AnyUserInterface;
     return this.userService.updateProfile(_id, dto);
+  }
+
+  @Get('policy')
+  @Public()
+  public async getPolicy() {
+    return this.policyService.getActual();
   }
 }
