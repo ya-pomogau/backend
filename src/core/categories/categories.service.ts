@@ -94,10 +94,7 @@ export class CategoriesService {
 
   // Только для админов с правами AdminPermission.CATEGORIES
   async updatePoints(data: Record<string, number>, user: AdminInterface) {
-    if (
-      user.role !== UserRole.ADMIN ||
-      (user.role === UserRole.ADMIN && !user.permissions.includes(AdminPermission.CATEGORIES))
-    ) {
+    if (!(user.role === UserRole.ADMIN && user.permissions.includes(AdminPermission.CATEGORIES))) {
       throw new ForbiddenException(exceptions.category.notEnoughRights);
     }
 
