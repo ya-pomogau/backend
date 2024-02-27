@@ -4,13 +4,13 @@ import { BlogPostInterface } from '../../../common/types/blog-post.types';
 
 export class PostDTO implements BlogPostInterface {
   @ApiProperty()
-  @IsString()
   @IsNotEmpty()
+  @IsString()
   title: string;
 
   @ApiProperty()
-  @IsString()
   @IsNotEmpty()
+  @IsString()
   text: string;
 
   @ApiProperty()

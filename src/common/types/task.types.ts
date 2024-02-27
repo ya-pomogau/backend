@@ -16,6 +16,11 @@ export enum ResolveStatus {
   REJECTED = 'rejected',
 }
 
+export enum ResolveResult {
+  FULFILLED = ResolveStatus.FULFILLED,
+  REJECTED = ResolveStatus.REJECTED,
+}
+
 export enum ReportStatus {
   PENDING = 'pending',
   REPORTED = 'reported',
@@ -27,7 +32,6 @@ export enum TaskReport {
 }
 
 export interface TaskInterface {
-  _id: string;
   recipient: UserProfile;
   volunteer: UserProfile | null;
   status: TaskStatus;
@@ -39,6 +43,7 @@ export interface TaskInterface {
   volunteerReport: TaskReport | null;
   recipientReport: TaskReport | null;
   adminResolve: ResolveStatus | null;
+  moderator: UserProfile | null;
   isPendingChanges: boolean;
 }
 

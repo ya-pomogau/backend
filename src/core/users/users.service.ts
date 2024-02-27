@@ -7,19 +7,42 @@ import {
 import { InternalServerErrorException, NotFoundException } from '@nestjs/common/exceptions';
 import { UsersRepository } from '../../datalake/users/users.repository';
 import { CreateAdminDto, CreateUserDto } from '../../common/dto/users.dto';
-import { UserRole, UserStatus } from '../../common/types/user.types';
+import {
+  AdminInterface,
+  AdminPermission,
+  UserProfile,
+  UserRole,
+  UserStatus,
+} from '../../common/types/user.types';
 import { HashService } from '../../common/hash/hash.service';
 import { Admin } from '../../datalake/users/schemas/admin.schema';
 import { POJOType } from '../../common/types/pojo.type';
 import { User } from '../../datalake/users/schemas/user.schema';
 import { Volunteer } from '../../datalake/users/schemas/volunteer.schema';
 import { Recipient } from '../../datalake/users/schemas/recipient.schema';
+import { PointGeoJSONInterface } from '../../common/types/point-geojson.types';
 
 @Injectable()
 export class UsersService {
   constructor(private readonly usersRepo: UsersRepository) {}
 
-  private async create(dto: CreateUserDto | CreateAdminDto): Promise<POJOType<User>> {
+  private async create(dto: {
+    address: string;
+    role: UserRole;
+    isRoot?: boolean;
+    keys?: boolean;
+    vkId: string;
+    avatar?: string;
+    login?: string;
+    isActive?: boolean;
+    score?: number;
+    password?: string;
+    phone: string;
+    permissions?: Array<AdminPermission>;
+    name: string;
+    location?: PointGeoJSONInterface;
+    status?: UserStatus;
+  }): Promise<POJOType<User>> {
     return this.usersRepo.create(dto);
   }
 
@@ -30,7 +53,7 @@ export class UsersService {
     });
   }
 
-  async checkAdminCredentials(login: string, password: string): Promise<Admin> | null {
+  async checkAdminCredentials(login: string, password: string): Promise<AdminInterface> | null {
     const user = await this.usersRepo.findOne(
       {
         role: UserRole.ADMIN,
@@ -41,14 +64,18 @@ export class UsersService {
         permissions: true,
         login: true,
         vkId: true,
-        profile: true,
         isRoot: true,
         role: true,
+        address: true,
+        avatar: true,
+        phone: true,
+        name: true,
+        isActive: true,
       }
     );
-    const { password: passDb } = user as Admin;
+    const { password: passDb, ...data } = user as AdminInterface;
     const isOk = await HashService.compareHash(password, passDb);
-    return isOk ? Promise.resolve(user as Admin) : null;
+    return isOk ? Promise.resolve(data as AdminInterface) : null;
   }
 
   async createUser(dto: CreateUserDto) {
@@ -78,7 +105,7 @@ export class UsersService {
       ...dto,
       password: await HashService.generateHash(dto.password),
       isRoot: false,
-      status: UserStatus.UNCONFIRMED,
+      isActive: true,
       role: UserRole.ADMIN,
     });
   }
@@ -97,7 +124,12 @@ export class UsersService {
           );
         }
         case UserStatus.UNCONFIRMED: {
-          return this.usersRepo.findByIdAndUpdate(_id, { status: UserStatus.CONFIRMED }, {});
+          const { name, phone, avatar, address, _id, vkId, role } = user;
+          return this.usersRepo.findOneAndUpdate(
+            { name, phone, avatar, address, _id, vkId, role },
+            { status: UserStatus.CONFIRMED },
+            {}
+          );
         }
         case UserStatus.CONFIRMED: {
           return user;
@@ -178,7 +210,7 @@ export class UsersService {
       throw new NotFoundException(`Пользователь с _id '${_id}' не найден!`);
     }
     if (user.role === UserRole.ADMIN) {
-      return this.usersRepo.findByIdAndUpdate(_id, { isActivated: true }, {});
+      return this.usersRepo.findOneAndUpdate({ _id, role: UserRole.ADMIN }, { isActive: true }, {});
     }
     throw new BadRequestException('Можно активировать только администратора');
   }
@@ -215,5 +247,68 @@ export class UsersService {
     throw new InternalServerErrorException('Внутренняя ошибка сервера', {
       cause: `Некорректная роль пользователя с _id '${_id}' `,
     });
+  }
+
+  public async grantPrivileges(userId: string, privileges: Array<AdminPermission>) {
+    const user = await this.usersRepo.findById(userId);
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден!', {
+        cause: `Пользователь с _id '${userId}' не найден`,
+      });
+    }
+    if (user.role !== UserRole.ADMIN) {
+      throw new BadRequestException('Пользователь должен быть администратором', {
+        cause: `Попытка дать права  ${privileges} пользователю с _id '${userId}' и ролью '${user.role}'`,
+      });
+    }
+    return this.usersRepo.findOneAndUpdate(
+      { _id: userId, role: UserRole.ADMIN },
+      { $addToSet: { permissions: { $each: privileges } } },
+      {}
+    );
+  }
+
+  public async revokePrivileges(userId: string, privileges: Array<AdminPermission>) {
+    const user = await this.usersRepo.findById(userId);
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден!', {
+        cause: `Пользователь с _id '${userId}' не найден`,
+      });
+    }
+    if (user.role !== UserRole.ADMIN) {
+      throw new BadRequestException('Пользователь должен быть администратором', {
+        cause: `Попытка дать права  ${privileges} пользователю с _id '${userId}' и ролью '${user.role}'`,
+      });
+    }
+    return this.usersRepo.findByIdAndUpdate(
+      userId,
+      { $pull: { permissions: { $in: privileges } } },
+      {}
+    );
+  }
+
+  public async getUsersByRole(role: UserRole) {
+    return this.usersRepo.find({
+      status: { $ne: UserStatus.UNCONFIRMED },
+      role,
+    });
+  }
+
+  public async getUnconfirmedUsers() {
+    return this.usersRepo.find({
+      status: UserStatus.UNCONFIRMED,
+    });
+  }
+
+  public async getAdministrators() {
+    return this.usersRepo.find({ role: UserRole.ADMIN, isRoot: false, isActive: true });
+  }
+
+  public async getProfile(userId: string) {
+    return this.usersRepo.findById(userId);
+  }
+
+  public async updateProfile(userId: string, dto: Partial<UserProfile>) {
+    return this.usersRepo.findByIdAndUpdate(userId, dto, { new: true });
   }
 }
