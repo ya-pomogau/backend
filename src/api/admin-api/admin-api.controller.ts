@@ -41,7 +41,7 @@ export class AdminApiController {
   ) {}
 
   @Get('all')
-  @ApiTags('Get a list of volunteers')
+  @ApiTags('Get a list of administrators')
   @AccessControlList({ role: UserRole.ADMIN, rights: [AccessRights.confirmUser] })
   public async getAdministrators() {
     return this.usersService.getAdministrators();
