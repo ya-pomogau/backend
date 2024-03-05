@@ -23,6 +23,7 @@ import { AccessRights } from '../../common/types/access-rights.types';
 import { PostDTO } from './dto/new-post.dto';
 import { BlogService } from '../../core/blog/blog.service';
 import { ApiCreateCategoryDto } from './dto/new-category.dto';
+import { ApiUpdateCategoryDto } from './dto/update-category.dto';
 import { CategoriesService } from '../../core/categories/categories.service';
 import { TasksService } from '../../core/tasks/tasks.service';
 import { ApiPrivilegesDto } from './dto/privileges.dto';
@@ -174,6 +175,31 @@ export class AdminApiController {
     return this.categoryService.createCategory(dto, req.user as AnyUserInterface);
   }
 
+  @Patch('categories/:id')
+  @ApiTags('Update category by id. Admins only.')
+  @AccessControlList({
+    role: UserRole.ADMIN,
+    rights: [AccessRights.categoryPoints],
+  })
+  async updateCategoryById(
+    id: string,
+    @Body() dto: ApiUpdateCategoryDto,
+    @Req() req: Express.Request
+  ) {
+    return this.categoryService.updateCategoryById(id, dto, req.user as AnyUserInterface);
+  }
+
+  @Delete('categories/:id')
+  @ApiTags('Delete category by id. Root only.')
+  @AccessControlList({
+    role: UserRole.ADMIN,
+    isRoot: true,
+    rights: [AccessRights.categoryPoints],
+  })
+  async deleteCategoryById(id: string, @Req() req: Express.Request) {
+    return this.categoryService.removeCategory(id, req.user as AnyUserInterface);
+  }
+  
   @Get('tasks/conflicted')
   @ApiTags('Get a list of conflicted tasks. Limited access.')
   @AccessControlList({
