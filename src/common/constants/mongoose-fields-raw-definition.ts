@@ -17,3 +17,8 @@ export const rawCategory = {
   points: { required: true, type: mongoose.SchemaTypes.Number },
   title: { required: true, type: mongoose.SchemaTypes.String },
 };
+
+export const rawGeoJson = {
+  type: { required: true, enum: ['Point', 'Polygon'], type: mongoose.SchemaTypes.String },
+  coordinates: { required: true, type: [mongoose.SchemaTypes.Number] },
+};
