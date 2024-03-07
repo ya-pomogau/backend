@@ -10,6 +10,7 @@ import { PointGeoJSON, PointGeoJSONSchema } from '../../../common/schemas/PointG
     virtuals: true,
     flattenObjectIds: true,
   },
+  id: false,
 })
 export class Recipient extends Document implements RecipientUserModelInterface {
   @Prop({

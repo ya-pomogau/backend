@@ -3,7 +3,7 @@ import {
   ArrayMaxSize,
   ArrayMinSize,
   IsArray,
-  IsDate,
+  IsDateString,
   IsDefined,
   IsNotEmpty,
   IsNumber,
@@ -15,9 +15,9 @@ import { GeoCoordinates } from '../../../common/types/point-geojson.types';
 
 export class ApiCreateTaskDto implements Omit<CreateTaskDto, 'recipientId'> {
   @ApiProperty()
-  @IsString()
   @IsDefined()
   @IsNotEmpty()
+  @IsString()
   categoryId: string;
 
   @ApiProperty({ required: true })
@@ -29,18 +29,18 @@ export class ApiCreateTaskDto implements Omit<CreateTaskDto, 'recipientId'> {
 
   @ApiProperty()
   @IsOptional()
-  @IsDate()
+  @IsDateString()
   date: Date | null;
 
   @ApiProperty()
-  @IsString()
   @IsDefined()
   @IsNotEmpty()
+  @IsString()
   address: string;
 
   @ApiProperty()
-  @IsString()
   @IsDefined()
   @IsNotEmpty()
+  @IsString()
   description: string;
 }

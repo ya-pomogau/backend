@@ -8,7 +8,7 @@ import configuration from './config/configuration';
 import { HashModule } from './common/hash/hash.module';
 import { UsersRepositoryModule } from './datalake/users/users-repository.module';
 import { CategoryRepositoryModule } from './datalake/category/category-repository.module';
-import { TaskRepositoryModule } from './datalake/task/task-repository.module';
+import { TasksRepositoryModule } from './datalake/task/tasks-repository.module';
 import { ConfidentialityPolicyModule } from './datalake/confidentiality-policy/confidentiality-policy.module';
 import { AuthApiModule } from './api/auth-api/auth-api.module';
 import { AuthModule } from './core/auth/auth.module';
@@ -17,10 +17,13 @@ import { MongooseConfigService } from './config/database-config.service';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { CategoriesModule } from './core/categories/categories.module';
 import { AdminApiModule } from './api/admin-api/admin-api.module';
+import { RecipientApiModule } from './api/recipient-api/recipient-api.module';
+import { VolunteerApiModule } from './api/volunteer-api/volunteer-api.module';
 import { BlogModule } from './core/blog/blog.module';
 import { ContactsRepositoryModule } from './datalake/contacts/contacts-repository.module';
 import { ContactsModule } from './core/contacts/contacts.module';
 import { TasksModule } from './core/tasks/tasks.module';
+import { SystemApiModule } from './api/system-api/system-api.module';
 
 @Module({
   imports: [
@@ -32,7 +35,7 @@ import { TasksModule } from './core/tasks/tasks.module';
     }),
     HashModule,
     // ScheduleModule.forRoot(),
-    TaskRepositoryModule,
+    TasksRepositoryModule,
     UsersRepositoryModule,
     ConfidentialityPolicyModule,
     AuthApiModule,
@@ -41,10 +44,13 @@ import { TasksModule } from './core/tasks/tasks.module';
     CategoryRepositoryModule,
     CategoriesModule,
     AdminApiModule,
+    RecipientApiModule,
+    VolunteerApiModule,
     BlogModule,
     ContactsRepositoryModule,
     ContactsModule,
     TasksModule,
+    SystemApiModule,
   ],
   providers: [
     {

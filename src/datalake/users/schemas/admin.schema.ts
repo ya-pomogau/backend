@@ -11,6 +11,7 @@ import { AdminPermission, AdminUserModelInterface } from '../../../common/types/
     virtuals: true,
     flattenObjectIds: true,
   },
+  id: false,
 })
 export class Admin extends Document implements AdminUserModelInterface {
   @Prop({

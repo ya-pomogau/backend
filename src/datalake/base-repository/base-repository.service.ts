@@ -1,7 +1,13 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import { DeleteResult, UpdateResult, BulkWriteResult } from 'mongodb';
-import { Document, FilterQuery, Model, UpdateQuery, type ObjectId } from 'mongoose';
-import { AnyError } from 'typeorm';
+import { DeleteResult, UpdateResult } from 'mongodb';
+import {
+  Document,
+  FilterQuery,
+  Model,
+  UpdateQuery,
+  type ObjectId,
+  MongooseBulkWriteOptions,
+} from 'mongoose';
 import { POJOType } from '../../common/types/pojo.type';
 
 export abstract class BaseRepositoryService<T extends Document, M = {}, V = {}> {
@@ -109,16 +115,13 @@ export abstract class BaseRepositoryService<T extends Document, M = {}, V = {}> 
     projection?: Record<string, unknown>,
     options?: Record<string, unknown>
   ): Promise<T> {
-    const doc = await this.entityModel
-      .findById(
-        id,
-        {
-          ...projection,
-        },
-        options
-      )
-      .exec();
-    return doc.toObject();
+    return this.entityModel.findById(
+      id,
+      {
+        ...projection,
+      },
+      options
+    );
   }
 
   async findByIdAndUpdate(
@@ -160,7 +163,7 @@ export abstract class BaseRepositoryService<T extends Document, M = {}, V = {}> 
   }
 
   async bulkWrite(docs: any, options: Record<string, unknown>): Promise<any> {
-    return await this.entityModel.bulkWrite(docs, options);
+    return this.entityModel.bulkWrite(docs, options as MongooseBulkWriteOptions);
   }
 
   async deleteMany(entityFilterQuery: FilterQuery<T>): Promise<DeleteResult> {

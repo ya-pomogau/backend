@@ -11,3 +11,14 @@ export const rawUserProfile = {
 
   _id: { required: true, type: mongoose.SchemaTypes.String },
 };
+
+export const rawCategory = {
+  accessLevel: { required: true, type: mongoose.SchemaTypes.Number },
+  points: { required: true, type: mongoose.SchemaTypes.Number },
+  title: { required: true, type: mongoose.SchemaTypes.String },
+};
+
+export const rawGeoJson = {
+  type: { required: true, enum: ['Point', 'Polygon'], type: mongoose.SchemaTypes.String },
+  coordinates: { required: true, type: [mongoose.SchemaTypes.Number] },
+};

@@ -8,24 +8,10 @@ import { GenericUserModelInterface, UserRole } from '../../../common/types/user.
   discriminatorKey: 'role',
   toObject: {
     versionKey: false,
-    virtuals: true,
+    virtuals: false,
     flattenObjectIds: true,
   },
-  /* virtuals: {
-    profile: {
-      get() {
-        return {
-          firstName: this.firstName,
-          lastName: this.lastName,
-          middleName: this.middleName,
-          phone: this.phone,
-          avatar: this.avatar,
-          address: this.address,
-          _id: this._id,
-        };
-      },
-    },
-  }, */
+  id: false,
 })
 export class User extends Document implements GenericUserModelInterface {
   @Prop({ required: true, type: mongoose.SchemaTypes.String })

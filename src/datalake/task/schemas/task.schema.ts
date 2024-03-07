@@ -8,7 +8,10 @@ import {
 } from '../../../common/types/task.types';
 import { PointGeoJSON, PointGeoJSONSchema } from '../../../common/schemas/PointGeoJSON.schema';
 import { UserProfile } from '../../../common/types/user.types';
-import { rawUserProfile } from '../../../common/constants/mongoose-fields-raw-definition';
+import {
+  rawCategory,
+  rawUserProfile,
+} from '../../../common/constants/mongoose-fields-raw-definition';
 import { CategoryInterface } from '../../../common/types/category.types';
 
 @Schema({
@@ -20,9 +23,6 @@ import { CategoryInterface } from '../../../common/types/category.types';
   },
 })
 export class Task extends Document implements TaskInterface {
-  @Prop({ type: mongoose.SchemaTypes.ObjectId, required: true })
-  _id: string;
-
   @Prop({ type: mongoose.SchemaTypes.String, required: true })
   address: string;
 
@@ -36,16 +36,21 @@ export class Task extends Document implements TaskInterface {
   @Prop({
     default: null,
     type: mongoose.SchemaTypes.String,
-    enum: Object.values<string>(ResolveStatus),
+    enum: [...Object.values<string>(ResolveStatus), null],
+    required: false,
   })
   adminResolve: ResolveStatus | null;
 
+  @Prop({ type: raw(rawUserProfile), required: false, default: null })
+  moderator: UserProfile | null;
+
+  @Prop({ type: raw(rawCategory), required: true, immutable: true })
   category: CategoryInterface;
 
-  @Prop({ required: true, type: mongoose.SchemaTypes.Date })
+  @Prop({ required: false, type: mongoose.SchemaTypes.Date })
   date: Date | null;
 
-  @Prop({ required: true, type: PointGeoJSONSchema })
+  @Prop({ required: true, type: PointGeoJSONSchema, index: '2dsphere' })
   location: PointGeoJSON;
 
   @Prop({ type: raw(rawUserProfile), required: true, immutable: true })
@@ -54,17 +59,19 @@ export class Task extends Document implements TaskInterface {
   @Prop({
     default: null,
     type: mongoose.SchemaTypes.String,
-    enum: Object.values<string>(TaskReport),
+    enum: [...Object.values<string>(TaskReport), null],
+    required: false,
   })
   recipientReport: TaskReport | null;
 
-  @Prop({ type: raw(rawUserProfile), required: true, immutable: true })
+  @Prop({ type: raw(rawUserProfile), required: false })
   volunteer: UserProfile;
 
   @Prop({
     default: null,
     type: mongoose.SchemaTypes.String,
-    enum: Object.values<string>(TaskReport),
+    enum: [...Object.values<string>(TaskReport), null],
+    required: false,
   })
   volunteerReport: TaskReport | null;
 
