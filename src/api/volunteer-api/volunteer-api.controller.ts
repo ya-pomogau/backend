@@ -17,7 +17,7 @@ export class VolunteerApiController {
     private readonly tasksService: TasksService
   ) {}
 
-  @AccessControlList({ role: UserRole.VOLUNTEER, level: UserStatus.CONFIRMED })
+  @AccessControlList({ role: UserRole.VOLUNTEER, level: UserStatus.UNCONFIRMED })
   @Get('tasks/virgin')
   public async getNewTasks(@Query() query: GetTasksSearchDto) {
     const { latitude, longitude, distance, ...data } = query;

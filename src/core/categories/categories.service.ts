@@ -4,12 +4,11 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import exceptions from 'src/common/constants/exceptions';
+
+import exceptions from '../../common/constants/exceptions';
 import { CategoryRepository } from '../../datalake/category/category.repository';
 import { CreateCategoryDto, UpdateCategoryDto } from '../../common/dto/category.dto';
-import { AdminPermission, AnyUserInterface, UserRole } from '../../common/types/user.types';
-
-const options = { select: '_id title points accessLevel' };
+import { AdminPermission, UserRole, AdminInterface, AnyUserInterface } from '../../common/types/user.types';
 
 @Injectable()
 export class CategoriesService {
@@ -39,7 +38,7 @@ export class CategoriesService {
   }
 
   // Только root
-  async removeCategory(id: string, user: AnyUserInterface) {
+  async removeCategory(id: string, user: AdminInterface) {
     let res;
     if (user.role !== UserRole.ADMIN || (user.role === UserRole.ADMIN && !user.isRoot)) {
       throw new ForbiddenException(exceptions.category.notEnoughRights);
@@ -60,12 +59,12 @@ export class CategoriesService {
   }
 
   // Только админы с правами AdminPermission.CATEGORIES
-  async updateCategoryById(id: string, updateData: UpdateCategoryDto, user: AnyUserInterface) {
+  async updateCategoryById(id: string, updateData: UpdateCategoryDto, user: AdminInterface) {
     let res;
 
     if (
       user.role !== UserRole.ADMIN ||
-      (user.role === UserRole.ADMIN && user.permissions.includes(AdminPermission.CATEGORIES))
+      (user.role === UserRole.ADMIN && !user.permissions.includes(AdminPermission.CATEGORIES))
     ) {
       throw new ForbiddenException(exceptions.category.notEnoughRights);
     }
@@ -86,7 +85,7 @@ export class CategoriesService {
   }
 
   // Только root
-  async createCategory(data: CreateCategoryDto, user: AnyUserInterface) {
+  async createCategory(data: CreateCategoryDto, user: AdminInterface) {
     if (user.role !== UserRole.ADMIN || (user.role === UserRole.ADMIN && !user.isRoot)) {
       throw new ForbiddenException(exceptions.category.notEnoughRights);
     }
@@ -95,38 +94,20 @@ export class CategoriesService {
   }
 
   // Только для админов с правами AdminPermission.CATEGORIES
-  async updateCategories(data: Record<string, number>, user: AnyUserInterface) {
-    const repo = this.categoriesRepo;
-    if (
-      user.role !== UserRole.ADMIN ||
-      (user.role === UserRole.ADMIN && user.permissions.includes(AdminPermission.CATEGORIES))
-    ) {
+  async updatePoints(data: Record<string, number>, user: AdminInterface) {
+    if (!(user.role === UserRole.ADMIN && user.permissions.includes(AdminPermission.CATEGORIES))) {
       throw new ForbiddenException(exceptions.category.notEnoughRights);
     }
 
-    const methods = Object.keys(data).map((el) => ({
-      updateOne: {
-        filter: { _id: el },
-        update: { points: data[el] },
-      },
-    }));
+    const res = await Promise.allSettled(
+      Object.keys(data).map(
+        (id) => this.categoriesRepo.findByIdAndUpdate(id, { points: data[id] }, {}),
+        this
+      )
+    ).catch((err) => {
+      throw new InternalServerErrorException(err.message);
+    });
 
-    return this.categoriesRepo
-      .bulkWrite(methods, {})
-      .then((res) => {
-        console.log(res);
-        if (res.modifiedCount < methods.length) {
-          console.log(
-            `Want to modify ${methods.length} categories, but found ${res.modifiedCount}`
-          );
-        }
-
-        return repo.find({ _id: { $in: Object.keys(data) } });
-      })
-      .catch((err) => {
-        throw new InternalServerErrorException(exceptions.category.internalError, {
-          cause: `Ошибка в методе обновления данных нескольких категории bulkWrite: ${err}`,
-        });
-      });
+    return res;
   }
 }
