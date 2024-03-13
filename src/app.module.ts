@@ -23,6 +23,7 @@ import { BlogModule } from './core/blog/blog.module';
 import { ContactsRepositoryModule } from './datalake/contacts/contacts-repository.module';
 import { ContactsModule } from './core/contacts/contacts.module';
 import { TasksModule } from './core/tasks/tasks.module';
+import { PolicyModule } from './core/policy/policy.module';
 import { SystemApiModule } from './api/system-api/system-api.module';
 
 @Module({
@@ -37,7 +38,7 @@ import { SystemApiModule } from './api/system-api/system-api.module';
     // ScheduleModule.forRoot(),
     TasksRepositoryModule,
     UsersRepositoryModule,
-    ConfidentialityPolicyModule,
+    PolicyRepositoryModule,
     AuthApiModule,
     AuthModule,
     UsersModule,
@@ -50,6 +51,7 @@ import { SystemApiModule } from './api/system-api/system-api.module';
     ContactsRepositoryModule,
     ContactsModule,
     TasksModule,
+    PolicyModule,
     SystemApiModule,
   ],
   providers: [

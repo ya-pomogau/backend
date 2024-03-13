@@ -5,7 +5,7 @@ import { BaseRepositoryService } from '../base-repository/base-repository.servic
 import { ConfidentialityPolicy } from './schemas/confidentiality-policy.schema';
 
 @Injectable()
-export class ConfidentialityPolicyRepository extends BaseRepositoryService<ConfidentialityPolicy> {
+export class PolicyRepository extends BaseRepositoryService<ConfidentialityPolicy> {
   constructor(
     @InjectModel(ConfidentialityPolicy.name)
     private readonly confidentialityPolicyModel: Model<ConfidentialityPolicy>
