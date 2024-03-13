@@ -9,4 +9,4 @@ import { Contacts, ContactSchema } from './schemas/contact.schema';
   exports: [ContactsRepository],
 })
 // eslint-disable-next-line prettier/prettier
-export class ContactsModule {}
+export class ContactsRepositoryModule {}

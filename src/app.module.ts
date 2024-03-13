@@ -9,7 +9,7 @@ import { HashModule } from './common/hash/hash.module';
 import { UsersRepositoryModule } from './datalake/users/users-repository.module';
 import { CategoryRepositoryModule } from './datalake/category/category-repository.module';
 import { TasksRepositoryModule } from './datalake/task/tasks-repository.module';
-import { ConfidentialityPolicyModule } from './datalake/confidentiality-policy/confidentiality-policy.module';
+import { PolicyRepositoryModule } from './datalake/confidentiality-policy/policy-repository.module';
 import { AuthApiModule } from './api/auth-api/auth-api.module';
 import { AuthModule } from './core/auth/auth.module';
 import { UsersModule } from './core/users/users.module';
@@ -20,6 +20,9 @@ import { AdminApiModule } from './api/admin-api/admin-api.module';
 import { RecipientApiModule } from './api/recipient-api/recipient-api.module';
 import { VolunteerApiModule } from './api/volunteer-api/volunteer-api.module';
 import { BlogModule } from './core/blog/blog.module';
+import { ContactsRepositoryModule } from './datalake/contacts/contacts-repository.module';
+import { ContactsModule } from './core/contacts/contacts.module';
+import { TasksModule } from './core/tasks/tasks.module';
 import { PolicyModule } from './core/policy/policy.module';
 import { SystemApiModule } from './api/system-api/system-api.module';
 
@@ -45,6 +48,9 @@ import { SystemApiModule } from './api/system-api/system-api.module';
     RecipientApiModule,
     VolunteerApiModule,
     BlogModule,
+    ContactsRepositoryModule,
+    ContactsModule,
+    TasksModule,
     PolicyModule,
     SystemApiModule,
   ],

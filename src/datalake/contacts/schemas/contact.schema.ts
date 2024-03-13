@@ -6,14 +6,8 @@ import { ContactsInterface } from '../../../common/types/contacts.types';
   timestamps: true,
   toObject: {
     versionKey: false,
-    virtuals: true,
+    virtuals: false,
     flattenObjectIds: true,
-  },
-  statics: {
-    async isContactsExist(): Promise<boolean> {
-      const count = await this.countDocuments().exec();
-      return Promise.resolve(count > 0);
-    },
   },
 })
 export class Contacts extends Document implements ContactsInterface {

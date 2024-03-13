@@ -33,8 +33,9 @@ export class RecipientApiController {
 
   @Get('/tasks/virgin')
   @AccessControlList({ role: UserRole.RECIPIENT, level: UserStatus.CONFIRMED })
-  public async getVirginTasks(@Query() query: GetTasksSearchDto) {
-    return this.tasksService.getTasksByStatus(TaskStatus.CREATED, query);
+  public async getVirginTasks(@Query() query: GetTasksSearchDto, @Req() req: Express.Request) {
+    const { user } = req;
+    return this.tasksService.getTasksByStatus(TaskStatus.CREATED, query, user as AnyUserInterface);
   }
 
   @Put('/tasks/:id/fulfill')
