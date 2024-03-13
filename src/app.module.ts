@@ -20,6 +20,7 @@ import { AdminApiModule } from './api/admin-api/admin-api.module';
 import { RecipientApiModule } from './api/recipient-api/recipient-api.module';
 import { VolunteerApiModule } from './api/volunteer-api/volunteer-api.module';
 import { BlogModule } from './core/blog/blog.module';
+import { PolicyModule } from './core/policy/policy.module';
 import { SystemApiModule } from './api/system-api/system-api.module';
 
 @Module({
@@ -34,7 +35,7 @@ import { SystemApiModule } from './api/system-api/system-api.module';
     // ScheduleModule.forRoot(),
     TasksRepositoryModule,
     UsersRepositoryModule,
-    ConfidentialityPolicyModule,
+    PolicyRepositoryModule,
     AuthApiModule,
     AuthModule,
     UsersModule,
@@ -44,6 +45,7 @@ import { SystemApiModule } from './api/system-api/system-api.module';
     RecipientApiModule,
     VolunteerApiModule,
     BlogModule,
+    PolicyModule,
     SystemApiModule,
   ],
   providers: [

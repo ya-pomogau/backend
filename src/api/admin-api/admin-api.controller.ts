@@ -199,7 +199,7 @@ export class AdminApiController {
   async deleteCategoryById(id: string, @Req() req: Express.Request) {
     return this.categoryService.removeCategory(id, req.user as AnyUserInterface);
   }
-
+  
   @Get('tasks/conflicted')
   @ApiTags('Get a list of conflicted tasks. Limited access.')
   @AccessControlList({

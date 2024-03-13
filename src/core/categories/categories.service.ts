@@ -4,10 +4,11 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
+
 import exceptions from '../../common/constants/exceptions';
 import { CategoryRepository } from '../../datalake/category/category.repository';
 import { CreateCategoryDto, UpdateCategoryDto } from '../../common/dto/category.dto';
-import { AdminPermission, UserRole, AdminInterface } from '../../common/types/user.types';
+import { AdminPermission, UserRole, AdminInterface, AnyUserInterface } from '../../common/types/user.types';
 
 @Injectable()
 export class CategoriesService {
@@ -69,7 +70,7 @@ export class CategoriesService {
     }
 
     try {
-      res = await this.categoriesRepo.findOneAndUpdate({ _id: id }, updateData, {});
+      res = await this.categoriesRepo.findOneAndUpdate({ _id: id }, updateData, options);
     } catch (err) {
       throw new InternalServerErrorException(exceptions.category.internalError, {
         cause: `Ошибка в методе обновления данных категории findOneAndUpdate: ${err}`,
