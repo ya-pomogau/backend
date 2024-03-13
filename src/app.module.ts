@@ -9,7 +9,7 @@ import { HashModule } from './common/hash/hash.module';
 import { UsersRepositoryModule } from './datalake/users/users-repository.module';
 import { CategoryRepositoryModule } from './datalake/category/category-repository.module';
 import { TasksRepositoryModule } from './datalake/task/tasks-repository.module';
-import { ConfidentialityPolicyModule } from './datalake/confidentiality-policy/confidentiality-policy.module';
+import { PolicyRepositoryModule } from './datalake/confidentiality-policy/policy-repository.module';
 import { AuthApiModule } from './api/auth-api/auth-api.module';
 import { AuthModule } from './core/auth/auth.module';
 import { UsersModule } from './core/users/users.module';

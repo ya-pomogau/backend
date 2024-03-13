@@ -75,6 +75,7 @@ export class SystemApiController {
   @Public()
   public async getContacts() {
     return this.contactsService.getActual();
+
   @Get('policy')
   @Public()
   public async getPolicy() {

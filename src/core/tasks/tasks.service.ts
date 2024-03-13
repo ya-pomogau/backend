@@ -8,6 +8,7 @@ import { Task } from '../../datalake/task/schemas/task.schema';
 import {
   ResolveResult,
   ResolveStatus,
+  TaskInterface,
   TaskReport,
   TaskStatus,
 } from '../../common/types/task.types';
@@ -139,9 +140,13 @@ export class TasksService {
     return this.tasksRepo.findOneAndUpdate(query, dto, { new: true });
   }
 
-  public async getTasksByStatus(taskStatus: TaskStatus, dto: Partial<GetTasksDto>) {
+  public async getTasksByStatus(
+    taskStatus: TaskStatus,
+    dto: Partial<GetTasksDto>,
+    user?: AnyUserInterface
+  ) {
     const { location: center, distance, start, end, categoryId } = dto;
-    const query: FilterQuery<Task> = {
+    const query: FilterQuery<TaskInterface> = {
       status: taskStatus,
       location: {
         $near: {
@@ -152,6 +157,9 @@ export class TasksService {
     };
     if (categoryId) {
       query.category._id = categoryId;
+    }
+    if (!!user && !!user.status) {
+      query.category.accessLevel = { $lte: user.status };
     }
     if (!!start && !!end) {
       query.date = {
