@@ -289,4 +289,20 @@ export class TasksService {
       { new: true }
     );
   }
+
+  public async cancelTask(taskId: string, user: AnyUserInterface) {
+    const task = await this.tasksRepo.findById(taskId);
+    const { recipient, volunteer } = task;
+    if (recipient._id !== user._id) {
+      throw new ForbiddenException('Нельзя отменить чужую задачу!', {
+        cause: `Попытка пользователя с _id '${user._id} удалить задачу с _id '${taskId}', созданную не им`,
+      });
+    }
+    if (volunteer) {
+      throw new ForbiddenException('Нельзя отменить задачу, которую уже взял волонтёр!', {
+        cause: `Попытка пользователя с _id '${user._id} удалить задачу с _id '${taskId}', которую уже взял волонтёр с _id '${volunteer._id}`,
+      });
+    }
+    return this.tasksRepo.deleteOne({ _id: taskId }, {});
+  }
 }

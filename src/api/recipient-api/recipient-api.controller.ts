@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -120,5 +121,12 @@ export class RecipientApiController {
     @Body() dto: Partial<ApiCreateTaskDto>
   ) {
     return this.tasksService.updateTask(id, user as AnyUserInterface, dto);
+  }
+
+  @Delete('/tasks/:id')
+  @AccessControlList({ role: UserRole.RECIPIENT })
+  public async cancelTask(@Param('id') id: string, @Req() req: Express.Request) {
+    const { user } = req;
+    return this.tasksService.cancelTask(id, user as AnyUserInterface);
   }
 }
