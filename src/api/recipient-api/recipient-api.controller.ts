@@ -124,7 +124,7 @@ export class RecipientApiController {
   }
 
   @Delete('/tasks/:id')
-  @AccessControlList({ role: UserRole.RECIPIENT })
+  @AccessControlList({ role: UserRole.RECIPIENT, level: UserStatus.CONFIRMED })
   public async cancelTask(@Param('id') id: string, @Req() req: Express.Request) {
     const { user } = req;
     return this.tasksService.cancelTask(id, user as AnyUserInterface);
