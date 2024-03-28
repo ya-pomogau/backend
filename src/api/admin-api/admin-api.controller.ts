@@ -182,6 +182,7 @@ export class AdminApiController {
     rights: [AccessRights.categoryPoints],
   })
   async updateCategoryById(
+    @Param('id')
     id: string,
     @Body() dto: ApiUpdateCategoryDto,
     @Req() req: Express.Request
@@ -196,7 +197,7 @@ export class AdminApiController {
     isRoot: true,
     rights: [AccessRights.categoryPoints],
   })
-  async deleteCategoryById(id: string, @Req() req: Express.Request) {
+  async deleteCategoryById(@Param('id') id: string, @Req() req: Express.Request) {
     return this.categoryService.removeCategory(id, req.user as AnyUserInterface);
   }
   
