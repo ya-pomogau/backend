@@ -3,6 +3,7 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InternalServerErrorException, NotFoundException } from '@nestjs/common/exceptions';
 import { UsersRepository } from '../../datalake/users/users.repository';
@@ -73,6 +74,9 @@ export class UsersService {
         isActive: true,
       }
     );
+    if (!user) {
+      throw new UnauthorizedException('Неверное имя пользователя или пароль');
+    }
     const { password: passDb, ...data } = user as AdminInterface;
     const isOk = await HashService.compareHash(password, passDb);
     return isOk ? Promise.resolve(data as AdminInterface) : null;
