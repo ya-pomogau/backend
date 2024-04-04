@@ -270,7 +270,6 @@ export class TasksService {
       return this.tasksRepo.findByIdAndUpdate(
         taskId,
         {
-          ...task,
           [myIndex]: result,
           status: result === task[counterpartyIndex] ? TaskStatus.COMPLETED : TaskStatus.CONFLICTED,
           adminResolve: result === task[counterpartyIndex] ? null : ResolveStatus.VIRGIN,
@@ -282,7 +281,6 @@ export class TasksService {
     return this.tasksRepo.findByIdAndUpdate(
       taskId,
       {
-        ...task,
         [myIndex]: result,
         isPendingChanges: true,
       },
