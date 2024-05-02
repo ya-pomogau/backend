@@ -19,6 +19,6 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('Некорректная пара логин и пароль');
     }
 
-    return user;
+    return UsersService.isLoginRequired(user._id as string) ? null : user;
   }
 }

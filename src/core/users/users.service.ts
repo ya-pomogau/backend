@@ -27,6 +27,8 @@ import { PointGeoJSONInterface } from '../../common/types/point-geojson.types';
 export class UsersService {
   constructor(private readonly usersRepo: UsersRepository) {}
 
+  private static loginRequired: Array<string> = [];
+
   private async create(dto: {
     address: string;
     role: UserRole;
@@ -129,6 +131,7 @@ export class UsersService {
         }
         case UserStatus.UNCONFIRMED: {
           const { name, phone, avatar, address, _id, vkId, role } = user;
+          UsersService.requireLogin(_id);
           return this.usersRepo.findOneAndUpdate(
             { name, phone, avatar, address, _id, vkId, role },
             { status: UserStatus.CONFIRMED },
@@ -162,6 +165,7 @@ export class UsersService {
     if (user.role === UserRole.VOLUNTEER || user.role === UserRole.RECIPIENT) {
       const { status } = user as Volunteer | Recipient;
       if (status < UserStatus.ACTIVATED) {
+        UsersService.requireLogin(_id);
         return this.usersRepo.findByIdAndUpdate(_id, { status: status + 1 }, {});
       }
       return user;
@@ -177,6 +181,7 @@ export class UsersService {
     if (user.role === UserRole.VOLUNTEER || user.role === UserRole.RECIPIENT) {
       const { status } = user as Volunteer | Recipient;
       if (status > UserStatus.UNCONFIRMED && status <= UserStatus.ACTIVATED) {
+        UsersService.requireLogin(_id);
         return this.usersRepo.findByIdAndUpdate(_id, { status: status - 1 }, {});
       }
       return user;
@@ -190,6 +195,7 @@ export class UsersService {
       throw new NotFoundException(`Пользователь с _id '${_id}' не найден<`);
     }
     if (user.role === UserRole.VOLUNTEER) {
+      UsersService.requireLogin(_id);
       return this.usersRepo.findByIdAndUpdate(_id, { keys: true }, {});
     }
 
@@ -202,6 +208,7 @@ export class UsersService {
       throw new NotFoundException(`Пользователь с _id '${_id}' не найден<`);
     }
     if (user.role === UserRole.VOLUNTEER) {
+      UsersService.requireLogin(_id);
       return this.usersRepo.findByIdAndUpdate(_id, { keys: false }, {});
     }
 
@@ -214,6 +221,7 @@ export class UsersService {
       throw new NotFoundException(`Пользователь с _id '${_id}' не найден!`);
     }
     if (user.role === UserRole.ADMIN) {
+      UsersService.requireLogin(_id);
       return this.usersRepo.findOneAndUpdate({ _id, role: UserRole.ADMIN }, { isActive: true }, {});
     }
     throw new BadRequestException('Можно активировать только администратора');
@@ -225,6 +233,7 @@ export class UsersService {
       throw new NotFoundException(`Пользователь с _id '${_id}' не найден!`);
     }
     if (user.role === UserRole.VOLUNTEER || user.role === UserRole.RECIPIENT) {
+      UsersService.requireLogin(_id);
       return this.usersRepo.findByIdAndUpdate(_id, { status: UserStatus.BLOCKED }, {});
     }
     if (user.role === UserRole.ADMIN) {
@@ -242,6 +251,7 @@ export class UsersService {
       throw new NotFoundException(`Пользователь с _id '${_id}' не найден!`);
     }
     if (user.role === UserRole.ADMIN) {
+      UsersService.requireLogin(_id);
       return this.usersRepo.findByIdAndUpdate(_id, { isActivated: false }, {});
     }
     if (user.role === UserRole.VOLUNTEER || user.role === UserRole.RECIPIENT) {
@@ -265,6 +275,7 @@ export class UsersService {
         cause: `Попытка дать права  ${privileges} пользователю с _id '${userId}' и ролью '${user.role}'`,
       });
     }
+    UsersService.requireLogin(userId);
     return this.usersRepo.findOneAndUpdate(
       { _id: userId, role: UserRole.ADMIN },
       { $addToSet: { permissions: { $each: privileges } } },
@@ -284,6 +295,7 @@ export class UsersService {
         cause: `Попытка дать права  ${privileges} пользователю с _id '${userId}' и ролью '${user.role}'`,
       });
     }
+    UsersService.requireLogin(userId);
     return this.usersRepo.findByIdAndUpdate(
       userId,
       { $pull: { permissions: { $in: privileges } } },
@@ -314,5 +326,19 @@ export class UsersService {
 
   public async updateProfile(userId: string, dto: Partial<UserProfile>) {
     return this.usersRepo.findByIdAndUpdate(userId, dto, { new: true });
+  }
+
+  private static requireLogin(userId: string) {
+    UsersService.loginRequired = [...UsersService.loginRequired, userId];
+  }
+
+  public static isLoginRequired(userId: string) {
+    return UsersService.loginRequired.includes(userId);
+  }
+
+  public static requiredLoginCompleted(userId: string) {
+    if (UsersService.isLoginRequired(userId)) {
+      UsersService.loginRequired = UsersService.loginRequired.filter((id) => id !== userId);
+    }
   }
 }
