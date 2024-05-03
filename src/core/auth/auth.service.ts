@@ -75,6 +75,8 @@ export class AuthService {
     const user = await this.usersService.checkVKCredential(String(vkId));
     if (user) {
       const token = await this.authenticate(user);
+      const { _id } = user;
+      UsersService.requiredLoginCompleted(_id);
       return { user, token };
     }
     // eslint-disable-next-line camelcase
