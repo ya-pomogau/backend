@@ -6,11 +6,14 @@ import { TasksService } from '../../core/tasks/tasks.service';
 import { GetTasksQueryDto } from '../recipient-api/dto/get-tasks-query.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { UsersService } from '../../core/users/users.service';
-import { AnyUserInterface } from '../../common/types/user.types';
+import { AnyUserInterface, UserRole } from '../../common/types/user.types';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ContactsService } from '../../core/contacts/contacts.service';
 import { PolicyService } from '../../core/policy/policy.service';
 import { AuthService } from '../../core/auth/auth.service';
+import { ApiTags } from '@nestjs/swagger';
+import { AccessControlList } from 'src/common/decorators/access-control-list.decorator';
+import { UpdateContactsRequestDto } from 'src/common/dto/contacts.dto';
 
 @Controller('system')
 export class SystemApiController {
@@ -78,6 +81,13 @@ export class SystemApiController {
   @Public()
   public async getContacts() {
     return this.contactsService.getActual();
+  }
+
+  @Patch('contacts')
+  @ApiTags('Update a contacts data. Root only.')
+  @AccessControlList({ role: UserRole.ADMIN, isRoot: true })
+  public async updateContacts(@Req() req: Express.Request, @Body() dto: UpdateContactsRequestDto) {
+    return this.contactsService.update(dto);
   }
 
   @Get('policy')
