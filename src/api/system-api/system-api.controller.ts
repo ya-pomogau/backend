@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Param, Patch, Query, Req, UseGuards } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { BlogService } from '../../core/blog/blog.service';
 import { Public } from '../../common/decorators/public.decorator';
 import { CategoriesService } from '../../core/categories/categories.service';
@@ -11,9 +12,8 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ContactsService } from '../../core/contacts/contacts.service';
 import { PolicyService } from '../../core/policy/policy.service';
 import { AuthService } from '../../core/auth/auth.service';
-import { ApiTags } from '@nestjs/swagger';
-import { AccessControlList } from 'src/common/decorators/access-control-list.decorator';
-import { UpdateContactsRequestDto } from 'src/common/dto/contacts.dto';
+import { AccessControlList } from '../../common/decorators/access-control-list.decorator';
+import { UpdateContactsRequestDto } from '../../common/dto/contacts.dto';
 
 @Controller('system')
 export class SystemApiController {
