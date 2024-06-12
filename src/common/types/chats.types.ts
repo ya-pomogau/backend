@@ -1,4 +1,5 @@
 import { type ObjectId } from 'mongoose';
+import { AnyUserInterface } from './user.types';
 
 export interface MessageInterface {
   _id: ObjectId;
@@ -17,4 +18,14 @@ export interface ChatInterface {
   taskId: ObjectId;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface ChatsInterface {
+  _id: ObjectId;
+  title: string;
+  body: string;
+  attaches: string[];
+  createdAt: Date;
+  author: AnyUserInterface;
+  chatId: ObjectId;
 }
