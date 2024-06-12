@@ -1,5 +1,4 @@
 import { Body, Controller, Get, Param, Patch, Query, Req, UseGuards } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
 import { BlogService } from '../../core/blog/blog.service';
 import { Public } from '../../common/decorators/public.decorator';
 import { CategoriesService } from '../../core/categories/categories.service';
@@ -7,13 +6,11 @@ import { TasksService } from '../../core/tasks/tasks.service';
 import { GetTasksQueryDto } from '../recipient-api/dto/get-tasks-query.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { UsersService } from '../../core/users/users.service';
-import { AnyUserInterface, UserRole } from '../../common/types/user.types';
+import { AnyUserInterface } from '../../common/types/user.types';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ContactsService } from '../../core/contacts/contacts.service';
 import { PolicyService } from '../../core/policy/policy.service';
 import { AuthService } from '../../core/auth/auth.service';
-import { AccessControlList } from '../../common/decorators/access-control-list.decorator';
-import { UpdateContactsRequestDto } from '../../common/dto/contacts.dto';
 
 @Controller('system')
 export class SystemApiController {
@@ -81,13 +78,6 @@ export class SystemApiController {
   @Public()
   public async getContacts() {
     return this.contactsService.getActual();
-  }
-
-  @Patch('contacts')
-  @ApiTags('Update a contacts data. Root only.')
-  @AccessControlList({ role: UserRole.ADMIN, isRoot: true })
-  public async updateContacts(@Req() req: Express.Request, @Body() dto: UpdateContactsRequestDto) {
-    return this.contactsService.update(dto);
   }
 
   @Get('policy')
