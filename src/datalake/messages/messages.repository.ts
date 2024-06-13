@@ -2,11 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { BaseRepositoryService } from '../base-repository/base-repository.service';
-import { Chats } from './schemas/chats.schema';
+import { Message } from './schemas/messages.schema';
 
 @Injectable()
-export class ChatsRepository extends BaseRepositoryService<Chats> {
-  constructor(@InjectModel(Chats.name) private chatsModel: Model<Chats>) {
+export class MessagesRepository extends BaseRepositoryService<Message> {
+  constructor(@InjectModel(Message.name) private chatsModel: Model<Message>) {
     super(chatsModel);
   }
 }
