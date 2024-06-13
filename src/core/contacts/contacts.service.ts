@@ -7,8 +7,8 @@ import { UpdateContactsRequestDto } from '../../common/dto/contacts.dto';
 export class ContactsService {
   constructor(private readonly contactsRepo: ContactsRepository) {}
 
-  public async update(id: string, dto: UpdateContactsRequestDto): Promise<ContactsInterface> {
-    return this.contactsRepo.findByIdAndUpdate(id, dto, {});
+  public async update(dto: UpdateContactsRequestDto): Promise<ContactsInterface> {
+    return this.contactsRepo.create({ ...dto });
   }
 
   public async getActual(): Promise<ContactsInterface> {
