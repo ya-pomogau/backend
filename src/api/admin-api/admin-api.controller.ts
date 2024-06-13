@@ -263,10 +263,10 @@ export class AdminApiController {
     return this.tasksService.getModeratedTasks(req.user as AnyUserInterface);
   }
 
-  @Patch('contacts')
+  @Patch('contacts/:id')
   @ApiTags('Update a contacts data. Root only.')
   @AccessControlList({ role: UserRole.ADMIN, isRoot: true })
-  public async updateContacts(@Body() dto: UpdateContactsRequestDto) {
-    return this.contactsService.update(dto);
+  public async updateContacts(@Param('id') id: string, @Body() dto: UpdateContactsRequestDto) {
+    return this.contactsService.update(id, dto);
   }
 }
