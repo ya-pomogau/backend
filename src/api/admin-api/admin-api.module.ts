@@ -9,6 +9,7 @@ import { LocalStrategy } from '../../core/auth/strategies/local.strategy';
 import { BlogModule } from '../../core/blog/blog.module';
 import { CategoriesModule } from '../../core/categories/categories.module';
 import { TasksModule } from '../../core/tasks/tasks.module';
+import { ContactsModule } from '../../core/contacts/contacts.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { TasksModule } from '../../core/tasks/tasks.module';
     BlogModule,
     CategoriesModule,
     TasksModule,
+    ContactsModule,
   ],
   controllers: [AdminApiController],
   providers: [UsersService, JwtStrategy, LocalStrategy],

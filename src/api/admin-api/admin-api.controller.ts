@@ -28,6 +28,8 @@ import { CategoriesService } from '../../core/categories/categories.service';
 import { TasksService } from '../../core/tasks/tasks.service';
 import { ApiPrivilegesDto } from './dto/privileges.dto';
 import { ResolveResult } from '../../common/types/task.types';
+import { UpdateContactsRequestDto } from '../../common/dto/contacts.dto';
+import { ContactsService } from '../../core/contacts/contacts.service';
 
 @UseGuards(JwtAuthGuard)
 @UseGuards(AccessControlGuard)
@@ -38,7 +40,8 @@ export class AdminApiController {
     private readonly usersService: UsersService,
     private readonly blogService: BlogService,
     private readonly categoryService: CategoriesService,
-    private readonly tasksService: TasksService
+    private readonly tasksService: TasksService,
+    private readonly contactsService: ContactsService
   ) {}
 
   @Get('all')
@@ -200,7 +203,7 @@ export class AdminApiController {
   async deleteCategoryById(@Param('id') id: string, @Req() req: Express.Request) {
     return this.categoryService.removeCategory(id, req.user as AnyUserInterface);
   }
-  
+
   @Get('tasks/conflicted')
   @ApiTags('Get a list of conflicted tasks. Limited access.')
   @AccessControlList({
@@ -258,5 +261,12 @@ export class AdminApiController {
   @AccessControlList({ role: UserRole.ADMIN, rights: [AccessRights.resolveConflict] })
   public async getModeratedTasks(@Req() req: Express.Request) {
     return this.tasksService.getModeratedTasks(req.user as AnyUserInterface);
+  }
+
+  @Patch('contacts')
+  @ApiTags('Update a contacts data. Root only.')
+  @AccessControlList({ role: UserRole.ADMIN, isRoot: true })
+  public async updateContacts(@Body() dto: UpdateContactsRequestDto) {
+    return this.contactsService.update(dto);
   }
 }
