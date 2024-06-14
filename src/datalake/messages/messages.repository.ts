@@ -6,7 +6,7 @@ import { Message } from './schemas/messages.schema';
 
 @Injectable()
 export class MessagesRepository extends BaseRepositoryService<Message> {
-  constructor(@InjectModel(Message.name) private chatsModel: Model<Message>) {
-    super(chatsModel);
+  constructor(@InjectModel(Message.name) private messageModel: Model<Message>) {
+    super(messageModel);
   }
 }
