@@ -1,6 +1,5 @@
 import { type ObjectId } from 'mongoose';
 import { AnyUserInterface, RecipientInterface, VolunteerInterface } from './user.types';
-import { chats } from '../constants/chats';
 
 export interface MessageInterface {
   _id: ObjectId;
@@ -12,7 +11,14 @@ export interface MessageInterface {
   chatId: ObjectId;
 }
 
-export type ChatType = keyof typeof chats;
+export const ChatTypes = {
+  TASK: 'TASK_CHAT',
+  SYSTEM: 'SYSTEM_CHAT',
+  CONFLICTVOLUNTEER: 'CONFLICT_CHAT_VOLUNTEER',
+  CONFLICTRECIPIENT: 'CONFLICT_CHAT_RECIPIENT',
+} as const;
+
+export type ChatType = keyof typeof ChatTypes;
 
 export interface ChatModelInterface {
   _id: ObjectId;
