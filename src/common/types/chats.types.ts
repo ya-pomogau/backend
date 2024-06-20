@@ -1,5 +1,6 @@
 import { type ObjectId } from 'mongoose';
 import { AnyUserInterface, RecipientInterface, VolunteerInterface } from './user.types';
+import { MongooseIdAndTimestampsInterface } from './system.types';
 
 export interface MessageInterface {
   _id: ObjectId;
@@ -21,10 +22,7 @@ export const ChatTypes = {
 export type ChatType = keyof typeof ChatTypes;
 
 export interface ChatModelInterface {
-  _id: ObjectId;
   type: ChatType;
-  createdAt: Date;
-  updatedAt: Date;
 }
 
 export interface TaskChatModelInterface {
