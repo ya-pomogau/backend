@@ -43,7 +43,7 @@ export interface ConflictChatWithVolunteerModelInterface {
   recipientChat: ObjectId;
 }
 
-export interface ConflictWithRecipientChatModelInterface {
+export interface ConflictChatWithRecipientModelInterface {
   taskId: ObjectId;
   recipient: RecipientInterface;
   volunteerChat: ObjectId;
@@ -57,4 +57,4 @@ export interface ConflictWithVolunteerChatInterface
 
 export interface ConflictWithRecipientChatInterface
   extends ChatModelInterface,
-    ConflictWithRecipientChatModelInterface {}
+    ConflictChatWithRecipientModelInterface {}
