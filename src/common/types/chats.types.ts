@@ -37,10 +37,10 @@ export interface SystemChatModelInterface {
   user: VolunteerInterface | RecipientInterface;
 }
 
-export interface ConflictWithVolunteerChatModelInterface {
+export interface ConflictChatWithVolunteerModelInterface {
   taskId: ObjectId;
   volunteer: VolunteerInterface;
-  recipient: RecipientInterface;
+  recipientChat: ObjectId;
 }
 
 export interface ConflictWithRecipientChatModelInterface {
@@ -53,7 +53,7 @@ export interface TaskChatInterface extends ChatModelInterface, TaskChatModelInte
 
 export interface ConflictWithVolunteerChatInterface
   extends ChatModelInterface,
-    ConflictWithVolunteerChatModelInterface {}
+    ConflictChatWithVolunteerModelInterface {}
 
 export interface ConflictWithRecipientChatInterface
   extends ChatModelInterface,
