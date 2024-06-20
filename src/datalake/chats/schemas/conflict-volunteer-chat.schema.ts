@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { type ObjectId, Document, SchemaTypes } from 'mongoose';
-import { ConflictWithVolunteerChatModelInterface } from '../../../common/types/chats.types';
-import { RecipientInterface, VolunteerInterface } from '../../../common/types/user.types';
+import { ConflictChatWithVolunteerModelInterface } from '../../../common/types/chats.types';
+import { VolunteerInterface } from '../../../common/types/user.types';
 
 @Schema({
   timestamps: true,
@@ -11,9 +11,9 @@ import { RecipientInterface, VolunteerInterface } from '../../../common/types/us
     flattenObjectIds: true,
   },
 })
-export class ConflictWithVolunteerChat
+export class ConflictChatWithVolunteer
   extends Document
-  implements ConflictWithVolunteerChatModelInterface
+  implements ConflictChatWithVolunteerModelInterface
 {
   @Prop({
     required: true,
@@ -31,8 +31,8 @@ export class ConflictWithVolunteerChat
     required: true,
     type: SchemaTypes.ObjectId,
   })
-  recipient: RecipientInterface;
+  recipientChat: ObjectId;
 }
 
 export const ConflictWithVolunteerChatSchema =
-  SchemaFactory.createForClass(ConflictWithVolunteerChat);
+  SchemaFactory.createForClass(ConflictChatWithVolunteer);
