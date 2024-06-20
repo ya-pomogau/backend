@@ -47,12 +47,17 @@ export interface ConflictChatWithRecipientModelInterface {
   volunteerChat: ObjectId;
 }
 
-export interface TaskChatInterface extends ChatModelInterface, TaskChatModelInterface {}
+export interface TaskChatInterface
+  extends ChatModelInterface,
+    TaskChatModelInterface,
+    MongooseIdAndTimestampsInterface {}
 
 export interface ConflictChatWithVolunteerInterface
   extends ChatModelInterface,
-    ConflictChatWithVolunteerModelInterface {}
+    ConflictChatWithVolunteerModelInterface,
+    MongooseIdAndTimestampsInterface {}
 
 export interface ConflictChatWithRecipientInterface
   extends ChatModelInterface,
-    ConflictChatWithRecipientModelInterface {}
+    ConflictChatWithRecipientModelInterface,
+    MongooseIdAndTimestampsInterface {}
