@@ -51,10 +51,10 @@ export interface ConflictChatWithRecipientModelInterface {
 
 export interface TaskChatInterface extends ChatModelInterface, TaskChatModelInterface {}
 
-export interface ConflictWithVolunteerChatInterface
+export interface ConflictChatWithVolunteerInterface
   extends ChatModelInterface,
     ConflictChatWithVolunteerModelInterface {}
 
-export interface ConflictWithRecipientChatInterface
+export interface ConflictChatWithRecipientInterface
   extends ChatModelInterface,
     ConflictChatWithRecipientModelInterface {}
