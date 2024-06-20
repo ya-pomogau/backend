@@ -28,6 +28,7 @@ export interface ChatModelInterface {
 }
 
 export interface TaskChatModelInterface {
+  taskId: ObjectId;
   volunteer: VolunteerInterface;
   recipient: RecipientInterface;
 }
