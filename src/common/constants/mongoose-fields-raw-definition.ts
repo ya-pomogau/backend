@@ -10,6 +10,14 @@ export const rawUserProfile = {
   phone: { required: true, type: mongoose.SchemaTypes.String },
 
   _id: { required: true, type: mongoose.SchemaTypes.String },
+
+  vkId: { required: false, type: mongoose.SchemaTypes.String },
+
+  role: { required: false, type: mongoose.SchemaTypes.String },
+
+  score: { required: false, type: mongoose.SchemaTypes.Number },
+
+  keys: { required: false, type: mongoose.SchemaTypes.Boolean },
 };
 
 export const rawCategory = {
