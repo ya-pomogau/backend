@@ -1,7 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, ObjectId, SchemaTypes } from 'mongoose';
-import { ChatModelInterface, ChatType } from '../../../common/types/chats.types';
-import { chats } from '../../../common/constants/chats';
+import { ChatModelInterface, ChatType, ChatTypes } from '../../../common/types/chats.types';
 
 @Schema({
   timestamps: true,
@@ -22,7 +21,7 @@ export class Chat extends Document implements ChatModelInterface {
   @Prop({
     required: true,
     type: SchemaTypes.String,
-    enum: Object.values(chats),
+    enum: Object.values(ChatTypes),
   })
   type: ChatType;
 
