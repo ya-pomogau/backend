@@ -34,5 +34,5 @@ export class ConflictChatWithVolunteer
   recipientChat: ObjectId;
 }
 
-export const ConflictWithVolunteerChatSchema =
+export const ConflictChatWithVolunteerSchema =
   SchemaFactory.createForClass(ConflictChatWithVolunteer);
