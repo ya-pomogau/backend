@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { UserStatus } from '../types/user.types';
 
 export const rawUserProfile = {
   address: { required: true, type: mongoose.SchemaTypes.String },
@@ -14,6 +15,8 @@ export const rawUserProfile = {
   vkId: { required: false, type: mongoose.SchemaTypes.String },
 
   role: { required: false, type: mongoose.SchemaTypes.String },
+
+  status: { required: false, enum: [Object.values(UserStatus)], type: mongoose.SchemaTypes.Number },
 
   score: { required: false, type: mongoose.SchemaTypes.Number },
 
