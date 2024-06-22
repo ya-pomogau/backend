@@ -5,12 +5,12 @@ import { ChatsRepository } from './chats.repository';
 import { TaskChat, TaskChatSchema } from './schemas/task-chat.schema';
 import { SystemChat, SystemChatSchema } from './schemas/system-chat.schema';
 import {
-  ConflictWithVolunteerChat,
-  ConflictWithVolunteerChatSchema,
+  ConflictChatWithVolunteer,
+  ConflictChatWithVolunteerSchema,
 } from './schemas/conflict-volunteer-chat.schema';
 import {
-  ConflictWithRecipientChat,
-  ConflictWithRecipientChatSchema,
+  ConflictChatWithRecipient,
+  ConflictChatWithRecipientSchema,
 } from './schemas/conflict-recipient-chat.schema';
 
 @Module({
@@ -22,8 +22,8 @@ import {
         discriminators: [
           { name: TaskChat.name, schema: TaskChatSchema },
           { name: SystemChat.name, schema: SystemChatSchema },
-          { name: ConflictWithVolunteerChat.name, schema: ConflictWithVolunteerChatSchema },
-          { name: ConflictWithRecipientChat.name, schema: ConflictWithRecipientChatSchema },
+          { name: ConflictChatWithVolunteer.name, schema: ConflictChatWithVolunteerSchema },
+          { name: ConflictChatWithRecipient.name, schema: ConflictChatWithRecipientSchema },
         ],
       } as ModelDefinition,
     ]),
