@@ -1,5 +1,6 @@
 import { PointGeoJSONInterface } from './point-geojson.types';
 import { MongooseIdAndTimestampsInterface } from './system.types';
+// eslint-disable-next-line import/no-cycle
 import { AccessRights } from './access-rights.types';
 
 /* export type UserProfile = {
