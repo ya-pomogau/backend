@@ -1,7 +1,8 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory, raw } from '@nestjs/mongoose';
 import { type ObjectId, Document, SchemaTypes } from 'mongoose';
 import { ConflictChatWithVolunteerModelInterface } from '../../../common/types/chats.types';
 import { VolunteerInterface } from '../../../common/types/user.types';
+import { rawUserProfile } from '../../../common/constants/mongoose-fields-raw-definition';
 
 @Schema({
   timestamps: true,
@@ -23,12 +24,14 @@ export class ConflictChatWithVolunteer
 
   @Prop({
     required: true,
-    type: SchemaTypes.ObjectId,
+    type: raw(rawUserProfile),
+    immutable: true,
   })
   volunteer: VolunteerInterface;
 
   @Prop({
-    required: true,
+    required: false,
+    default: null,
     type: SchemaTypes.ObjectId,
   })
   recipientChat: ObjectId;
