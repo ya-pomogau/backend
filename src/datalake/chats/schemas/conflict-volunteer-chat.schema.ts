@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory, raw } from '@nestjs/mongoose';
 import { type ObjectId, Document, SchemaTypes } from 'mongoose';
-import { ConflictChatWithVolunteerModelInterface } from '../../../common/types/chats.types';
+import { ChatType, ConflictChatWithVolunteerInterface } from '../../../common/types/chats.types';
 import { VolunteerInterface } from '../../../common/types/user.types';
 import { rawUserProfile } from '../../../common/constants/mongoose-fields-raw-definition';
 
@@ -14,8 +14,32 @@ import { rawUserProfile } from '../../../common/constants/mongoose-fields-raw-de
 })
 export class ConflictChatWithVolunteer
   extends Document
-  implements ConflictChatWithVolunteerModelInterface
+  implements ConflictChatWithVolunteerInterface
 {
+  @Prop({
+    required: true,
+    type: SchemaTypes.String,
+  })
+  _id: string;
+
+  @Prop({
+    required: true,
+    type: SchemaTypes.String,
+  })
+  createdAt: string;
+
+  @Prop({
+    required: true,
+    type: SchemaTypes.String,
+  })
+  updatedAt: string;
+
+  @Prop({
+    required: true,
+    type: SchemaTypes.String,
+  })
+  type: ChatType;
+
   @Prop({
     required: true,
     type: SchemaTypes.ObjectId,
