@@ -13,10 +13,10 @@ export interface MessageInterface {
 }
 
 export const ChatTypes = {
-  TASK: 'TASK_CHAT',
-  SYSTEM: 'SYSTEM_CHAT',
-  CONFLICTVOLUNTEER: 'CONFLICT_CHAT_VOLUNTEER',
-  CONFLICTRECIPIENT: 'CONFLICT_CHAT_RECIPIENT',
+  TASK_CHAT: 'TaskChat',
+  SYSTEM_CHAT: 'SystemChat',
+  CONFLICT_CHAT_WITH_VOLUNTEER: 'ConflictChatWithVolunteer',
+  CONFLICT_CHAT_WITH_RECIPIENT: 'ConflictChatWithRecipient',
 } as const;
 
 export type ChatType = keyof typeof ChatTypes;
