@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory, raw } from '@nestjs/mongoose';
 import { type ObjectId, Document, SchemaTypes } from 'mongoose';
-import { ConflictChatWithRecipientModelInterface } from '../../../common/types/chats.types';
+import { ChatType, ConflictChatWithRecipientInterface } from '../../../common/types/chats.types';
 import { RecipientInterface } from '../../../common/types/user.types';
 import { rawUserProfile } from '../../../common/constants/mongoose-fields-raw-definition';
 
@@ -14,8 +14,32 @@ import { rawUserProfile } from '../../../common/constants/mongoose-fields-raw-de
 })
 export class ConflictChatWithRecipient
   extends Document
-  implements ConflictChatWithRecipientModelInterface
+  implements ConflictChatWithRecipientInterface
 {
+  @Prop({
+    required: true,
+    type: SchemaTypes.String,
+  })
+  _id: string;
+
+  @Prop({
+    required: true,
+    type: SchemaTypes.String,
+  })
+  createdAt: string;
+
+  @Prop({
+    required: true,
+    type: SchemaTypes.String,
+  })
+  updatedAt: string;
+
+  @Prop({
+    required: true,
+    type: SchemaTypes.String,
+  })
+  type: ChatType;
+
   @Prop({
     required: true,
     type: SchemaTypes.ObjectId,
