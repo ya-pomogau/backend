@@ -1,6 +1,6 @@
 import { SchemaTypes } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { SystemChatModelInterface } from '../../../common/types/chats.types';
+import { ChatType, SystemChatInterface } from '../../../common/types/chats.types';
 import { VolunteerInterface, RecipientInterface } from '../../../common/types/user.types';
 
 @Schema({
@@ -11,7 +11,31 @@ import { VolunteerInterface, RecipientInterface } from '../../../common/types/us
     flattenObjectIds: true,
   },
 })
-export class SystemChat extends Document implements SystemChatModelInterface {
+export class SystemChat extends Document implements SystemChatInterface {
+  @Prop({
+    required: true,
+    type: SchemaTypes.String,
+  })
+  _id: string;
+
+  @Prop({
+    required: true,
+    type: SchemaTypes.String,
+  })
+  createdAt: string;
+
+  @Prop({
+    required: true,
+    type: SchemaTypes.String,
+  })
+  updatedAt: string;
+
+  @Prop({
+    required: true,
+    type: SchemaTypes.String,
+  })
+  type: ChatType;
+
   @Prop({
     required: true,
     type: SchemaTypes.ObjectId,

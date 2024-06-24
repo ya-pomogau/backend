@@ -52,6 +52,11 @@ export interface TaskChatInterface
     TaskChatModelInterface,
     MongooseIdAndTimestampsInterface {}
 
+export interface SystemChatInterface
+  extends ChatModelInterface,
+    SystemChatModelInterface,
+    MongooseIdAndTimestampsInterface {}
+
 export interface ConflictChatWithVolunteerInterface
   extends ChatModelInterface,
     ConflictChatWithVolunteerModelInterface,
