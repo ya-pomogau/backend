@@ -1,5 +1,10 @@
 import { type ObjectId } from 'mongoose';
-import { AnyUserInterface, RecipientInterface, VolunteerInterface } from './user.types';
+import {
+  AdminInterface,
+  AnyUserInterface,
+  RecipientInterface,
+  VolunteerInterface,
+} from './user.types';
 import { MongooseIdAndTimestampsInterface } from './system.types';
 
 export interface MessageInterface {
@@ -33,6 +38,7 @@ export interface TaskChatModelInterface {
 
 export interface SystemChatModelInterface {
   user: VolunteerInterface | RecipientInterface;
+  admin: AdminInterface;
 }
 
 export interface ConflictChatWithVolunteerModelInterface {
