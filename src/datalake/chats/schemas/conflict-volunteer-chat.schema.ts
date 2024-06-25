@@ -42,6 +42,12 @@ export class ConflictChatWithVolunteer
 
   @Prop({
     required: true,
+    type: SchemaTypes.Boolean,
+  })
+  isActive: boolean;
+
+  @Prop({
+    required: true,
     type: SchemaTypes.ObjectId,
   })
   taskId: ObjectId;

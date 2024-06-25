@@ -28,6 +28,7 @@ export type ChatType = keyof typeof ChatTypes;
 
 export interface ChatModelInterface {
   type: ChatType;
+  isActive: boolean;
 }
 
 export interface TaskChatModelInterface {

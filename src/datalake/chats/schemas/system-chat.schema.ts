@@ -42,6 +42,12 @@ export class SystemChat extends Document implements SystemChatInterface {
 
   @Prop({
     required: true,
+    type: SchemaTypes.Boolean,
+  })
+  isActive: boolean;
+
+  @Prop({
+    required: true,
     type: SchemaTypes.ObjectId,
   })
   user: VolunteerInterface | RecipientInterface;

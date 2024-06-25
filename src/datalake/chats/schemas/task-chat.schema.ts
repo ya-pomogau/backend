@@ -39,6 +39,12 @@ export class TaskChat extends Document implements TaskChatInterface {
 
   @Prop({
     required: true,
+    type: SchemaTypes.Boolean,
+  })
+  isActive: boolean;
+
+  @Prop({
+    required: true,
     type: SchemaTypes.ObjectId,
   })
   taskId: ObjectId;
