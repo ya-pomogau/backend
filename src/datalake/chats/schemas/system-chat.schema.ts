@@ -1,11 +1,12 @@
 import { SchemaTypes } from 'mongoose';
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory, raw } from '@nestjs/mongoose';
 import { ChatType, SystemChatInterface } from '../../../common/types/chats.types';
 import {
   VolunteerInterface,
   RecipientInterface,
   AdminInterface,
 } from '../../../common/types/user.types';
+import { rawUserProfile } from '../../../common/constants/mongoose-fields-raw-definition';
 
 @Schema({
   timestamps: true,
@@ -53,10 +54,11 @@ export class SystemChat extends Document implements SystemChatInterface {
   user: VolunteerInterface | RecipientInterface;
 
   @Prop({
-    required: true,
-    type: SchemaTypes.ObjectId,
+    required: false,
+    default: null,
+    type: raw(rawUserProfile),
   })
-  admin: AdminInterface;
+  admin: AdminInterface | null;
 }
 
 export const SystemChatSchema = SchemaFactory.createForClass(SystemChat);
