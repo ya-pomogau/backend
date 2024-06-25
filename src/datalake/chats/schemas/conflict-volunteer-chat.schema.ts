@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory, raw } from '@nestjs/mongoose';
 import { type ObjectId, Document, SchemaTypes } from 'mongoose';
 import { ChatType, ConflictChatWithVolunteerInterface } from '../../../common/types/chats.types';
-import { VolunteerInterface } from '../../../common/types/user.types';
+import { AdminInterface, VolunteerInterface } from '../../../common/types/user.types';
 import { rawUserProfile } from '../../../common/constants/mongoose-fields-raw-definition';
 
 @Schema({
@@ -64,7 +64,14 @@ export class ConflictChatWithVolunteer
     default: null,
     type: SchemaTypes.ObjectId,
   })
-  recipientChat: ObjectId;
+  opponentChat: ObjectId | null;
+
+  @Prop({
+    required: false,
+    default: null,
+    type: raw(rawUserProfile),
+  })
+  admin: AdminInterface | null;
 }
 
 export const ConflictChatWithVolunteerSchema =
