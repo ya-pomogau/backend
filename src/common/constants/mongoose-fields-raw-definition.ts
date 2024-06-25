@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+// import { AccessRights } from '../types/access-rights.types';
 
 export const rawGeoJson = {
   type: { required: true, enum: ['Point', 'Polygon'], type: mongoose.SchemaTypes.String },
@@ -31,6 +32,19 @@ export const rawUserProfile = {
   // score: { required: false, type: mongoose.SchemaTypes.Number },
 
   // keys: { required: false, type: mongoose.SchemaTypes.Boolean },
+
+  // permissions: {
+  //   required: false,
+  //   enum: [
+  //     AccessRights.confirmUser,
+  //     AccessRights.createTask,
+  //     AccessRights.giveKey,
+  //     AccessRights.resolveConflict,
+  //     AccessRights.contentEditor,
+  //     AccessRights.categoryPoints,
+  //   ],
+  //   type: mongoose.SchemaTypes.String,
+  // },
 };
 
 export const rawCategory = {
