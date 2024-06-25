@@ -33,6 +33,27 @@ export class TaskChat extends Document implements TaskChatInterface {
 
   @Prop({
     required: true,
+    default: null,
+    type: SchemaTypes.Date,
+  })
+  recipientLastReadAt: Date | null;
+
+  @Prop({
+    required: true,
+    default: null,
+    type: SchemaTypes.Date,
+  })
+  volunteerLastReadAt: Date | null;
+
+  @Prop({
+    required: true,
+    default: null,
+    type: SchemaTypes.Date,
+  })
+  adminLastReadAt: Date | null;
+
+  @Prop({
+    required: true,
     type: SchemaTypes.String,
   })
   type: ChatType;

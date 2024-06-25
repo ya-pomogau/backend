@@ -29,6 +29,9 @@ export type ChatType = keyof typeof ChatTypes;
 export interface ChatModelInterface {
   type: ChatType;
   isActive: boolean;
+  recipientLastReadAt: Date | null;
+  volunteerLastReadAt: Date | null;
+  adminLastReadAt: Date | null;
 }
 
 export interface TaskChatModelInterface {
