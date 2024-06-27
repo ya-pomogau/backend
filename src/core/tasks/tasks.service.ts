@@ -367,11 +367,14 @@ export class TasksService {
       });
     }
 
+    const newScore: number = volunteer.score + categoryPoints;
+    const newTasksComleted: number = volunteer.tasksCompleted + 1;
+
     const updatedVolonteer = (await this.usersRepo.findByIdAndUpdate(
       volunteerId,
       {
-        score: volunteer.score + categoryPoints,
-        tasksCompleted: volunteer.tasksCompleted + 1,
+        score: newScore,
+        tasksCompleted: newTasksComleted,
       },
       { new: true }
     )) as User & Volunteer;
