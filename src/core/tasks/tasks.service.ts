@@ -1,4 +1,10 @@
-import { ConflictException, ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { FilterQuery } from 'mongoose';
 import { TasksRepository } from '../../datalake/task/task.repository';
 import { UsersRepository } from '../../datalake/users/users.repository';
@@ -104,11 +110,29 @@ export class TasksService {
   }
 
   public async resolveConflict(taskId: string, outcome: ResolveResult) {
-    return this.tasksRepo.findOneAndUpdate(
-      { _id: taskId, status: TaskStatus.CONFLICTED, adminResolve: ResolveStatus.PENDING },
-      { status: TaskStatus.COMPLETED, adminResolve: outcome },
-      {}
-    );
+    const task = await this.tasksRepo.findById(taskId);
+    if (task.status !== TaskStatus.CONFLICTED) {
+      throw new ForbiddenException(
+        'Разрешение конфликта доступно только для задач, которые закрыты с конфликтом',
+        {
+          cause: `Попытка разрешения конфликта по задаче с _id '${task._id}' со статусом ${task.status} `,
+        }
+      );
+    }
+
+    if (outcome === ResolveResult.FULFILLED) {
+      return this.closeTaskAsFulfilled({
+        taskId,
+        volunteerId: task.volunteer._id,
+        categoryPoints: task.category.points,
+        adminResolveResult: ResolveResult.FULFILLED,
+      });
+    }
+
+    return this.closeTaskAsRejected({
+      taskId,
+      adminResolveResult: ResolveResult.REJECTED,
+    });
   }
 
   public async getModeratedTasks(moderator: AnyUserInterface) {
@@ -253,6 +277,7 @@ export class TasksService {
     const counterpartyIndex =
       userRole === UserRole.RECIPIENT ? 'volunteerReport' : 'recipientReport';
     const task = await this.tasksRepo.findById(taskId);
+
     if (task.status === TaskStatus.CREATED) {
       throw new ForbiddenException('Нельзя отчитаться по не открытой задаче!', {
         cause: `Попытка отчёта по задаче с _id '${task._id}' со статусом ${task.status} `,
@@ -266,22 +291,39 @@ export class TasksService {
         cause: `Попытка повторного  отчёта по задаче с _id '${task._id}' со статусом ${task.status} `,
       });
     }
-    if (task[counterpartyIndex]) {
+
+    if (!task[counterpartyIndex]) {
       return this.tasksRepo.findByIdAndUpdate(
         taskId,
         {
           [myIndex]: result,
-          status: result === task[counterpartyIndex] ? TaskStatus.COMPLETED : TaskStatus.CONFLICTED,
-          adminResolve: result === task[counterpartyIndex] ? null : ResolveStatus.VIRGIN,
-          isPendingChanges: false,
+          isPendingChanges: true,
         },
         { new: true }
       );
     }
+
+    if (result === task[counterpartyIndex]) {
+      if (result === TaskReport.FULFILLED) {
+        return this.closeTaskAsFulfilled({
+          taskId,
+          volunteerId: task.volunteer._id,
+          categoryPoints: task.category.points,
+          userIndex: myIndex,
+        });
+      }
+      return this.closeTaskAsRejected({
+        taskId,
+        userIndex: myIndex,
+      });
+    }
+
     return this.tasksRepo.findByIdAndUpdate(
       taskId,
       {
         [myIndex]: result,
+        status: TaskStatus.CONFLICTED,
+        adminResolve: ResolveStatus.VIRGIN,
         isPendingChanges: true,
       },
       { new: true }
@@ -302,5 +344,115 @@ export class TasksService {
       });
     }
     return this.tasksRepo.deleteOne({ _id: taskId }, {});
+  }
+
+  private async closeTaskAsFulfilled({
+    taskId,
+    volunteerId,
+    categoryPoints,
+    adminResolveResult,
+    userIndex,
+  }: {
+    taskId: string;
+    volunteerId: string;
+    categoryPoints: number;
+    adminResolveResult?: ResolveResult;
+    userIndex?: string;
+  }) {
+    const volunteer = (await this.usersRepo.findById(volunteerId)) as User & Volunteer;
+
+    if (!volunteer) {
+      throw new NotFoundException('Пользователь не найден!', {
+        cause: `Пользователь с _id '${volunteerId}' не найден`,
+      });
+    }
+
+    const updatedVolonteer = (await this.usersRepo.findByIdAndUpdate(
+      volunteerId,
+      {
+        score: volunteer.score + categoryPoints,
+        tasksCompleted: volunteer.tasksCompleted + 1,
+      },
+      { new: true }
+    )) as User & Volunteer;
+
+    if (!updatedVolonteer) {
+      throw new InternalServerErrorException('Internal Server Error', {
+        cause: 'Обновление данных волонтера не выполнено или выполнено с ошибкой',
+      });
+    }
+
+    let updatedTask: Task;
+    if (userIndex) {
+      updatedTask = await this.tasksRepo.findByIdAndUpdate(
+        taskId,
+        {
+          [userIndex]: TaskReport.FULFILLED,
+          status: TaskStatus.COMPLETED,
+          adminResolve: adminResolveResult || null,
+          isPendingChanges: false,
+        },
+        { new: true }
+      );
+    }
+
+    updatedTask = await this.tasksRepo.findByIdAndUpdate(
+      taskId,
+      {
+        status: TaskStatus.COMPLETED,
+        adminResolve: adminResolveResult || null,
+      },
+      { new: true }
+    );
+
+    if (!updatedTask) {
+      throw new InternalServerErrorException('Internal Server Error', {
+        cause: 'Обновление данных задачи не выполнено или выполнено с ошибкой',
+      });
+    }
+
+    return updatedTask;
+  }
+
+  private async closeTaskAsRejected({
+    taskId,
+    adminResolveResult,
+    userIndex,
+  }: {
+    taskId: string;
+    adminResolveResult?: ResolveResult;
+    userIndex?: string;
+  }) {
+    let updatedTask: Task;
+
+    if (userIndex) {
+      updatedTask = await this.tasksRepo.findByIdAndUpdate(
+        taskId,
+        {
+          [userIndex]: TaskReport.REJECTED,
+          status: TaskStatus.COMPLETED,
+          adminResolve: adminResolveResult || null,
+          isPendingChanges: false,
+        },
+        { new: true }
+      );
+    }
+
+    updatedTask = await this.tasksRepo.findByIdAndUpdate(
+      taskId,
+      {
+        status: TaskStatus.COMPLETED,
+        adminResolve: adminResolveResult || null,
+      },
+      { new: true }
+    );
+
+    if (!updatedTask) {
+      throw new InternalServerErrorException('Internal Server Error', {
+        cause: 'Обновление данных задачи не выполнено или выполнено с ошибкой',
+      });
+    }
+
+    return updatedTask;
   }
 }
