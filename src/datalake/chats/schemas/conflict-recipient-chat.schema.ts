@@ -24,7 +24,7 @@ export class ConflictChatWithRecipient
   recipient: RecipientInterface;
 
   @Prop({
-    required: true,
+    required: false,
     default: null,
     type: SchemaTypes.Date,
   })
@@ -51,7 +51,7 @@ export class ConflictChatWithRecipient
   admin: AdminInterface | null;
 
   @Prop({
-    required: true,
+    required: false,
     default: null,
     type: SchemaTypes.Date,
   })
