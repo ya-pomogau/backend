@@ -35,32 +35,32 @@ export interface TaskChatModelInterface {
   taskId: ObjectId;
   volunteer: VolunteerInterface;
   recipient: RecipientInterface;
-  volunteerLastReadAt: Date;
-  recipientLastReadAt: Date;
+  volunteerLastReadAt: Date | null;
+  recipientLastReadAt: Date | null;
 }
 
 export interface SystemChatModelInterface {
   user: VolunteerInterface | RecipientInterface;
   admin: AdminInterface;
-  userLastReadAt: Date;
-  adminLastReadAt: Date;
+  userLastReadAt: Date | null;
+  adminLastReadAt: Date | null;
 }
 
 export interface ConflictChatModelInterface {
   taskId: ObjectId;
   opponentChat: ObjectId;
   admin: AdminInterface;
-  adminLastReadAt: Date;
+  adminLastReadAt: Date | null;
 }
 
 export interface ConflictChatWithVolunteerModelInterface extends ConflictChatModelInterface {
   volunteer: VolunteerInterface;
-  volunteerLastReadAt: Date;
+  volunteerLastReadAt: Date | null;
 }
 
 export interface ConflictChatWithRecipientModelInterface extends ConflictChatModelInterface {
   recipient: RecipientInterface;
-  recipientLastReadAt: Date;
+  recipientLastReadAt: Date | null;
 }
 
 export interface TaskChatInterface
