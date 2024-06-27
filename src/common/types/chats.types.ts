@@ -48,16 +48,19 @@ export interface SystemChatModelInterface {
 
 export interface ConflictChatModelInterface {
   taskId: ObjectId;
-  opponentChat: ObjectId | null;
-  admin: AdminInterface | null;
+  opponentChat: ObjectId;
+  admin: AdminInterface;
+  adminLastReadAt: Date;
 }
 
 export interface ConflictChatWithVolunteerModelInterface extends ConflictChatModelInterface {
   volunteer: VolunteerInterface;
+  volunteerLastReadAt: Date;
 }
 
 export interface ConflictChatWithRecipientModelInterface extends ConflictChatModelInterface {
   recipient: RecipientInterface;
+  recipientLastReadAt: Date;
 }
 
 export interface TaskChatInterface
