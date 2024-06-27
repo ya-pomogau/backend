@@ -14,14 +14,14 @@ import { rawUserProfile } from '../../../common/constants/mongoose-fields-raw-de
 })
 export class TaskChat extends Document implements TaskChatModelInterface {
   @Prop({
-    required: true,
+    required: false,
     default: null,
     type: SchemaTypes.Date,
   })
   recipientLastReadAt: Date | null;
 
   @Prop({
-    required: true,
+    required: false,
     default: null,
     type: SchemaTypes.Date,
   })
