@@ -35,6 +35,8 @@ export interface TaskChatModelInterface {
   taskId: ObjectId;
   volunteer: VolunteerInterface;
   recipient: RecipientInterface;
+  volunteerLastReadAt: Date;
+  recipientLastReadAt: Date;
 }
 
 export interface SystemChatModelInterface {
