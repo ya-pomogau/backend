@@ -24,7 +24,7 @@ export class ConflictChatWithVolunteer
   volunteer: VolunteerInterface;
 
   @Prop({
-    required: true,
+    required: false,
     default: null,
     type: SchemaTypes.Date,
   })
@@ -51,7 +51,7 @@ export class ConflictChatWithVolunteer
   admin: AdminInterface | null;
 
   @Prop({
-    required: true,
+    required: false,
     default: null,
     type: SchemaTypes.Date,
   })
