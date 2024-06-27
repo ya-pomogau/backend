@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory, raw } from '@nestjs/mongoose';
 import { type ObjectId, Document, SchemaTypes } from 'mongoose';
-import { ChatType, ConflictChatWithVolunteerInterface } from '../../../common/types/chats.types';
+import { ConflictChatWithVolunteerModelInterface } from '../../../common/types/chats.types';
 import { AdminInterface, VolunteerInterface } from '../../../common/types/user.types';
 import { rawUserProfile } from '../../../common/constants/mongoose-fields-raw-definition';
 
@@ -14,32 +14,14 @@ import { rawUserProfile } from '../../../common/constants/mongoose-fields-raw-de
 })
 export class ConflictChatWithVolunteer
   extends Document
-  implements ConflictChatWithVolunteerInterface
+  implements ConflictChatWithVolunteerModelInterface
 {
   @Prop({
     required: true,
-    type: SchemaTypes.String,
+    type: raw(rawUserProfile),
+    immutable: true,
   })
-  _id: string;
-
-  @Prop({
-    required: true,
-    type: SchemaTypes.String,
-  })
-  createdAt: string;
-
-  @Prop({
-    required: true,
-    type: SchemaTypes.String,
-  })
-  updatedAt: string;
-
-  @Prop({
-    required: true,
-    default: null,
-    type: SchemaTypes.Date,
-  })
-  recipientLastReadAt: Date | null;
+  volunteer: VolunteerInterface;
 
   @Prop({
     required: true,
@@ -50,35 +32,9 @@ export class ConflictChatWithVolunteer
 
   @Prop({
     required: true,
-    default: null,
-    type: SchemaTypes.Date,
-  })
-  adminLastReadAt: Date | null;
-
-  @Prop({
-    required: true,
-    type: SchemaTypes.String,
-  })
-  type: ChatType;
-
-  @Prop({
-    required: true,
-    type: SchemaTypes.Boolean,
-  })
-  isActive: boolean;
-
-  @Prop({
-    required: true,
     type: SchemaTypes.ObjectId,
   })
   taskId: ObjectId;
-
-  @Prop({
-    required: true,
-    type: raw(rawUserProfile),
-    immutable: true,
-  })
-  volunteer: VolunteerInterface;
 
   @Prop({
     required: false,
@@ -93,6 +49,13 @@ export class ConflictChatWithVolunteer
     type: raw(rawUserProfile),
   })
   admin: AdminInterface | null;
+
+  @Prop({
+    required: true,
+    default: null,
+    type: SchemaTypes.Date,
+  })
+  adminLastReadAt: Date | null;
 }
 
 export const ConflictChatWithVolunteerSchema =
