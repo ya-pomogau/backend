@@ -42,6 +42,8 @@ export interface TaskChatModelInterface {
 export interface SystemChatModelInterface {
   user: VolunteerInterface | RecipientInterface;
   admin: AdminInterface;
+  userLastReadAt: Date;
+  adminLastReadAt: Date;
 }
 
 export interface ConflictChatModelInterface {
