@@ -18,14 +18,14 @@ import { rawUserProfile } from '../../../common/constants/mongoose-fields-raw-de
 })
 export class SystemChat extends Document implements SystemChatModelInterface {
   @Prop({
-    required: true,
+    required: false,
     default: null,
     type: SchemaTypes.Date,
   })
   userLastReadAt: Date | null;
 
   @Prop({
-    required: true,
+    required: false,
     default: null,
     type: SchemaTypes.Date,
   })
@@ -33,7 +33,7 @@ export class SystemChat extends Document implements SystemChatModelInterface {
 
   @Prop({
     required: true,
-    type: SchemaTypes.ObjectId,
+    type: raw(rawUserProfile),
   })
   user: VolunteerInterface | RecipientInterface;
 
