@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
+import { ApiBulkUpdateCategoryDto } from '../../api/admin-api/dto/bulk-update-category.dto';
 import exceptions from '../../common/constants/exceptions';
 import { CategoryRepository } from '../../datalake/category/category.repository';
 import { CreateCategoryDto, UpdateCategoryDto } from '../../common/dto/category.dto';
@@ -55,6 +56,39 @@ export class CategoriesService {
     if (!res.deletedCount) {
       throw new InternalServerErrorException(exceptions.category.nothingToDelete);
     }
+    return res;
+  }
+
+  // Только админы с правами AdminPermission.CATEGORIES
+  async updateCategoriesByIds(updateData: ApiBulkUpdateCategoryDto[], user: AdminInterface) {
+    let res;
+
+    if (
+      user.role !== UserRole.ADMIN ||
+      (user.role === UserRole.ADMIN && !user.permissions.includes(AdminPermission.CATEGORIES))
+    ) {
+      throw new ForbiddenException(exceptions.category.notEnoughRights);
+    }
+
+    const bulkUpdateArr = updateData.map((item) => {
+      const { id, ...data } = item;
+      const operation = {
+        updateOne: {
+          filter: { _id: id },
+          update: { ...data },
+        },
+      };
+      return operation;
+    });
+
+    try {
+      res = await this.categoriesRepo.bulkWrite(bulkUpdateArr, { ordered: false });
+    } catch (err) {
+      throw new InternalServerErrorException(exceptions.category.internalError, {
+        cause: `Ошибка в методе массового обновления категорий updateCategoriesByIds: ${err}`,
+      });
+    }
+
     return res;
   }
 
