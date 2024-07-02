@@ -5,11 +5,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
-import { ApiBulkUpdateCategoryDto } from '../../api/admin-api/dto/bulk-update-category.dto';
+import { ApiBulkUpdateCategoriesDto } from '../../api/admin-api/dto/bulk-update-categories.dto';
 import exceptions from '../../common/constants/exceptions';
-import { CategoryRepository } from '../../datalake/category/category.repository';
 import { CreateCategoryDto, UpdateCategoryDto } from '../../common/dto/category.dto';
 import { AdminPermission, UserRole, AdminInterface } from '../../common/types/user.types';
+import { CategoryRepository } from '../../datalake/category/category.repository';
 
 @Injectable()
 export class CategoriesService {
@@ -60,7 +60,7 @@ export class CategoriesService {
   }
 
   // Только админы с правами AdminPermission.CATEGORIES
-  async updateCategoriesByIds(updateData: ApiBulkUpdateCategoryDto[], user: AdminInterface) {
+  async updateCategoriesByIds(dto: ApiBulkUpdateCategoriesDto, user: AdminInterface) {
     let res;
 
     if (
@@ -70,7 +70,7 @@ export class CategoriesService {
       throw new ForbiddenException(exceptions.category.notEnoughRights);
     }
 
-    const bulkUpdateArr = updateData.map((item) => {
+    const bulkUpdateArr = dto.data.map((item) => {
       const { id, ...data } = item;
       const operation = {
         updateOne: {

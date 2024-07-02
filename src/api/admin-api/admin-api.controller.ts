@@ -30,7 +30,7 @@ import { PostDTO } from './dto/new-post.dto';
 import { ApiPrivilegesDto } from './dto/privileges.dto';
 import { ApiCreateCategoryDto } from './dto/new-category.dto';
 import { ApiUpdateCategoryDto } from './dto/update-category.dto';
-import { ApiBulkUpdateCategoryDto } from './dto/bulk-update-category.dto';
+import { ApiBulkUpdateCategoriesDto } from './dto/bulk-update-categories.dto';
 
 @UseGuards(JwtAuthGuard)
 @UseGuards(AccessControlGuard)
@@ -186,10 +186,10 @@ export class AdminApiController {
     rights: [AccessRights.categoryPoints],
   })
   async updateCategoriesByIds(
-    @Body() dtos: ApiBulkUpdateCategoryDto[],
+    @Body() dto: ApiBulkUpdateCategoriesDto,
     @Req() req: Express.Request
   ) {
-    return this.categoryService.updateCategoriesByIds(dtos, req.user as AnyUserInterface);
+    return this.categoryService.updateCategoriesByIds(dto, req.user as AnyUserInterface);
   }
 
   @Patch('categories/:id')
