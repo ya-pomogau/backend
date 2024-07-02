@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-cycle
 import { UserRole, UserStatus } from './user.types';
 
 export enum AccessRights {
