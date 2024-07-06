@@ -25,7 +25,9 @@ import { ContactsModule } from './core/contacts/contacts.module';
 import { TasksModule } from './core/tasks/tasks.module';
 import { PolicyModule } from './core/policy/policy.module';
 import { SystemApiModule } from './api/system-api/system-api.module';
-import { ChatModule } from './entities/chats/chat.module';
+import { AppController } from './app.controller';
+import { ChatEntity } from './entities/chats/chat.entity';
+import { ChatRepository } from './entities/chats/chats.repository';
 
 @Module({
   imports: [
@@ -54,13 +56,15 @@ import { ChatModule } from './entities/chats/chat.module';
     TasksModule,
     PolicyModule,
     SystemApiModule,
-    ChatModule,
   ],
+  controllers: [AppController],
   providers: [
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
+    ChatEntity,
+    ChatRepository,
   ],
 })
 export class AppModule {}
