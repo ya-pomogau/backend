@@ -376,7 +376,7 @@ export class TasksService {
         score: newScore || volunteer.score,
         tasksCompleted: newTasksComleted,
       },
-      { new: true, overwriteDiscriminatorKey: true }
+      { new: true }
     )) as User & Volunteer;
 
     if (!updatedVolonteer) {
