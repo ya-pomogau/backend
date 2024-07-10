@@ -303,4 +303,18 @@ export class TasksService {
     }
     return this.tasksRepo.deleteOne({ _id: taskId }, {});
   }
+
+  /**
+   * Изменение баллов незакрытых задач в категории
+   */
+  public async updatePointsByCategory(categoryId: string, points: number) {
+    try {
+      return await this.tasksRepo.updateMany(
+        { category: categoryId, status: TaskStatus.CREATED },
+        { $set: { points } }
+      );
+    } catch (error) {
+      throw new Error(`Error updating points by category: ${error.message}`);
+    }
+  }
 }
