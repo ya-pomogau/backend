@@ -33,7 +33,7 @@ export class Volunteer extends Document implements VolunteerUserModelInterface {
   @Prop({ required: false, default: false, type: SchemaTypes.Boolean })
   keys: boolean;
 
-  @Prop({ type: SchemaTypes.Number, required: true, default: 0 })
+  @Prop({ type: SchemaTypes.Number, default: 0 })
   tasksCompleted: number;
 }
 

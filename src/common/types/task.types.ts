@@ -50,3 +50,22 @@ export interface TaskInterface {
 export interface TaskModelVirtuals {
   status: TaskStatus;
 }
+
+export interface TaskClosingProps {
+  taskId: string;
+}
+
+export interface FulfilledTaskClosingProps extends TaskClosingProps {
+  volunteerId: string;
+  categoryPoints: number;
+}
+
+export type TaskClosingConditionalProps =
+  | {
+      adminResolveResult?: ResolveResult;
+      userIndex?: never;
+    }
+  | {
+      adminResolveResult?: never;
+      userIndex?: string;
+    };

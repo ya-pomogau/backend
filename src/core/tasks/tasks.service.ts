@@ -17,6 +17,9 @@ import {
   TaskInterface,
   TaskReport,
   TaskStatus,
+  TaskClosingProps,
+  FulfilledTaskClosingProps,
+  TaskClosingConditionalProps,
 } from '../../common/types/task.types';
 import { AnyUserInterface, UserRole } from '../../common/types/user.types';
 import { Volunteer } from '../../datalake/users/schemas/volunteer.schema';
@@ -346,19 +349,27 @@ export class TasksService {
     return this.tasksRepo.deleteOne({ _id: taskId }, {});
   }
 
+  private updateVolunteerScore(
+    volunteer: User & Volunteer,
+    points: number
+  ): Promise<User & Volunteer> {
+    return this.usersRepo.findOneAndUpdate(
+      { _id: volunteer._id, role: volunteer.role },
+      {
+        score: volunteer.score + points || volunteer.score,
+        tasksCompleted: volunteer.tasksCompleted + 1,
+      },
+      { new: true }
+    ) as Promise<User & Volunteer>;
+  }
+
   private async closeTaskAsFulfilled({
     taskId,
     volunteerId,
     categoryPoints,
     adminResolveResult,
     userIndex,
-  }: {
-    taskId: string;
-    volunteerId: string;
-    categoryPoints: number;
-    adminResolveResult?: ResolveResult;
-    userIndex?: string;
-  }) {
+  }: FulfilledTaskClosingProps & TaskClosingConditionalProps) {
     const volunteer = (await this.usersRepo.findById(volunteerId)) as User & Volunteer;
 
     if (!volunteer) {
@@ -367,65 +378,56 @@ export class TasksService {
       });
     }
 
-    const newScore: number = volunteer.score + categoryPoints;
-    const newTasksComleted: number = volunteer.tasksCompleted + 1;
-
-    const updatedVolonteer = (await this.usersRepo.findOneAndUpdate(
-      { _id: volunteerId, role: volunteer.role },
-      {
-        score: newScore || volunteer.score,
-        tasksCompleted: newTasksComleted,
-      },
-      { new: true }
-    )) as User & Volunteer;
-
-    if (!updatedVolonteer) {
-      throw new InternalServerErrorException('Internal Server Error', {
-        cause: 'Обновление данных волонтера не выполнено или выполнено с ошибкой',
-      });
+    let volunteerUpdateResult;
+    let taskUpdateResult;
+    if (userIndex) {
+      [volunteerUpdateResult, taskUpdateResult] = await Promise.allSettled([
+        this.updateVolunteerScore(volunteer, categoryPoints),
+        this.tasksRepo.findByIdAndUpdate(
+          taskId,
+          {
+            [userIndex]: TaskReport.FULFILLED,
+            status: TaskStatus.COMPLETED,
+            adminResolve: adminResolveResult || null,
+            isPendingChanges: false,
+          },
+          { new: true }
+        ),
+      ]);
     }
 
-    let updatedTask: Task;
-    if (userIndex) {
-      updatedTask = await this.tasksRepo.findByIdAndUpdate(
+    [volunteerUpdateResult, taskUpdateResult] = await Promise.allSettled([
+      this.updateVolunteerScore(volunteer, categoryPoints),
+      this.tasksRepo.findByIdAndUpdate(
         taskId,
         {
-          [userIndex]: TaskReport.FULFILLED,
           status: TaskStatus.COMPLETED,
           adminResolve: adminResolveResult || null,
-          isPendingChanges: false,
         },
         { new: true }
-      );
-    }
+      ),
+    ]);
 
-    updatedTask = await this.tasksRepo.findByIdAndUpdate(
-      taskId,
-      {
-        status: TaskStatus.COMPLETED,
-        adminResolve: adminResolveResult || null,
-      },
-      { new: true }
-    );
-
-    if (!updatedTask) {
+    if (volunteerUpdateResult.status === 'rejected') {
       throw new InternalServerErrorException('Internal Server Error', {
-        cause: 'Обновление данных задачи не выполнено или выполнено с ошибкой',
+        cause: `Обновление данных волонтера не выполнено или выполнено с ошибкой: ${volunteerUpdateResult.reason}`,
       });
     }
 
-    return updatedTask;
+    if (taskUpdateResult.status === 'rejected') {
+      throw new InternalServerErrorException('Internal Server Error', {
+        cause: `Обновление данных задачи не выполнено или выполнено с ошибкой: ${taskUpdateResult.reason}`,
+      });
+    }
+
+    return taskUpdateResult.value;
   }
 
   private async closeTaskAsRejected({
     taskId,
     adminResolveResult,
     userIndex,
-  }: {
-    taskId: string;
-    adminResolveResult?: ResolveResult;
-    userIndex?: string;
-  }) {
+  }: TaskClosingProps & TaskClosingConditionalProps) {
     let updatedTask: Task;
 
     if (userIndex) {
