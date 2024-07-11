@@ -10,6 +10,7 @@ import { CategoryRepository } from '../../datalake/category/category.repository'
 import { CreateCategoryDto, UpdateCategoryDto } from '../../common/dto/category.dto';
 import { AdminPermission, UserRole, AdminInterface } from '../../common/types/user.types';
 import { TasksService } from '../tasks/tasks.service';
+import { Category } from '../../datalake/category/schemas/category.schema';
 
 @Injectable()
 export class CategoriesService {
@@ -64,7 +65,7 @@ export class CategoriesService {
 
   // Только админы с правами AdminPermission.CATEGORIES
   async updateCategoryById(id: string, updateData: UpdateCategoryDto, user: AdminInterface) {
-    let res;
+    let res: Category | undefined;
 
     if (
       user.role !== UserRole.ADMIN ||
@@ -74,11 +75,14 @@ export class CategoriesService {
     }
 
     try {
-      res = await this.categoriesRepo.findOneAndUpdate({ _id: id }, updateData, { new: true });
+      const categoryUpdatePromise = this.categoriesRepo.findOneAndUpdate({ _id: id }, updateData, {
+        new: true,
+      });
 
-      const pointsUpdate = this.tasksService.updatePointsByCategory(id, updateData.points);
+      const pointsUpdatePromise = this.tasksService.updatePointsByCategory(id, updateData.points);
 
-      await Promise.all([res, pointsUpdate]);
+      const [category] = await Promise.all([categoryUpdatePromise, pointsUpdatePromise]);
+      res = category;
     } catch (err) {
       throw new InternalServerErrorException(exceptions.category.internalError, {
         cause: `Ошибка в методе обновления данных категории findOneAndUpdate: ${err}`,

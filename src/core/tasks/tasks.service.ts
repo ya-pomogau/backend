@@ -309,9 +309,10 @@ export class TasksService {
    */
   public async updatePointsByCategory(categoryId: string, points: number) {
     try {
-      return await this.tasksRepo.updateMany(
-        { category: categoryId, status: TaskStatus.CREATED },
-        { $set: { points } }
+      return this.tasksRepo.updateMany(
+        { category: categoryId, status: { $ne: TaskStatus.COMPLETED } },
+        { $set: { points } },
+        { new: true }
       );
     } catch (error) {
       throw new Error(`Error updating points by category: ${error.message}`);
