@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
+import { User } from 'obsolete/users/entities/user.entity';
 import { ApiBulkUpdateCategoriesDto } from '../../api/admin-api/dto/bulk-update-categories.dto';
 import exceptions from '../../common/constants/exceptions';
 import { CreateCategoryDto, UpdateCategoryDto } from '../../common/dto/category.dto';
@@ -62,11 +63,11 @@ export class CategoriesService {
   // Только админы с правами AdminPermission.CATEGORIES
   async updateCategoriesByIds(dto: ApiBulkUpdateCategoriesDto, user: AdminInterface) {
     let res;
+    const hasAccessToUpdate: boolean =
+      (user.role === UserRole.ADMIN && user.isRoot === true) ||
+      (user.role === UserRole.ADMIN && user.permissions.includes(AdminPermission.CATEGORIES));
 
-    if (
-      user.role !== UserRole.ADMIN ||
-      (user.role === UserRole.ADMIN && !user.permissions.includes(AdminPermission.CATEGORIES))
-    ) {
+    if (user.role !== UserRole.ADMIN || !hasAccessToUpdate) {
       throw new ForbiddenException(exceptions.category.notEnoughRights);
     }
 
@@ -95,11 +96,11 @@ export class CategoriesService {
   // Только админы с правами AdminPermission.CATEGORIES
   async updateCategoryById(id: string, updateData: UpdateCategoryDto, user: AdminInterface) {
     let res;
+    const hasAccessToUpdate: boolean =
+      (user.role === UserRole.ADMIN && user.isRoot === true) ||
+      (user.role === UserRole.ADMIN && user.permissions.includes(AdminPermission.CATEGORIES));
 
-    if (
-      user.role !== UserRole.ADMIN ||
-      (user.role === UserRole.ADMIN && !user.permissions.includes(AdminPermission.CATEGORIES))
-    ) {
+    if (user.role !== UserRole.ADMIN || !hasAccessToUpdate) {
       throw new ForbiddenException(exceptions.category.notEnoughRights);
     }
 
