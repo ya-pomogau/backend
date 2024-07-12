@@ -10,6 +10,7 @@ import { UsersRepository } from '../../datalake/users/users.repository';
 import { CreateAdminDto, CreateUserDto } from '../../common/dto/users.dto';
 import {
   AdminInterface,
+  VolunteerInterface,
   AdminPermission,
   UserProfile,
   UserRole,
@@ -326,6 +327,15 @@ export class UsersService {
 
   public async updateProfile(userId: string, dto: Partial<UserProfile>) {
     return this.usersRepo.findByIdAndUpdate(userId, dto, { new: true });
+  }
+
+  public async updateVolunteerProfile(
+    userId: string,
+    dto: Partial<VolunteerInterface>
+  ): Promise<User & Volunteer> {
+    return this.usersRepo.findOneAndUpdate({ _id: userId, role: UserRole.VOLUNTEER }, dto, {
+      new: true,
+    }) as Promise<User & Volunteer>;
   }
 
   private static requireLogin(userId: string) {

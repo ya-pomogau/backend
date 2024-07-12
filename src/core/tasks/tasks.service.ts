@@ -24,13 +24,15 @@ import {
 import { AnyUserInterface, UserRole } from '../../common/types/user.types';
 import { Volunteer } from '../../datalake/users/schemas/volunteer.schema';
 import { User } from '../../datalake/users/schemas/user.schema';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class TasksService {
   constructor(
     private readonly tasksRepo: TasksRepository,
     private readonly usersRepo: UsersRepository,
-    private readonly categoryRepo: CategoryRepository
+    private readonly categoryRepo: CategoryRepository,
+    private readonly usersService: UsersService,
   ) {}
 
   public async create(dto: CreateTaskDto) {
@@ -349,20 +351,6 @@ export class TasksService {
     return this.tasksRepo.deleteOne({ _id: taskId }, {});
   }
 
-  private updateVolunteerScore(
-    volunteer: User & Volunteer,
-    points: number
-  ): Promise<User & Volunteer> {
-    return this.usersRepo.findOneAndUpdate(
-      { _id: volunteer._id, role: volunteer.role },
-      {
-        score: volunteer.score + points || volunteer.score,
-        tasksCompleted: volunteer.tasksCompleted + 1,
-      },
-      { new: true }
-    ) as Promise<User & Volunteer>;
-  }
-
   private async closeTaskAsFulfilled({
     taskId,
     volunteerId,
@@ -378,11 +366,14 @@ export class TasksService {
       });
     }
 
-    let volunteerUpdateResult;
-    let taskUpdateResult;
+    let volunteerUpdateResult: PromiseSettledResult<User & Volunteer>;
+    let taskUpdateResult: PromiseSettledResult<Task>;
     if (userIndex) {
       [volunteerUpdateResult, taskUpdateResult] = await Promise.allSettled([
-        this.updateVolunteerScore(volunteer, categoryPoints),
+        this.usersService.updateVolunteerProfile(volunteer._id, {
+          score: volunteer.score + categoryPoints || volunteer.score,
+          tasksCompleted: volunteer.tasksCompleted + 1,
+        }),
         this.tasksRepo.findByIdAndUpdate(
           taskId,
           {
@@ -397,7 +388,10 @@ export class TasksService {
     }
 
     [volunteerUpdateResult, taskUpdateResult] = await Promise.allSettled([
-      this.updateVolunteerScore(volunteer, categoryPoints),
+      this.usersService.updateVolunteerProfile(volunteer._id, {
+        score: volunteer.score + categoryPoints || volunteer.score,
+        tasksCompleted: volunteer.tasksCompleted + 1,
+      }),
       this.tasksRepo.findByIdAndUpdate(
         taskId,
         {
