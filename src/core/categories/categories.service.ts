@@ -4,8 +4,6 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-
-import { User } from 'obsolete/users/entities/user.entity';
 import { ApiBulkUpdateCategoriesDto } from '../../api/admin-api/dto/bulk-update-categories.dto';
 import exceptions from '../../common/constants/exceptions';
 import { CreateCategoryDto, UpdateCategoryDto } from '../../common/dto/category.dto';
@@ -41,11 +39,9 @@ export class CategoriesService {
 
   // Только root
   async removeCategory(id: string, user: AdminInterface) {
-    let res;
-    if (user.role !== UserRole.ADMIN || (user.role === UserRole.ADMIN && !user.isRoot)) {
-      throw new ForbiddenException(exceptions.category.notEnoughRights);
-    }
+    this.checkIsEnoughRights(user, [], true);
 
+    let res;
     try {
       res = await this.categoriesRepo.deleteOne({ _id: id }, {});
     } catch (err) {
@@ -62,15 +58,9 @@ export class CategoriesService {
 
   // Только админы с правами AdminPermission.CATEGORIES
   async updateCategoriesByIds(dto: ApiBulkUpdateCategoriesDto, user: AdminInterface) {
+    this.checkIsEnoughRights(user, [AdminPermission.CATEGORIES]);
+
     let res;
-    const hasAccessToUpdate: boolean =
-      (user.role === UserRole.ADMIN && user.isRoot === true) ||
-      (user.role === UserRole.ADMIN && user.permissions.includes(AdminPermission.CATEGORIES));
-
-    if (user.role !== UserRole.ADMIN || !hasAccessToUpdate) {
-      throw new ForbiddenException(exceptions.category.notEnoughRights);
-    }
-
     const bulkUpdateArr = dto.data.map((item) => {
       const { id, ...data } = item;
       const operation = {
@@ -95,15 +85,9 @@ export class CategoriesService {
 
   // Только админы с правами AdminPermission.CATEGORIES
   async updateCategoryById(id: string, updateData: UpdateCategoryDto, user: AdminInterface) {
+    this.checkIsEnoughRights(user, [AdminPermission.CATEGORIES]);
+
     let res;
-    const hasAccessToUpdate: boolean =
-      (user.role === UserRole.ADMIN && user.isRoot === true) ||
-      (user.role === UserRole.ADMIN && user.permissions.includes(AdminPermission.CATEGORIES));
-
-    if (user.role !== UserRole.ADMIN || !hasAccessToUpdate) {
-      throw new ForbiddenException(exceptions.category.notEnoughRights);
-    }
-
     try {
       res = await this.categoriesRepo.findOneAndUpdate({ _id: id }, updateData, { new: true });
     } catch (err) {
@@ -111,28 +95,21 @@ export class CategoriesService {
         cause: `Ошибка в методе обновления данных категории findOneAndUpdate: ${err}`,
       });
     }
-
-    if (!res) {
-      throw new NotFoundException(exceptions.category.notFound);
-    }
+    if (!res) throw new NotFoundException(exceptions.category.notFound);
 
     return res;
   }
 
   // Только root
   async createCategory(data: CreateCategoryDto, user: AdminInterface) {
-    if (user.role !== UserRole.ADMIN || (user.role === UserRole.ADMIN && !user.isRoot)) {
-      throw new ForbiddenException(exceptions.category.notEnoughRights);
-    }
+    this.checkIsEnoughRights(user, [], true);
 
     return this.categoriesRepo.create(data);
   }
 
   // Только для админов с правами AdminPermission.CATEGORIES
   async updatePoints(data: Record<string, number>, user: AdminInterface) {
-    if (!(user.role === UserRole.ADMIN && user.permissions.includes(AdminPermission.CATEGORIES))) {
-      throw new ForbiddenException(exceptions.category.notEnoughRights);
-    }
+    this.checkIsEnoughRights(user, [AdminPermission.CATEGORIES]);
 
     const res = await Promise.allSettled(
       Object.keys(data).map(
@@ -144,5 +121,30 @@ export class CategoriesService {
     });
 
     return res;
+  }
+
+  private checkIsEnoughRights(
+    user: AdminInterface,
+    requirements: AdminPermission[],
+    onlyRoot = false
+  ): boolean {
+    if (user.role === UserRole.ADMIN && user.isRoot) return true;
+
+    let hasPermission = false;
+    if (user.role !== UserRole.ADMIN || (onlyRoot && !user.isRoot)) {
+      hasPermission = false;
+    }
+
+    if (onlyRoot === false && requirements.length > 0) {
+      hasPermission = requirements.every((requirement) =>
+        user.permissions.some((permission) => permission === requirement)
+      );
+    }
+
+    if (!hasPermission) {
+      throw new ForbiddenException(exceptions.category.notEnoughRights);
+    }
+
+    return hasPermission;
   }
 }
