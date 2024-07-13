@@ -45,8 +45,37 @@ export class UsersService {
     name: string;
     location?: PointGeoJSONInterface;
     status?: UserStatus;
-  }): Promise<POJOType<User>> {
-    return this.usersRepo.create(dto);
+  }) {
+    const {
+      permissions,
+      _id,
+      vkId,
+      role,
+      avatar,
+      address,
+      isRoot,
+      isActive,
+      name,
+      phone,
+      login,
+      createdAtr,
+      updatedAt,
+    } = await this.usersRepo.create(dto);
+    return Promise.resolve({
+      permissions,
+      _id,
+      vkId,
+      role,
+      avatar,
+      address,
+      isRoot,
+      isActive,
+      name,
+      phone,
+      login,
+      createdAtr,
+      updatedAt,
+    } as Record<string, unknown>);
   }
 
   async checkVKCredential(vkId: string): Promise<POJOType<User>> | null {
