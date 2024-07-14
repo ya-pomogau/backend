@@ -7,7 +7,8 @@ import {
 import { ApiBulkUpdateCategoriesDto } from '../../api/admin-api/dto/bulk-update-categories.dto';
 import exceptions from '../../common/constants/exceptions';
 import { CreateCategoryDto, UpdateCategoryDto } from '../../common/dto/category.dto';
-import { AdminPermission, UserRole, AdminInterface } from '../../common/types/user.types';
+import { AdminPermission, AdminInterface } from '../../common/types/user.types';
+import { checkIsEnoughRights } from '../../common/helpers/checkIsEnoughRights';
 import { CategoryRepository } from '../../datalake/category/category.repository';
 
 @Injectable()
@@ -39,7 +40,9 @@ export class CategoriesService {
 
   // Только root
   async removeCategory(id: string, user: AdminInterface) {
-    this.checkIsEnoughRights(user, [], true);
+    if (!checkIsEnoughRights(user, [], true)) {
+      throw new ForbiddenException(exceptions.category.notEnoughRights);
+    }
 
     let res;
     try {
@@ -58,7 +61,9 @@ export class CategoriesService {
 
   // Только админы с правами AdminPermission.CATEGORIES
   async updateCategoriesByIds(dto: ApiBulkUpdateCategoriesDto, user: AdminInterface) {
-    this.checkIsEnoughRights(user, [AdminPermission.CATEGORIES]);
+    if (!checkIsEnoughRights(user, [AdminPermission.CATEGORIES])) {
+      throw new ForbiddenException(exceptions.category.notEnoughRights);
+    }
 
     let res;
     const bulkUpdateArr = dto.data.map((item) => {
@@ -85,7 +90,9 @@ export class CategoriesService {
 
   // Только админы с правами AdminPermission.CATEGORIES
   async updateCategoryById(id: string, updateData: UpdateCategoryDto, user: AdminInterface) {
-    this.checkIsEnoughRights(user, [AdminPermission.CATEGORIES]);
+    if (!checkIsEnoughRights(user, [AdminPermission.CATEGORIES])) {
+      throw new ForbiddenException(exceptions.category.notEnoughRights);
+    }
 
     let res;
     try {
@@ -102,14 +109,18 @@ export class CategoriesService {
 
   // Только root
   async createCategory(data: CreateCategoryDto, user: AdminInterface) {
-    this.checkIsEnoughRights(user, [], true);
+    if (!checkIsEnoughRights(user, [], true)) {
+      throw new ForbiddenException(exceptions.category.notEnoughRights);
+    }
 
     return this.categoriesRepo.create(data);
   }
 
   // Только для админов с правами AdminPermission.CATEGORIES
   async updatePoints(data: Record<string, number>, user: AdminInterface) {
-    this.checkIsEnoughRights(user, [AdminPermission.CATEGORIES]);
+    if (!checkIsEnoughRights(user, [AdminPermission.CATEGORIES])) {
+      throw new ForbiddenException(exceptions.category.notEnoughRights);
+    }
 
     const res = await Promise.allSettled(
       Object.keys(data).map(
@@ -121,30 +132,5 @@ export class CategoriesService {
     });
 
     return res;
-  }
-
-  private checkIsEnoughRights(
-    user: AdminInterface,
-    requirements: AdminPermission[],
-    onlyRoot = false
-  ): boolean {
-    if (user.role === UserRole.ADMIN && user.isRoot) return true;
-
-    let hasPermission = false;
-    if (user.role !== UserRole.ADMIN || (onlyRoot && !user.isRoot)) {
-      hasPermission = false;
-    }
-
-    if (onlyRoot === false && requirements.length > 0) {
-      hasPermission = requirements.every((requirement) =>
-        user.permissions.some((permission) => permission === requirement)
-      );
-    }
-
-    if (!hasPermission) {
-      throw new ForbiddenException(exceptions.category.notEnoughRights);
-    }
-
-    return hasPermission;
   }
 }
