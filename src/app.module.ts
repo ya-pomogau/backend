@@ -25,7 +25,6 @@ import { ContactsModule } from './core/contacts/contacts.module';
 import { TasksModule } from './core/tasks/tasks.module';
 import { PolicyModule } from './core/policy/policy.module';
 import { SystemApiModule } from './api/system-api/system-api.module';
-import { AppController } from './app.controller';
 import { ChatEntity } from './entities/chats/chat.entity';
 import { ChatRepository } from './entities/chats/chats.repository';
 
@@ -57,7 +56,6 @@ import { ChatRepository } from './entities/chats/chats.repository';
     PolicyModule,
     SystemApiModule,
   ],
-  controllers: [AppController],
   providers: [
     {
       provide: APP_GUARD,
