@@ -26,7 +26,6 @@ import { TasksModule } from './core/tasks/tasks.module';
 import { PolicyModule } from './core/policy/policy.module';
 import { SystemApiModule } from './api/system-api/system-api.module';
 import { ChatEntity } from './entities/chats/chat.entity';
-import { ChatRepository } from './entities/chats/chats.repository';
 
 @Module({
   imports: [
@@ -62,7 +61,6 @@ import { ChatRepository } from './entities/chats/chats.repository';
       useClass: JwtAuthGuard,
     },
     ChatEntity,
-    ChatRepository,
   ],
 })
 export class AppModule {}
