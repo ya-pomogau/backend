@@ -9,9 +9,4 @@ export class MessagesRepository extends BaseRepositoryService<Message> {
   constructor(@InjectModel(Message.name) private messageModel: Model<Message>) {
     super(messageModel);
   }
-
-  async addMessage(chatId: string, message: Record<string, any>): Promise<Message> {
-    const createdMessage = new this.messageModel({ ...message, chatId });
-    return createdMessage.save();
-  }
 }
