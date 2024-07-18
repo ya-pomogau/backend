@@ -74,3 +74,10 @@ export interface GetUserChatsResponseDtoInterface {
   system: Array<SystemChatInfo>;
   conflict: Array<ConflictChatInfo>;
 }
+
+export interface GetAdminChatsResponseDtoInterface {
+  my: Array<SystemChatInfo>;
+  system: Array<SystemChatInfo>;
+  moderated: Array<ConflictChatInfo>;
+  conflict: Array<ConflictChatInfo>;
+}
