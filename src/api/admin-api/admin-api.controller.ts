@@ -14,22 +14,23 @@ import {
 import { MethodNotAllowedException } from '@nestjs/common/exceptions';
 import { ApiTags } from '@nestjs/swagger';
 import { UsersService } from '../../core/users/users.service';
-import { NewAdminDto } from './dto/new-admin.dto';
-import { AnyUserInterface, UserRole } from '../../common/types/user.types';
+import { BlogService } from '../../core/blog/blog.service';
+import { CategoriesService } from '../../core/categories/categories.service';
+import { ContactsService } from '../../core/contacts/contacts.service';
+import { TasksService } from '../../core/tasks/tasks.service';
 import { AccessControlGuard } from '../../common/guards/access-control.guard';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { AccessControlList } from '../../common/decorators/access-control-list.decorator';
+import { AnyUserInterface, UserRole } from '../../common/types/user.types';
 import { AccessRights } from '../../common/types/access-rights.types';
-import { PostDTO } from './dto/new-post.dto';
-import { BlogService } from '../../core/blog/blog.service';
-import { ApiCreateCategoryDto } from './dto/new-category.dto';
-import { ApiUpdateCategoryDto } from './dto/update-category.dto';
-import { CategoriesService } from '../../core/categories/categories.service';
-import { TasksService } from '../../core/tasks/tasks.service';
-import { ApiPrivilegesDto } from './dto/privileges.dto';
 import { ResolveResult } from '../../common/types/task.types';
 import { UpdateContactsRequestDto } from '../../common/dto/contacts.dto';
-import { ContactsService } from '../../core/contacts/contacts.service';
+import { NewAdminDto } from './dto/new-admin.dto';
+import { PostDTO } from './dto/new-post.dto';
+import { ApiPrivilegesDto } from './dto/privileges.dto';
+import { ApiCreateCategoryDto } from './dto/new-category.dto';
+import { ApiUpdateCategoryDto } from './dto/update-category.dto';
+import { ApiBulkUpdateCategoriesDto } from './dto/bulk-update-categories.dto';
 
 @UseGuards(JwtAuthGuard)
 @UseGuards(AccessControlGuard)
@@ -176,6 +177,19 @@ export class AdminApiController {
   })
   public async createCategory(@Body() dto: ApiCreateCategoryDto, @Req() req: Express.Request) {
     return this.categoryService.createCategory(dto, req.user as AnyUserInterface);
+  }
+
+  @Patch('categories')
+  @ApiTags('Bulk update categories by ids. Admins only.')
+  @AccessControlList({
+    role: UserRole.ADMIN,
+    rights: [AccessRights.categoryPoints],
+  })
+  async updateCategoriesByIds(
+    @Body() dto: ApiBulkUpdateCategoriesDto,
+    @Req() req: Express.Request
+  ) {
+    return this.categoryService.updateCategoriesByIds(dto, req.user as AnyUserInterface);
   }
 
   @Patch('categories/:id')

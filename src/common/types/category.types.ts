@@ -5,3 +5,7 @@ export interface CategoryInterface {
   points: number;
   accessLevel: UserStatus;
 }
+
+export interface BulkUpdateCategoryInterface extends Partial<CategoryInterface> {
+  id: string;
+}
