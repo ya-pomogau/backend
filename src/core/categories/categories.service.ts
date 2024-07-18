@@ -4,11 +4,12 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-
+import { ApiBulkUpdateCategoriesDto } from '../../api/admin-api/dto/bulk-update-categories.dto';
 import exceptions from '../../common/constants/exceptions';
-import { CategoryRepository } from '../../datalake/category/category.repository';
 import { CreateCategoryDto, UpdateCategoryDto } from '../../common/dto/category.dto';
-import { AdminPermission, UserRole, AdminInterface } from '../../common/types/user.types';
+import { AdminPermission, AdminInterface } from '../../common/types/user.types';
+import { checkIsEnoughRights } from '../../common/helpers/checkIsEnoughRights';
+import { CategoryRepository } from '../../datalake/category/category.repository';
 import { TasksService } from '../tasks/tasks.service';
 import { Category } from '../../datalake/category/schemas/category.schema';
 
@@ -44,11 +45,11 @@ export class CategoriesService {
 
   // Только root
   async removeCategory(id: string, user: AdminInterface) {
-    let res;
-    if (user.role !== UserRole.ADMIN || (user.role === UserRole.ADMIN && !user.isRoot)) {
+    if (!checkIsEnoughRights(user, [], true)) {
       throw new ForbiddenException(exceptions.category.notEnoughRights);
     }
 
+    let res;
     try {
       res = await this.categoriesRepo.deleteOne({ _id: id }, {});
     } catch (err) {
@@ -64,16 +65,41 @@ export class CategoriesService {
   }
 
   // Только админы с правами AdminPermission.CATEGORIES
-  async updateCategoryById(id: string, updateData: UpdateCategoryDto, user: AdminInterface) {
-    let res: Category | undefined;
-
-    if (
-      user.role !== UserRole.ADMIN ||
-      (user.role === UserRole.ADMIN && !user.permissions.includes(AdminPermission.CATEGORIES))
-    ) {
+  async updateCategoriesByIds(dto: ApiBulkUpdateCategoriesDto, user: AdminInterface) {
+    if (!checkIsEnoughRights(user, [AdminPermission.CATEGORIES])) {
       throw new ForbiddenException(exceptions.category.notEnoughRights);
     }
 
+    let res;
+    const bulkUpdateArr = dto.data.map((item) => {
+      const { id, ...data } = item;
+      const operation = {
+        updateOne: {
+          filter: { _id: id },
+          update: { ...data },
+        },
+      };
+      return operation;
+    });
+
+    try {
+      res = await this.categoriesRepo.bulkWrite(bulkUpdateArr, { ordered: false });
+    } catch (err) {
+      throw new InternalServerErrorException(exceptions.category.internalError, {
+        cause: `Ошибка в методе массового обновления категорий updateCategoriesByIds: ${err}`,
+      });
+    }
+
+    return res;
+  }
+
+  // Только админы с правами AdminPermission.CATEGORIES
+  async updateCategoryById(id: string, updateData: UpdateCategoryDto, user: AdminInterface) {
+    if (!checkIsEnoughRights(user, [AdminPermission.CATEGORIES])) {
+      throw new ForbiddenException(exceptions.category.notEnoughRights);
+    }
+
+    let res;
     try {
       const categoryUpdatePromise = this.categoriesRepo.findOneAndUpdate({ _id: id }, updateData, {
         new: true,
@@ -88,17 +114,14 @@ export class CategoriesService {
         cause: `Ошибка в методе обновления данных категории findOneAndUpdate: ${err}`,
       });
     }
-
-    if (!res) {
-      throw new NotFoundException(exceptions.category.notFound);
-    }
+    if (!res) throw new NotFoundException(exceptions.category.notFound);
 
     return res;
   }
 
   // Только root
   async createCategory(data: CreateCategoryDto, user: AdminInterface) {
-    if (user.role !== UserRole.ADMIN || (user.role === UserRole.ADMIN && !user.isRoot)) {
+    if (!checkIsEnoughRights(user, [], true)) {
       throw new ForbiddenException(exceptions.category.notEnoughRights);
     }
 
@@ -107,7 +130,7 @@ export class CategoriesService {
 
   // Только для админов с правами AdminPermission.CATEGORIES
   async updatePoints(data: Record<string, number>, user: AdminInterface) {
-    if (!(user.role === UserRole.ADMIN && user.permissions.includes(AdminPermission.CATEGORIES))) {
+    if (!checkIsEnoughRights(user, [AdminPermission.CATEGORIES])) {
       throw new ForbiddenException(exceptions.category.notEnoughRights);
     }
 

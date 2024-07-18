@@ -61,6 +61,7 @@ export interface VolunteerUserModelInterface {
   status: UserStatus;
   location: PointGeoJSONInterface;
   keys: boolean;
+  tasksCompleted: number;
 }
 
 export interface RecipientUserModelInterface {
