@@ -35,13 +35,19 @@ export class SystemApiGateway implements OnGatewayInit, OnGatewayConnection, OnG
 
   private connectedUsers: Map<string, WSConnectUserDto> = new Map();
 
-  @SubscribeMessage('init')
   afterInit(server: Server) {
     console.log('SystemApi socket server was initialized');
   }
 
-  @SubscribeMessage('connect')
-  handleConnection(@ConnectedSocket() client: Socket, @MessageBody() user: WSConnectUserDto) {
+  /**
+   * Хук, который срабатывает при подключении к сокету.
+   * @param {Socket} client Данные о текущем подключившемся пользователе
+   * @example http://localhost:3001?id=555&name=Kolya
+   */
+  handleConnection(@ConnectedSocket() client: Socket) {
+    // На время тестирования передаём id и name пользователя в query. Позже мы будем получать данные текущего подключившегося с помощью токена
+    const {id, name} = client.handshake.query as unknown as WSConnectUserDto;
+
     const participantsIds: Array<string> = [];
     if (this.connectedUsers.size > 0) {
       // eslint-disable-next-line no-restricted-syntax
@@ -49,14 +55,18 @@ export class SystemApiGateway implements OnGatewayInit, OnGatewayConnection, OnG
         participantsIds.push(user.id);
       }
     }
-    client.emit('connection', { data: { message: 'Hello!', participants: participantsIds } });
+    client.emit('connect_user', { data: { message: 'Hello!', participants: participantsIds } });
     client.broadcast.emit('connection', {
-      data: { message: `Hello, world! ${user.name} is online from now on!` },
+      data: { message: `Hello, world! ${name} is online from now on!` },
     });
-    this.connectedUsers.set(client.id, user);
+    this.connectedUsers.set(client.id, {id, name});
   }
 
-  @SubscribeMessage('disconnect')
+  @SubscribeMessage("test_event")
+  handleTestEvent() {
+    console.log("This is test event")
+  }
+
   handleDisconnect(@ConnectedSocket() client: Socket) {
     const { name } = this.connectedUsers.get(client.id);
     const designation = name || client.id;

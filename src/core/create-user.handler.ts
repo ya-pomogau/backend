@@ -9,7 +9,7 @@ import { User } from '../datalake/users/schemas/user.schema';
 export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
   constructor(private readonly usersService: UsersService) {}
 
-  async execute({ dto }: CreateUserCommand): Promise<Promise<POJOType<User>>> {
+  async execute({ dto }: CreateUserCommand) {
     return this.usersService.createUser(dto);
   }
 }
