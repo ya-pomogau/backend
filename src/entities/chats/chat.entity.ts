@@ -7,15 +7,15 @@ import { Types } from 'mongoose';
 
 @Injectable({ scope: Scope.TRANSIENT })
 export class ChatEntity {
-  private metadata: ChatInterface[];
-  private messages: { [chatId: string]: MessageInterface[] };
+  private chat: ChatInterface | null;
+  private messages: MessageInterface[];
 
   constructor(
     private readonly chatsRepository: ChatsRepository,
     private readonly messagesRepository: MessagesRepository
   ) {
-    this.metadata = [];
-    this.messages = {};
+    this.chat = null;
+    this.messages = [];
   }
 
   async createChat(
@@ -23,53 +23,42 @@ export class ChatEntity {
     messages: Partial<MessageInterface>[]
   ): Promise<ChatEntity> {
     const chat = await this.chatsRepository.create(metadata as any) as ChatInterface;
-    this.metadata.push(chat);
+    this.chat = chat;
     if (messages.length > 0) {
-      const savedMessages = await Promise.all(
+      this.messages = await Promise.all(
         messages.map((message) =>
           this.messagesRepository.create({ ...message, chatId: chat._id } as any)
         )
-      );
-      this.messages[chat._id.toString()] = savedMessages as MessageInterface[];
+      ) as MessageInterface[];
     } else {
-      this.messages[chat._id.toString()] = [];
+      this.messages = [];
     }
     return this;
   }
 
   async findChatByParams(params: Partial<ChatInterface>): Promise<ChatEntity> {
     const chats = await this.chatsRepository.find(params) as ChatInterface[];
-    this.metadata = chats;
-    this.messages = {}; // Сброс сообщений при новом поиске
-    for (const chat of chats) {
-      const chatMessages = await this.messagesRepository.find({ chatId: chat._id }) as MessageInterface[];
-      this.messages[chat._id.toString()] = chatMessages;
+    if (chats.length > 0) {
+      this.chat = chats[0];
+      this.messages = await this.messagesRepository.find({ chatId: this.chat._id }) as MessageInterface[];
     }
     return this;
   }
 
   async findConflictingChats(params: Partial<ChatInterface>): Promise<ChatEntity> {
-    // Поиск чатов по типу
     const primaryChats = await this.findChatByParams(params);
-    const conflictingChats: ChatInterface[] = [];
-    this.metadata = primaryChats.metadata;
-    this.messages = primaryChats.messages;
-    // Поиск конфликтных чатов, которые указывают друг на друга
-    for (const primaryChat of this.metadata) {
-      const conflictChats = await this.chatsRepository.find({
-        taskId: primaryChat.taskId,
-        ownerId: { $ne: primaryChat.ownerId },
-      }) as ChatInterface[];
-      if (conflictChats.length > 0) {
-        conflictingChats.push(...conflictChats);
-      }
+    if (!primaryChats.chat) return this;
+
+    const conflictChats = await this.chatsRepository.find({
+      taskId: primaryChats.chat.taskId,
+      ownerId: { $ne: primaryChats.chat.ownerId },
+    }) as ChatInterface[];
+
+    if (conflictChats.length > 0) {
+      this.chat = conflictChats[0];
+      this.messages = await this.messagesRepository.find({ chatId: this.chat._id }) as MessageInterface[];
     }
-    // Объединение найденных чатов и сообщений
-    for (const conflictChat of conflictingChats) {
-      const conflictMessages = await this.messagesRepository.find({ chatId: conflictChat._id }) as MessageInterface[];
-      this.metadata.push(conflictChat);
-      this.messages[conflictChat._id.toString()] = conflictMessages;
-    }
+
     return this;
   }
 
@@ -77,11 +66,12 @@ export class ChatEntity {
     const newMessage = await this.messagesRepository.create({
       ...message,
       chatId: new Types.ObjectId(chatId),
-    } as any);
-    if (!this.messages[chatId]) {
-      this.messages[chatId] = [];
+    } as any) as MessageInterface;
+    
+    if (this.chat && this.chat._id.toString() === chatId) {
+      this.messages.push(newMessage);
     }
-    this.messages[chatId].push(newMessage as MessageInterface);
+
     return this;
   }
 
@@ -90,9 +80,8 @@ export class ChatEntity {
     const chats = await this.chatsRepository.find({ _id: objectId }) as ChatInterface[];
     if (chats.length > 0) {
       await this.chatsRepository['model'].updateOne({ _id: objectId }, { isOpen: false }).exec();
-      const chatIndex = this.metadata.findIndex((c) => c._id.toString() === chatId);
-      if (chatIndex !== -1) {
-        this.metadata[chatIndex].isOpen = false;
+      if (this.chat && this.chat._id.toString() === chatId) {
+        this.chat.isOpen = false;
       }
     }
     return this;
