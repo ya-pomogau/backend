@@ -28,7 +28,11 @@ class WSConnectUserDto implements WSConnectUserInterface {
   name: string;
 }
 
-@WebSocketGateway({})
+@WebSocketGateway({
+  cors: {
+    allowedHeaders: '*'
+  }
+})
 export class SystemApiGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   public server: Server;
