@@ -7,8 +7,8 @@ export interface MessageInterface {
   timestamp: number;
   author: ObjectId;
 }
+
 export interface ChatInterface {
-  _id: string;
   users: [ObjectId, ObjectId | null];
   messages: MessageInterface[];
   isOpen: boolean;

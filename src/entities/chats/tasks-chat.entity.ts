@@ -18,7 +18,7 @@ export class ChatEntity {
     this.messages = [];
   }
 
-  async createChat(
+/*   async createChat(
     metadata: Partial<ChatInterface>,
     messages: Partial<MessageInterface>[]
   ): Promise<ChatEntity> {
@@ -34,18 +34,18 @@ export class ChatEntity {
       this.messages = [];
     }
     return this;
-  }
+  } */
 
-  async findChatByParams(params: Partial<ChatInterface>): Promise<ChatEntity> {
+/*   async findChatByParams(params: Partial<ChatInterface>): Promise<ChatEntity> {
     const chats = await this.chatsRepository.find(params) as ChatInterface[];
     if (chats.length > 0) {
       this.chat = chats[0];
       this.messages = await this.messagesRepository.find({ chatId: this.chat._id }) as MessageInterface[];
     }
     return this;
-  }
+  } */
 
-  async findConflictingChats(params: Partial<ChatInterface>): Promise<ChatEntity> {
+/*   async findConflictingChats(params: Partial<ChatInterface>): Promise<ChatEntity> {
     const primaryChats = await this.findChatByParams(params);
     if (!primaryChats.chat) return this;
 
@@ -60,9 +60,9 @@ export class ChatEntity {
     }
 
     return this;
-  }
+  } */
 
-  async addMessage(chatId: string, message: Partial<MessageInterface>): Promise<ChatEntity> {
+/*   async addMessage(chatId: string, message: Partial<MessageInterface>): Promise<ChatEntity> {
     const newMessage = await this.messagesRepository.create({
       ...message,
       chatId: new Types.ObjectId(chatId),
@@ -73,9 +73,9 @@ export class ChatEntity {
     }
 
     return this;
-  }
+  } */
 
-  async closeChat(chatId: string): Promise<ChatEntity> {
+/*   async closeChat(chatId: string): Promise<ChatEntity> {
     const objectId = new Types.ObjectId(chatId);
     const chats = await this.chatsRepository.find({ _id: objectId }) as ChatInterface[];
     if (chats.length > 0) {
@@ -85,5 +85,5 @@ export class ChatEntity {
       }
     }
     return this;
-  }
+  } */
 }

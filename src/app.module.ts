@@ -25,7 +25,7 @@ import { ContactsModule } from './core/contacts/contacts.module';
 import { TasksModule } from './core/tasks/tasks.module';
 import { PolicyModule } from './core/policy/policy.module';
 import { SystemApiModule } from './api/system-api/system-api.module';
-import { ChatEntity } from './entities/chats/chat.entity';
+import { ChatEntity } from './entities/chats/tasks-chat.entity';
 
 @Module({
   imports: [
