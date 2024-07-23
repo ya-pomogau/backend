@@ -10,7 +10,7 @@ services:
       - ./src:/app/src
       - /app/node_modules
     ports:
-      - 3001:3001
+      - ${CONTAINER_PORT}:${SERVER_PORT}
     env_file:
       - .env.dev
     restart: on-failure
@@ -19,7 +19,7 @@ services:
     environment:
       # wait for mongodb service ready
       # https://github.com/ufoscout/docker-compose-wait
-      WAIT_HOSTS: mongodb:27017
+      WAIT_HOSTS: mongodb:${DATABASE_PORT}
       WAIT_LOGGER_LEVEL: info
 
   mongodb:

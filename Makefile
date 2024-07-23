@@ -1,7 +1,7 @@
 composeDev = docker-compose.dev.yml
 
 run-dev:
-	docker compose -f $(composeDev) up --build
+	docker compose -f $(composeDev) --env-file=.env.dev up --build
 
 stop-dev:
 	docker compose -f $(composeDev) down
