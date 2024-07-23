@@ -1,0 +1,17 @@
+FROM node:16-alpine
+
+WORKDIR /app
+
+COPY package*.json .
+
+RUN npm ci
+
+COPY . .
+
+# wait script while the services on which the application depends start
+# https://github.com/ufoscout/docker-compose-wait
+COPY --from=ghcr.io/ufoscout/docker-compose-wait:latest /wait /wait
+
+EXPOSE 3001
+
+CMD /wait && npm start
