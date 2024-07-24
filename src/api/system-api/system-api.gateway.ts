@@ -1,4 +1,7 @@
 // eslint-disable-next-line max-classes-per-file
+import { UnauthorizedException, UseGuards } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import {
   ConnectedSocket,
   MessageBody,
@@ -8,36 +11,28 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
+  WsException,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { IsNotEmpty, IsString } from 'class-validator';
-
-// временная реализация интерфейса и dto
-interface WSConnectUserInterface {
-  id: string;
-  name: string;
-}
-
-class WSConnectUserDto implements WSConnectUserInterface {
-  @IsString()
-  @IsNotEmpty()
-  id: string;
-
-  @IsString()
-  @IsNotEmpty()
-  name: string;
-}
+import exceptions from '../../common/constants/exceptions';
+import { AnyUserInterface } from '../../common/types/user.types';
+import { SocketAuthGuard } from '../../common/guards/socket-auth.guard';
 
 @WebSocketGateway({
   cors: {
-    allowedHeaders: '*'
-  }
+    allowedHeaders: '*',
+  },
 })
 export class SystemApiGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService
+  ) {}
+
   @WebSocketServer()
   public server: Server;
 
-  private connectedUsers: Map<string, WSConnectUserDto> = new Map();
+  private connectedUsers: Map<string, AnyUserInterface> = new Map();
 
   afterInit(server: Server) {
     console.log('SystemApi socket server was initialized');
@@ -48,27 +43,45 @@ export class SystemApiGateway implements OnGatewayInit, OnGatewayConnection, OnG
    * @param {Socket} client Данные о текущем подключившемся пользователе
    * @example http://localhost:3001?id=555&name=Kolya
    */
-  handleConnection(@ConnectedSocket() client: Socket) {
-    // На время тестирования передаём id и name пользователя в query. Позже мы будем получать данные текущего подключившегося с помощью токена
-    const {id, name} = client.handshake.query as unknown as WSConnectUserDto;
+  @UseGuards(SocketAuthGuard)
+  async handleConnection(@ConnectedSocket() client: Socket) {
+    const token = client.handshake.headers.authorization;
+    if (!token) {
+      throw new UnauthorizedException(exceptions.auth.unauthorized);
+    }
+
+    let payload: AnyUserInterface;
+    try {
+      payload = await this.jwtService.verifyAsync(token, {
+        secret: this.configService.get<string>('jwt.key'),
+      });
+    } catch (error) {
+      throw new WsException({
+        error,
+        message: 'Ошибка верификации токена при установлении websocket-соединения',
+      });
+    }
+    console.log('user:', payload);
 
     const participantsIds: Array<string> = [];
     if (this.connectedUsers.size > 0) {
       // eslint-disable-next-line no-restricted-syntax
       for (const user of this.connectedUsers.values()) {
-        participantsIds.push(user.id);
+        participantsIds.push(user._id);
       }
     }
+
     client.emit('connect_user', { data: { message: 'Hello!', participants: participantsIds } });
     client.broadcast.emit('connection', {
-      data: { message: `Hello, world! ${name} is online from now on!` },
+      data: { message: `Hello, world! ${payload.name} is online from now on!` },
     });
-    this.connectedUsers.set(client.id, {id, name});
+
+    this.connectedUsers.set(client.id, payload);
   }
 
-  @SubscribeMessage("test_event")
+  @SubscribeMessage('test_event')
   handleTestEvent() {
-    console.log("This is test event")
+    console.log('This is test event');
   }
 
   handleDisconnect(@ConnectedSocket() client: Socket) {
