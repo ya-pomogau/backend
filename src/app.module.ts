@@ -25,7 +25,6 @@ import { ContactsModule } from './core/contacts/contacts.module';
 import { TasksModule } from './core/tasks/tasks.module';
 import { PolicyModule } from './core/policy/policy.module';
 import { SystemApiModule } from './api/system-api/system-api.module';
-import { TasksChatEntity } from './entities/chats/tasks-chat.entity';
 
 @Module({
   imports: [
@@ -60,7 +59,6 @@ import { TasksChatEntity } from './entities/chats/tasks-chat.entity';
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
-    TasksChatEntity,
   ],
 })
 export class AppModule {}
