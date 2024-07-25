@@ -1,89 +1,105 @@
 import { Injectable, Scope } from '@nestjs/common';
 import { ChatsRepository } from '../../datalake/chats/chats.repository';
 import { MessagesRepository } from '../../datalake/messages/messages.repository';
-import { ChatInterface } from '../../common/types/chat.types';
-import { MessageInterface } from '../../common/types/chats.types';
+import { MessageInterface, TaskChatInterface } from '../../common/types/chats.types';
 import { Types } from 'mongoose';
 
+export interface ITasksChatEntity {
+  createChat(metadata: Partial<TaskChatInterface>, messages: MessageInterface[]): Promise<this>;
+  findChatByParams(params: Partial<TaskChatInterface>): Promise<this>;
+  findConflictingChats(params: Partial<TaskChatInterface>): Promise<this>;
+  addMessage(chatId: string, message: Partial<MessageInterface>): Promise<this>;
+  closeChat(): Promise<this>;
+}
+
 @Injectable({ scope: Scope.TRANSIENT })
-export class ChatEntity {
-  private chat: ChatInterface | null;
+export class TasksChatEntity {
+  private metadata: TaskChatInterface | null;
   private messages: MessageInterface[];
+  private chatId: string;
 
   constructor(
     private readonly chatsRepository: ChatsRepository,
     private readonly messagesRepository: MessagesRepository
   ) {
-    this.chat = null;
+    this.metadata = null;
     this.messages = [];
+    this.chatId = '';
   }
 
-/*   async createChat(
-    metadata: Partial<ChatInterface>,
-    messages: Partial<MessageInterface>[]
-  ): Promise<ChatEntity> {
-    const chat = await this.chatsRepository.create(metadata as any) as ChatInterface;
-    this.chat = chat;
-    if (messages.length > 0) {
-      this.messages = await Promise.all(
+  async createChat(
+    metadata: Partial<TaskChatInterface>,
+    messages: MessageInterface[]
+  ): Promise<this> {
+    const chat = (await this.chatsRepository.create(metadata)) as TaskChatInterface;
+    this.metadata = chat;
+    this.chatId = chat._id;
+    if (messages.length > 0 && chat) {
+      const savedMessages = await Promise.all(
         messages.map((message) =>
-          this.messagesRepository.create({ ...message, chatId: chat._id } as any)
+          this.messagesRepository.create({ ...message, chatId: this.chatId })
         )
-      ) as MessageInterface[];
+      );
+      this.messages = savedMessages;
     } else {
       this.messages = [];
     }
     return this;
-  } */
+  }
 
-/*   async findChatByParams(params: Partial<ChatInterface>): Promise<ChatEntity> {
-    const chats = await this.chatsRepository.find(params) as ChatInterface[];
+  async findChatByParams(params: Partial<TaskChatInterface>): Promise<this> {
+    const chats = (await this.chatsRepository.find(params)) as TaskChatInterface[];
     if (chats.length > 0) {
-      this.chat = chats[0];
-      this.messages = await this.messagesRepository.find({ chatId: this.chat._id }) as MessageInterface[];
+      this.metadata = chats[0];
+      this.messages = (await this.messagesRepository.find({
+        chatId: this.metadata._id,
+      })) as MessageInterface[];
+    } else {
+      this.metadata = null;
+      this.messages = [];
     }
     return this;
-  } */
+  }
 
-/*   async findConflictingChats(params: Partial<ChatInterface>): Promise<ChatEntity> {
-    const primaryChats = await this.findChatByParams(params);
-    if (!primaryChats.chat) return this;
-
-    const conflictChats = await this.chatsRepository.find({
-      taskId: primaryChats.chat.taskId,
-      ownerId: { $ne: primaryChats.chat.ownerId },
-    }) as ChatInterface[];
-
+  async findConflictingChats(params: Partial<TaskChatInterface>): Promise<this> {
+    await this.findChatByParams(params);
+    if (!this.metadata) {
+      return this;
+    }
+    const { taskId, _id } = this.metadata;
+    const conflictChats = (await this.chatsRepository.find({
+      taskId,
+      _id: { $ne: _id },
+    })) as TaskChatInterface[];
     if (conflictChats.length > 0) {
-      this.chat = conflictChats[0];
-      this.messages = await this.messagesRepository.find({ chatId: this.chat._id }) as MessageInterface[];
+      this.metadata = conflictChats[0];
+      this.messages = (await this.messagesRepository.find({
+        chatId: this.metadata._id,
+      })) as MessageInterface[];
     }
-
     return this;
-  } */
+  }
 
-/*   async addMessage(chatId: string, message: Partial<MessageInterface>): Promise<ChatEntity> {
-    const newMessage = await this.messagesRepository.create({
+  async addMessage(chatId: string, message: Partial<MessageInterface>): Promise<this> {
+    if (!this.chatId) {
+      throw new Error('Chat ID is not set');
+    }
+    const newMessage = (await this.messagesRepository.create({
       ...message,
       chatId: new Types.ObjectId(chatId),
-    } as any) as MessageInterface;
-    
-    if (this.chat && this.chat._id.toString() === chatId) {
-      this.messages.push(newMessage);
-    }
-
+    })) as MessageInterface;
+    this.messages.push(newMessage);
     return this;
-  } */
+  }
 
-/*   async closeChat(chatId: string): Promise<ChatEntity> {
-    const objectId = new Types.ObjectId(chatId);
-    const chats = await this.chatsRepository.find({ _id: objectId }) as ChatInterface[];
+  async closeChat(): Promise<this> {
+    const chats = (await this.chatsRepository.find({ _id: this.chatId })) as TaskChatInterface[];
     if (chats.length > 0) {
-      await this.chatsRepository['model'].updateOne({ _id: objectId }, { isOpen: false }).exec();
-      if (this.chat && this.chat._id.toString() === chatId) {
-        this.chat.isOpen = false;
-      }
+      await this.chatsRepository['model']
+        .updateOne({ _id: this.chatId }, { isActive: false })
+        .exec();
+      this.metadata.isActive = false;
     }
     return this;
-  } */
+  }
 }
