@@ -4,7 +4,6 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import {
   ConnectedSocket,
-  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
   OnGatewayInit,
@@ -18,6 +17,7 @@ import exceptions from '../../common/constants/exceptions';
 import { AnyUserInterface } from '../../common/types/user.types';
 import { SocketAuthGuard } from '../../common/guards/socket-auth.guard';
 
+@UseGuards(SocketAuthGuard)
 @WebSocketGateway({
   cors: {
     allowedHeaders: '*',
@@ -34,6 +34,7 @@ export class SystemApiGateway implements OnGatewayInit, OnGatewayConnection, OnG
 
   private connectedUsers: Map<string, AnyUserInterface> = new Map();
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   afterInit(server: Server) {
     console.log('SystemApi socket server was initialized');
   }
@@ -43,7 +44,6 @@ export class SystemApiGateway implements OnGatewayInit, OnGatewayConnection, OnG
    * @param {Socket} client Данные о текущем подключившемся пользователе
    * @example http://localhost:3001?id=555&name=Kolya
    */
-  @UseGuards(SocketAuthGuard)
   async handleConnection(@ConnectedSocket() client: Socket) {
     const token = client.handshake.headers.authorization;
     if (!token) {

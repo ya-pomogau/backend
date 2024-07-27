@@ -13,8 +13,7 @@ export class SocketAuthGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    console.log('canActivate');
-    const token = context.getArgs()[0].handshake.headers.authorization;
+    const token = context.switchToWs().getClient().handshake.headers.authorization;
     if (!token) {
       throw new UnauthorizedException(exceptions.auth.unauthorized);
     }
