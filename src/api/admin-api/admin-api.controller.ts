@@ -78,20 +78,17 @@ export class AdminApiController {
     return this.usersService.deactivate(_id);
   }
 
-  @Put(':id/privileges')
-  @ApiTags('Grant administrator privileges. Root only.')
+  // Обновление привилегий администратора. Только root
+  @Patch(':id/privileges')
+  @ApiTags('Update administrator privileges. Root only.')
   @AccessControlList({ role: UserRole.ADMIN, isRoot: true })
-  public async grantPrivileges(@Param('id') userId, @Body() dto: ApiPrivilegesDto) {
+  public async updatePrivileges(
+    @Param('id') userId,
+    @Body() dto: ApiPrivilegesDto,
+    @Req() req: Express.Request
+  ) {
     const { privileges } = dto;
-    return this.usersService.grantPrivileges(userId, privileges);
-  }
-
-  @Delete(':id/privileges')
-  @ApiTags('Revoke administrator privileges. Root only.')
-  @AccessControlList({ role: UserRole.ADMIN, isRoot: true })
-  public async revokePrivileges(@Param('id') userId, @Body() dto: ApiPrivilegesDto) {
-    const { privileges } = dto;
-    return this.usersService.revokePrivileges(userId, privileges);
+    return this.usersService.updatePrivileges(req.user as AnyUserInterface, userId, privileges);
   }
 
   @Put('users/:id/confirm')
