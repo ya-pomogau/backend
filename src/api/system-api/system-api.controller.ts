@@ -73,6 +73,7 @@ export class SystemApiController {
     const token = await this.authService.authenticate({ ...profile });
     return Promise.resolve({ ...profile, token });
   }
+  
 
   @Get('contacts')
   @Public()

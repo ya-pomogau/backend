@@ -49,3 +49,51 @@ export class UserProfile extends Document implements UserProfileInterface {
 }
 
 export const UserProfileSchema = SchemaFactory.createForClass<UserProfileInterface>(UserProfile); */
+
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, ObjectId } from 'mongoose';
+import * as mongoose from 'mongoose';
+
+@Schema({
+  timestamps: false,
+  toObject: {
+    transform(doc, ret) {
+      delete ret._id;
+    },
+    versionKey: false,
+    virtuals: true,
+  },
+  virtuals: {
+    fullName: {
+      get() {
+        return `${this.firstName ? this.firstName : ''} ${this.middleName ? this.middleName : ''} ${
+          this.lastName ? this.lastName : ''
+        }`;
+      },
+    },
+  },
+})
+export class UserProfile extends Document {
+  @Prop({ required: false, type: mongoose.SchemaTypes.ObjectId })
+  _id: string | ObjectId;
+
+  @Prop({ required: true, type: mongoose.SchemaTypes.String })
+  address: string;
+
+  @Prop({ required: true, type: mongoose.SchemaTypes.String })
+  avatar: string;
+
+  @Prop({ required: true, type: mongoose.SchemaTypes.String })
+  firstName: string;
+
+  @Prop({ required: true, type: mongoose.SchemaTypes.String })
+  lastName: string;
+
+  @Prop({ required: true, type: mongoose.SchemaTypes.String })
+  middleName: string;
+
+  @Prop({ required: true, type: mongoose.SchemaTypes.String })
+  phone: string;
+}
+
+export const UserProfileSchema = SchemaFactory.createForClass(UserProfile);

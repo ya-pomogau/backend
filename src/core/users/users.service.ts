@@ -355,8 +355,15 @@ export class UsersService {
   }
 
   public async updateProfile(userId: string, dto: Partial<UserProfile>) {
-    return this.usersRepo.findByIdAndUpdate(userId, dto, { new: true });
+    const user = await this.usersRepo.findById(userId);
+    if (!user) {
+      throw new NotFoundException(`Пользователь с _id '${userId}' не найден`);
+    }
+    Object.assign(user, dto);
+
+      return this.usersRepo.findByIdAndUpdate(userId, dto, { new: true });
   }
+  
 
   public async updateVolunteerProfile(
     userId: string,
