@@ -32,7 +32,7 @@ export class TasksService {
     private readonly tasksRepo: TasksRepository,
     private readonly usersRepo: UsersRepository,
     private readonly categoryRepo: CategoryRepository,
-    private readonly usersService: UsersService,
+    private readonly usersService: UsersService
   ) {}
 
   public async create(dto: CreateTaskDto) {

@@ -1,16 +1,15 @@
-import { Body, Controller, Post } from "@nestjs/common";
-import { UsersRepository } from "./users.repository";
-import { CreateAdminDto, CreateUserDto } from "../../common/dto/users.dto";
-import { UserRole, UserStatus } from "../../common/types/user.types";
+import { Body, Controller, Post } from '@nestjs/common';
+import { UsersRepository } from './users.repository';
+import { CreateAdminDto, CreateUserDto } from '../../common/dto/users.dto';
+import { UserRole, UserStatus } from '../../common/types/user.types';
 
-@Controller("users")
+@Controller('users')
 export class UsersTestcontrollerController {
-  constructor(private readonly usersRepo: UsersRepository) {
-  }
+  constructor(private readonly usersRepo: UsersRepository) {}
 
-  @Post("create")
+  @Post('create')
   async create(@Body() dto: CreateUserDto | CreateAdminDto) {
-    console.log("dto:");
+    console.log('dto:');
     console.dir(dto);
     let extras: Partial<CreateUserDto | CreateAdminDto> = {};
     if (dto.role === UserRole.VOLUNTEER) {
@@ -19,9 +18,9 @@ export class UsersTestcontrollerController {
     const doc = await this.usersRepo.create({
       status: UserStatus.UNCONFIRMED,
       ...dto,
-      ...extras
+      ...extras,
     });
-    console.log("doc");
+    console.log('doc');
     console.dir(doc);
     return doc;
   }

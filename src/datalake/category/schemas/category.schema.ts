@@ -12,7 +12,6 @@ import { CategoryInterface } from '../../../common/types/category.types';
   },
   id: false,
 })
-
 export class Category extends Document implements CategoryInterface {
   @Prop({ required: true, immutable: true, type: SchemaTypes.String })
   title: string;
