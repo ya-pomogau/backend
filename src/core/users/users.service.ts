@@ -296,6 +296,68 @@ export class UsersService {
     });
   }
 
+  // Добавление привилегий администратору. Только root
+  public async grantPrivileges(
+    admin: AnyUserInterface,
+    userId: string,
+    privileges: Array<AdminPermission>
+  ) {
+    if (!checkIsEnoughRights(admin, [], true)) {
+      throw new ForbiddenException(exceptions.users.onlyForAdmins);
+    }
+
+    const user = await this.usersRepo.findById(userId);
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден!', {
+        cause: `Пользователь с _id '${userId}' не найден`,
+      });
+    }
+    if (user.role !== UserRole.ADMIN) {
+      throw new BadRequestException('Пользователь должен быть администратором', {
+        cause: `Попытка дать права  ${privileges} пользователю с _id '${userId}' и ролью '${user.role}'`,
+      });
+    }
+
+    UsersService.requireLogin(userId);
+
+    return this.usersRepo.findOneAndUpdate(
+      { _id: userId, role: UserRole.ADMIN },
+      { $addToSet: { permissions: { $each: privileges } } },
+      {}
+    );
+  }
+
+  // Удаление привилегий администратора. Только root
+  public async revokePrivileges(
+    admin: AnyUserInterface,
+    userId: string,
+    privileges: Array<AdminPermission>
+  ) {
+    if (!checkIsEnoughRights(admin, [], true)) {
+      throw new ForbiddenException(exceptions.users.onlyForAdmins);
+    }
+
+    const user = await this.usersRepo.findById(userId);
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден!', {
+        cause: `Пользователь с _id '${userId}' не найден`,
+      });
+    }
+    if (user.role !== UserRole.ADMIN) {
+      throw new BadRequestException('Пользователь должен быть администратором', {
+        cause: `Попытка дать права  ${privileges} пользователю с _id '${userId}' и ролью '${user.role}'`,
+      });
+    }
+
+    UsersService.requireLogin(userId);
+
+    return this.usersRepo.findByIdAndUpdate(
+      userId,
+      { $pull: { permissions: { $in: privileges } } },
+      {}
+    );
+  }
+
   // Обновление привилегий администратора. Только root
   public async updatePrivileges(
     admin: AnyUserInterface,
