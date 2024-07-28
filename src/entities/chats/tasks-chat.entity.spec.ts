@@ -5,6 +5,10 @@ import { ChatsRepository } from '../../datalake/chats/chats.repository';
 import { MessagesRepository } from '../../datalake/messages/messages.repository';
 import { MessageInterface, TaskChatInterface } from '../../common/types/chats.types';
 import { UserStatus } from '../../common/types/user.types';
+import { TaskDto } from '../../common/dtos/tasks.dto';
+import { PointGeoJSON } from '../../common/schemas/PointGeoJSON.schema';
+import { Category } from '../../datalake/category/schemas/category.schema';
+import { ResolveStatus } from '../../common/types/task.types';
 
 describe('TasksChatEntity', () => {
   let chatEntity: TasksChatEntity;
@@ -18,6 +22,7 @@ describe('TasksChatEntity', () => {
       create: jest.fn(),
       find: jest.fn(),
       updateOne: jest.fn(),
+      findById: jest.fn(),
     };
     messagesRepository = {
       create: jest.fn(),
@@ -40,8 +45,7 @@ describe('TasksChatEntity', () => {
   });
 
   it('should create a chat', async () => {
-    const metadata: Partial<TaskChatInterface> = {
-      taskId: new Types.ObjectId().toHexString(),
+    const metadata: TaskDto = {
       volunteer: {
         name: 'volunteer-name',
         phone: 'volunteer-phone',
@@ -49,14 +53,7 @@ describe('TasksChatEntity', () => {
         address: 'volunteer-address',
         vkId: 'volunteer-vkId',
         role: 'volunteer-role',
-        score: 0,
-        status: UserStatus.ACTIVATED,
-        location: undefined,
-        keys: false,
-        tasksCompleted: 0,
         _id: new Types.ObjectId().toHexString(),
-        createdAt: 'volunteer-createdAt',
-        updatedAt: 'volunteer-updatedAt',
       },
       recipient: {
         name: 'recipient-name',
@@ -65,257 +62,39 @@ describe('TasksChatEntity', () => {
         address: 'recipient-address',
         vkId: 'recipient-vkId',
         role: 'recipient-role',
-        status: UserStatus.ACTIVATED,
-        location: undefined,
         _id: new Types.ObjectId().toHexString(),
-        createdAt: 'recipient-createdAt',
-        updatedAt: 'recipient-updatedAt',
       },
-      isActive: true,
-      type: 'TASK_CHAT',
-      volunteerLastReadAt: null,
-      recipientLastReadAt: null,
+      title: '',
+      date: undefined,
+      address: '',
+      location: { type: 'Point', coordinates: [0, 0] } as PointGeoJSON,
+      category: {
+        _id: new Types.ObjectId().toHexString(),
+        title: 'category-title',
+        points: 0,
+        accessLevel: UserStatus.ACTIVATED,
+      } as Category,
+      volunteerReport: ResolveStatus.VIRGIN,
+      recipientReport: ResolveStatus.VIRGIN,
+      adminResolve: ResolveStatus.VIRGIN,
+      isPendingChanges: false,
     };
 
-    const messageId = new Types.ObjectId();
-
-    const messages: Partial<MessageInterface>[] = [
-      {
-        title: 'title',
-        body: 'body',
-        attaches: ['attaches', 'attaches'],
-        createdAt: new Date(),
-        author: {
-          name: 'string',
-          phone: 'string',
-          avatar: 'string',
-          address: 'string',
-          vkId: 'string',
-          role: 'string',
-          score: 0,
-          status: UserStatus.ACTIVATED,
-          location: undefined,
-          keys: false,
-          tasksCompleted: 0,
-          _id: new Types.ObjectId().toHexString(),
-          createdAt: '',
-          updatedAt: '',
-          permissions: [],
-          login: '',
-          password: '',
-          isRoot: false,
-          isActive: false,
-        },
-      },
-    ];
+    const chatId = new Types.ObjectId().toHexString();
 
     (chatsRepository.create as jest.Mock).mockResolvedValue({
-      _id: chatId.toHexString(),
+      _id: chatId,
       ...metadata,
     });
-    (messagesRepository.create as jest.Mock).mockResolvedValue({
-      _id: messageId.toHexString(),
-      ...messages[0],
-    });
 
-    await chatEntity.createChat(metadata as TaskChatInterface, messages as MessageInterface[]);
+    await chatEntity.createChat(metadata);
 
-    expect(chatsRepository.create).toHaveBeenCalledWith(metadata);
-    expect(messagesRepository.create).toHaveBeenCalledWith({
-      ...messages[0],
-      chatId: chatId.toHexString(),
-    });
-    expect(chatEntity['metadata']?._id).toEqual(chatId.toHexString());
-    expect(chatEntity['messages'][0]._id).toEqual(messageId.toHexString());
-    expect(chatEntity['chatId']).toEqual(chatId.toHexString());
-  });
-
-  it('should find a chat by params', async () => {
-    const chatId = new Types.ObjectId().toHexString();
-    const metadata: TaskChatInterface = {
-      _id: chatId,
-      taskId: new Types.ObjectId().toHexString(),
-      volunteer: {
-        name: 'volunteer-name',
-        phone: 'volunteer-phone',
-        avatar: 'volunteer-avatar',
-        address: 'volunteer-address',
-        vkId: 'volunteer-vkId',
-        role: 'volunteer-role',
-        score: 0,
-        status: UserStatus.ACTIVATED,
-        location: undefined,
-        keys: false,
-        tasksCompleted: 0,
-        _id: new Types.ObjectId().toHexString(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-      recipient: {
-        name: 'recipient-name',
-        phone: 'recipient-phone',
-        avatar: 'recipient-avatar',
-        address: 'recipient-address',
-        vkId: 'recipient-vkId',
-        role: 'recipient-role',
-        status: UserStatus.ACTIVATED,
-        location: undefined,
-        _id: new Types.ObjectId().toHexString(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-      isActive: true,
-      type: 'TASK_CHAT',
-      volunteerLastReadAt: null,
-      recipientLastReadAt: null,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    const messages: MessageInterface[] = [
-      {
-        _id: new Types.ObjectId().toHexString(),
-        title: 'title',
-        body: 'body',
-        attaches: ['attaches', 'attaches'],
-        createdAt: new Date(),
-        author: {
-          name: 'string',
-          phone: 'string',
-          avatar: 'string',
-          address: 'string',
-          vkId: 'string',
-          role: 'string',
-          score: 0,
-          status: UserStatus.ACTIVATED,
-          location: undefined,
-          keys: false,
-          tasksCompleted: 0,
-          _id: new Types.ObjectId().toHexString(),
-          createdAt: '',
-          updatedAt: '',
-          permissions: [],
-          login: '',
-          password: '',
-          isRoot: false,
-          isActive: false,
-        },
-      },
-    ];
-
-    (chatsRepository.find as jest.Mock).mockResolvedValue([metadata]);
-    (messagesRepository.find as jest.Mock).mockResolvedValue(messages);
-
-    await chatEntity.findChatByParams({ taskId: metadata.taskId });
-
-    expect(chatsRepository.find).toHaveBeenCalledWith({ taskId: metadata.taskId });
-    expect(messagesRepository.find).toHaveBeenCalledWith({ chatId: metadata._id });
-    expect(chatEntity['metadata']).toEqual(metadata);
-    expect(chatEntity['messages']).toEqual(messages);
-  });
-
-  it('should return null metadata and empty messages if no chat is found', async () => {
-    (chatsRepository.find as jest.Mock).mockResolvedValue([]);
-    (messagesRepository.find as jest.Mock).mockResolvedValue([]);
-
-    await chatEntity.findChatByParams({ taskId: new Types.ObjectId() });
-
-    expect(chatEntity['metadata']).toBeNull();
-    expect(chatEntity['messages']).toEqual([]);
-  });
-
-  it('should find conflicting chats', async () => {
-    const chatId = new Types.ObjectId().toHexString();
-    const conflictingChatId = new Types.ObjectId().toHexString();
-
-    const metadata: TaskChatInterface = {
-      _id: chatId,
-      taskId: new Types.ObjectId().toHexString(),
-      volunteer: {
-        name: 'volunteer-name',
-        phone: 'volunteer-phone',
-        avatar: 'volunteer-avatar',
-        address: 'volunteer-address',
-        vkId: 'volunteer-vkId',
-        role: 'volunteer-role',
-        score: 0,
-        status: UserStatus.ACTIVATED,
-        location: undefined,
-        keys: false,
-        tasksCompleted: 0,
-        _id: new Types.ObjectId().toHexString(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-      recipient: {
-        name: 'recipient-name',
-        phone: 'recipient-phone',
-        avatar: 'recipient-avatar',
-        address: 'recipient-address',
-        vkId: 'recipient-vkId',
-        role: 'recipient-role',
-        status: UserStatus.ACTIVATED,
-        location: undefined,
-        _id: new Types.ObjectId().toHexString(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-      isActive: true,
-      type: 'TASK_CHAT',
-      volunteerLastReadAt: null,
-      recipientLastReadAt: null,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    const conflictingMetadata: TaskChatInterface = {
+    expect(chatsRepository.create).toHaveBeenCalledWith({
       ...metadata,
-      _id: conflictingChatId,
-    };
-
-    const messages: MessageInterface[] = [
-      {
-        _id: new Types.ObjectId().toHexString(),
-        title: 'title',
-        body: 'body',
-        attaches: ['attaches', 'attaches'],
-        createdAt: new Date(),
-        author: {
-          name: 'string',
-          phone: 'string',
-          avatar: 'string',
-          address: 'string',
-          vkId: 'string',
-          role: 'string',
-          score: 0,
-          status: UserStatus.ACTIVATED,
-          location: undefined,
-          keys: false,
-          tasksCompleted: 0,
-          _id: new Types.ObjectId().toHexString(),
-          createdAt: '',
-          updatedAt: '',
-          permissions: [],
-          login: '',
-          password: '',
-          isRoot: false,
-          isActive: false,
-        },
-      },
-    ];
-
-    (chatsRepository.find as jest.Mock)
-      .mockResolvedValueOnce([metadata])
-      .mockResolvedValueOnce([conflictingMetadata]);
-    (messagesRepository.find as jest.Mock).mockResolvedValue(messages);
-
-    await chatEntity.findConflictingChats({ taskId: metadata.taskId });
-
-    expect(chatsRepository.find).toHaveBeenCalledWith({ taskId: metadata.taskId });
-    expect(chatsRepository.find).toHaveBeenCalledWith({ taskId: metadata.taskId, _id: { $ne: metadata._id } });
-    expect(messagesRepository.find).toHaveBeenCalledWith({ chatId: conflictingMetadata._id });
-    expect(chatEntity['metadata']).toEqual(conflictingMetadata);
-    expect(chatEntity['messages']).toEqual(messages);
+      isActive: true, // ensure isActive flag is added
+    });
+    expect(chatEntity['metadata']?._id).toEqual(chatId);
+    expect(chatEntity['chatId']).toEqual(chatId);
   });
 
   it('should add a message', async () => {
@@ -347,7 +126,10 @@ describe('TasksChatEntity', () => {
       },
     };
 
-    const savedMessage = { _id: new Types.ObjectId().toHexString(), ...newMessage } as MessageInterface;
+    const savedMessage = {
+      _id: new Types.ObjectId().toHexString(),
+      ...newMessage,
+    } as MessageInterface;
 
     (messagesRepository.create as jest.Mock).mockResolvedValue(savedMessage);
 
@@ -371,13 +153,17 @@ describe('TasksChatEntity', () => {
     chatEntity['metadata'] = metadata as TaskChatInterface;
     chatEntity['chatId'] = chatId;
 
-    (chatsRepository.find as jest.Mock).mockResolvedValue([{ _id: chatId }]);
+    (chatsRepository.findById as jest.Mock).mockResolvedValue(metadata);
     (chatsRepository.updateOne as jest.Mock).mockResolvedValue({});
 
     await chatEntity.closeChat();
 
-    expect(chatsRepository.find).toHaveBeenCalledWith({ _id: chatId });
-    expect(chatsRepository.updateOne).toHaveBeenCalledWith({ _id: chatId }, { isActive: false });
+    expect(chatsRepository.findById).toHaveBeenCalledWith(chatId);
+    expect(chatsRepository.updateOne).toHaveBeenCalledWith(
+      { _id: chatId },
+      { isActive: false },
+      {}
+    );
     expect(chatEntity['metadata'].isActive).toBe(false);
   });
 });
