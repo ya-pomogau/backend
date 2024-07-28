@@ -59,8 +59,10 @@ export class UsersService {
       name,
       phone,
       login,
-      createdAtr,
+      createdAt,
       updatedAt,
+      status,
+      location,
     } = await this.usersRepo.create(dto);
     return Promise.resolve({
       permissions,
@@ -74,8 +76,10 @@ export class UsersService {
       name,
       phone,
       login,
-      createdAtr,
+      createdAt,
       updatedAt,
+      status,
+      location,
     } as Record<string, unknown>);
   }
 
