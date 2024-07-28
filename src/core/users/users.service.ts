@@ -323,7 +323,7 @@ export class UsersService {
     return this.usersRepo.findOneAndUpdate(
       { _id: userId, role: UserRole.ADMIN },
       { $addToSet: { permissions: { $each: privileges } } },
-      {}
+      { new: true }
     );
   }
 
@@ -354,7 +354,7 @@ export class UsersService {
     return this.usersRepo.findByIdAndUpdate(
       userId,
       { $pull: { permissions: { $in: privileges } } },
-      {}
+      { new: true }
     );
   }
 
