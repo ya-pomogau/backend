@@ -1,7 +1,6 @@
 // eslint-disable-next-line max-classes-per-file
 import {
   ConnectedSocket,
-  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
   OnGatewayInit,
@@ -30,8 +29,8 @@ class WSConnectUserDto implements WSConnectUserInterface {
 
 @WebSocketGateway({
   cors: {
-    allowedHeaders: '*'
-  }
+    allowedHeaders: '*',
+  },
 })
 export class SystemApiGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
@@ -39,7 +38,9 @@ export class SystemApiGateway implements OnGatewayInit, OnGatewayConnection, OnG
 
   private connectedUsers: Map<string, WSConnectUserDto> = new Map();
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   afterInit(server: Server) {
+    // eslint-disable-next-line no-console
     console.log('SystemApi socket server was initialized');
   }
 
@@ -50,7 +51,7 @@ export class SystemApiGateway implements OnGatewayInit, OnGatewayConnection, OnG
    */
   handleConnection(@ConnectedSocket() client: Socket) {
     // На время тестирования передаём id и name пользователя в query. Позже мы будем получать данные текущего подключившегося с помощью токена
-    const {id, name} = client.handshake.query as unknown as WSConnectUserDto;
+    const { id, name } = client.handshake.query as unknown as WSConnectUserDto;
 
     const participantsIds: Array<string> = [];
     if (this.connectedUsers.size > 0) {
@@ -63,12 +64,13 @@ export class SystemApiGateway implements OnGatewayInit, OnGatewayConnection, OnG
     client.broadcast.emit('connection', {
       data: { message: `Hello, world! ${name} is online from now on!` },
     });
-    this.connectedUsers.set(client.id, {id, name});
+    this.connectedUsers.set(client.id, { id, name });
   }
 
-  @SubscribeMessage("test_event")
+  @SubscribeMessage('test_event')
   handleTestEvent() {
-    console.log("This is test event")
+    // eslint-disable-next-line no-console
+    console.log('This is test event');
   }
 
   handleDisconnect(@ConnectedSocket() client: Socket) {

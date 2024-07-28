@@ -78,20 +78,43 @@ export class AdminApiController {
     return this.usersService.deactivate(_id);
   }
 
+  // Добавление привилегий администратору. Только root
   @Put(':id/privileges')
   @ApiTags('Grant administrator privileges. Root only.')
   @AccessControlList({ role: UserRole.ADMIN, isRoot: true })
-  public async grantPrivileges(@Param('id') userId, @Body() dto: ApiPrivilegesDto) {
+  public async grantPrivileges(
+    @Param('id') userId,
+    @Body() dto: ApiPrivilegesDto,
+    @Req() req: Express.Request
+  ) {
     const { privileges } = dto;
-    return this.usersService.grantPrivileges(userId, privileges);
+    return this.usersService.grantPrivileges(req.user as AnyUserInterface, userId, privileges);
   }
 
+  // Удаление привилегий администратора. Только root
   @Delete(':id/privileges')
   @ApiTags('Revoke administrator privileges. Root only.')
   @AccessControlList({ role: UserRole.ADMIN, isRoot: true })
-  public async revokePrivileges(@Param('id') userId, @Body() dto: ApiPrivilegesDto) {
+  public async revokePrivileges(
+    @Param('id') userId,
+    @Body() dto: ApiPrivilegesDto,
+    @Req() req: Express.Request
+  ) {
     const { privileges } = dto;
-    return this.usersService.revokePrivileges(userId, privileges);
+    return this.usersService.revokePrivileges(req.user as AnyUserInterface, userId, privileges);
+  }
+
+  // Обновление привилегий администратора. Только root
+  @Patch(':id/privileges')
+  @ApiTags('Update administrator privileges. Root only.')
+  @AccessControlList({ role: UserRole.ADMIN, isRoot: true })
+  public async updatePrivileges(
+    @Param('id') userId,
+    @Body() dto: ApiPrivilegesDto,
+    @Req() req: Express.Request
+  ) {
+    const { privileges } = dto;
+    return this.usersService.updatePrivileges(req.user as AnyUserInterface, userId, privileges);
   }
 
   @Put('users/:id/confirm')
@@ -118,6 +141,7 @@ export class AdminApiController {
   @Delete('users/:id/promote')
   @ApiTags('Downgrade regular user (lower status). Limited access.')
   @AccessControlList({ role: UserRole.ADMIN, isRoot: true })
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async downgrade(@Param('id') _id: string) {
     throw new MethodNotAllowedException('Этот метод нельзя использовать здесь!');
     // return this.usersService.downgrade(_id);
@@ -133,6 +157,7 @@ export class AdminApiController {
   @Delete('users/:id/keys')
   @AccessControlList({ role: UserRole.ADMIN, isRoot: true })
   @ApiTags('Revoke keys from regular user. Limited access.')
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async revokeKeys(@Param('id') _id: string) {
     throw new MethodNotAllowedException('Этот метод нельзя использовать здесь!');
     //  return this.usersService.revokeKeys(_id);

@@ -1,4 +1,4 @@
-import { UserStatus } from "../types/user.types";
+import { UserStatus } from '../types/user.types';
 
 export type CreateCategoryDto = {
   title: string;
