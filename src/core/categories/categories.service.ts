@@ -12,6 +12,7 @@ import { checkIsEnoughRights } from '../../common/helpers/checkIsEnoughRights';
 import { CategoryRepository } from '../../datalake/category/category.repository';
 import { TasksService } from '../tasks/tasks.service';
 import { TasksRepository } from 'src/datalake/task/task.repository';
+import { TaskStatus } from 'src/common/types/task.types';
 
 @Injectable()
 export class CategoriesService {
@@ -103,7 +104,7 @@ export class CategoriesService {
     try {
       res = await this.categoriesRepo.findOneAndUpdate({ _id: id }, updateData, { new: false });
       await this.tasksRepo.updateMany(
-        { 'category._id': id },
+        { 'category._id': id, status: { $in: [TaskStatus.ACCEPTED, TaskStatus.CREATED] } },
         {
           $set: {
             'category.points': updateData.points,
