@@ -1,5 +1,4 @@
-// eslint-disable-next-line max-classes-per-file
-import { UseGuards } from '@nestjs/common';
+import { UnauthorizedException, UseGuards } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import {
@@ -13,7 +12,6 @@ import {
   WsException,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import exceptions from '../../common/constants/exceptions';
 import { AnyUserInterface } from '../../common/types/user.types';
 import { SocketAuthGuard } from '../../common/guards/socket-auth.guard';
 
@@ -43,24 +41,17 @@ export class SystemApiGateway implements OnGatewayInit, OnGatewayConnection, OnG
   /**
    * Хук, который срабатывает при подключении к сокету.
    * @param {Socket} client Данные о текущем подключившемся пользователе
-   * @example http://localhost:3001?id=555&name=Kolya
+   * @example http://localhost:3001
+   * @headers {authorization} value Токен пользователя
    */
-  async handleConnection(@ConnectedSocket() client: Socket) {
-    const token = client.handshake.headers.authorization;
-    if (!token) {
-      throw new WsException(exceptions.auth.unauthorized);
-    }
-
+  async handleConnection(@ConnectedSocket() client: Socket): Promise<void> {
     let payload: AnyUserInterface;
     try {
-      payload = await this.jwtService.verifyAsync(token, {
+      payload = await this.jwtService.verifyAsync(client.handshake.headers.authorization, {
         secret: this.configService.get<string>('jwt.key'),
       });
     } catch (error) {
-      throw new WsException({
-        error,
-        message: 'Ошибка верификации токена при установлении websocket-соединения',
-      });
+      return this.disconnect(client, { type: UnauthorizedException.name, message: error.message });
     }
     console.log('user:', payload);
 
@@ -87,10 +78,19 @@ export class SystemApiGateway implements OnGatewayInit, OnGatewayConnection, OnG
   }
 
   handleDisconnect(@ConnectedSocket() client: Socket) {
-    const { name } = this.connectedUsers.get(client.id);
-    const designation = name || client.id;
+    const connectedUser = this.connectedUsers.get(client.id);
+
     client.broadcast.emit('disconnection', {
-      data: { message: `Hello, world! ${designation} has dropped connection recently!` },
+      data: {
+        message: `Hello, world! ${
+          connectedUser?.name || client.id
+        } has dropped connection recently!`,
+      },
     });
+  }
+
+  private disconnect(socket: Socket, error: Record<string, unknown>) {
+    socket.emit('error', new WsException(error));
+    socket.disconnect();
   }
 }

@@ -45,5 +45,6 @@ module.exports = {
     'no-underscore-dangle': 'off',
     'no-console': ['warn', { allow: ['info'] }],
     'no-shadow': 'off',
+    'consistent-return': 'warn',
   },
 };
