@@ -6,7 +6,6 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InternalServerErrorException, NotFoundException } from '@nestjs/common/exceptions';
-import { UsersRepository } from '../../datalake/users/users.repository';
 import { CreateAdminDto, CreateUserDto } from '../../common/dto/users.dto';
 import {
   AdminInterface,
@@ -15,14 +14,18 @@ import {
   UserProfile,
   UserRole,
   UserStatus,
+  AnyUserInterface,
 } from '../../common/types/user.types';
 import { HashService } from '../../common/hash/hash.service';
-import { Admin } from '../../datalake/users/schemas/admin.schema';
 import { POJOType } from '../../common/types/pojo.type';
+import { PointGeoJSONInterface } from '../../common/types/point-geojson.types';
+import { checkIsEnoughRights } from '../../common/helpers/checkIsEnoughRights';
+import exceptions from '../../common/constants/exceptions';
+import { UsersRepository } from '../../datalake/users/users.repository';
+import { Admin } from '../../datalake/users/schemas/admin.schema';
 import { User } from '../../datalake/users/schemas/user.schema';
 import { Volunteer } from '../../datalake/users/schemas/volunteer.schema';
 import { Recipient } from '../../datalake/users/schemas/recipient.schema';
-import { PointGeoJSONInterface } from '../../common/types/point-geojson.types';
 
 @Injectable()
 export class UsersService {
@@ -59,8 +62,10 @@ export class UsersService {
       name,
       phone,
       login,
-      createdAtr,
+      createdAt,
       updatedAt,
+      status,
+      location,
     } = await this.usersRepo.create(dto);
     return Promise.resolve({
       permissions,
@@ -74,8 +79,10 @@ export class UsersService {
       name,
       phone,
       login,
-      createdAtr,
+      createdAt,
       updatedAt,
+      status,
+      location,
     } as Record<string, unknown>);
   }
 
@@ -252,7 +259,11 @@ export class UsersService {
     }
     if (user.role === UserRole.ADMIN) {
       UsersService.requireLogin(_id);
-      return this.usersRepo.findOneAndUpdate({ _id, role: UserRole.ADMIN }, { isActive: true }, {});
+      return this.usersRepo.findOneAndUpdate(
+        { _id, role: UserRole.ADMIN },
+        { isActive: true },
+        { new: true }
+      );
     }
     throw new BadRequestException('Можно активировать только администратора');
   }
@@ -282,7 +293,11 @@ export class UsersService {
     }
     if (user.role === UserRole.ADMIN) {
       UsersService.requireLogin(_id);
-      return this.usersRepo.findByIdAndUpdate(_id, { isActivated: false }, {});
+      return this.usersRepo.findOneAndUpdate(
+        { _id, role: UserRole.ADMIN },
+        { isActive: false },
+        { new: true }
+      );
     }
     if (user.role === UserRole.VOLUNTEER || user.role === UserRole.RECIPIENT) {
       throw new BadRequestException('Нужен _id администратора!');
@@ -293,7 +308,16 @@ export class UsersService {
     });
   }
 
-  public async grantPrivileges(userId: string, privileges: Array<AdminPermission>) {
+  // Добавление привилегий администратору. Только root
+  public async grantPrivileges(
+    admin: AnyUserInterface,
+    userId: string,
+    privileges: Array<AdminPermission>
+  ) {
+    if (!checkIsEnoughRights(admin, [], true)) {
+      throw new ForbiddenException(exceptions.users.onlyForAdmins);
+    }
+
     const user = await this.usersRepo.findById(userId);
     if (!user) {
       throw new NotFoundException('Пользователь не найден!', {
@@ -305,15 +329,26 @@ export class UsersService {
         cause: `Попытка дать права  ${privileges} пользователю с _id '${userId}' и ролью '${user.role}'`,
       });
     }
+
     UsersService.requireLogin(userId);
+
     return this.usersRepo.findOneAndUpdate(
       { _id: userId, role: UserRole.ADMIN },
       { $addToSet: { permissions: { $each: privileges } } },
-      {}
+      { new: true }
     );
   }
 
-  public async revokePrivileges(userId: string, privileges: Array<AdminPermission>) {
+  // Удаление привилегий администратора. Только root
+  public async revokePrivileges(
+    admin: AnyUserInterface,
+    userId: string,
+    privileges: Array<AdminPermission>
+  ) {
+    if (!checkIsEnoughRights(admin, [], true)) {
+      throw new ForbiddenException(exceptions.users.onlyForAdmins);
+    }
+
     const user = await this.usersRepo.findById(userId);
     if (!user) {
       throw new NotFoundException('Пользователь не найден!', {
@@ -325,11 +360,44 @@ export class UsersService {
         cause: `Попытка дать права  ${privileges} пользователю с _id '${userId}' и ролью '${user.role}'`,
       });
     }
+
     UsersService.requireLogin(userId);
+
     return this.usersRepo.findByIdAndUpdate(
       userId,
       { $pull: { permissions: { $in: privileges } } },
-      {}
+      { new: true }
+    );
+  }
+
+  // Обновление привилегий администратора. Только root
+  public async updatePrivileges(
+    admin: AnyUserInterface,
+    userId: string,
+    privileges: Array<AdminPermission>
+  ) {
+    if (!checkIsEnoughRights(admin, [], true)) {
+      throw new ForbiddenException(exceptions.users.onlyForAdmins);
+    }
+
+    const user = await this.usersRepo.findById(userId);
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден!', {
+        cause: `Пользователь с _id '${userId}' не найден`,
+      });
+    }
+    if (user.role !== UserRole.ADMIN) {
+      throw new BadRequestException('Пользователь должен быть администратором', {
+        cause: `Попытка дать права  ${privileges} пользователю с _id '${userId}' и ролью '${user.role}'`,
+      });
+    }
+
+    UsersService.requireLogin(userId);
+
+    return this.usersRepo.findOneAndUpdate(
+      { _id: userId, role: UserRole.ADMIN },
+      { $set: { permissions: privileges } },
+      { new: true }
     );
   }
 
