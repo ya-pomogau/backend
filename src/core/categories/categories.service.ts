@@ -10,10 +10,15 @@ import { CreateCategoryDto, UpdateCategoryDto } from '../../common/dto/category.
 import { AdminPermission, AdminInterface } from '../../common/types/user.types';
 import { checkIsEnoughRights } from '../../common/helpers/checkIsEnoughRights';
 import { CategoryRepository } from '../../datalake/category/category.repository';
+import { TasksService } from '../tasks/tasks.service';
+import { TasksRepository } from 'src/datalake/task/task.repository';
 
 @Injectable()
 export class CategoriesService {
-  constructor(private readonly categoriesRepo: CategoryRepository) {}
+  constructor(
+    private readonly categoriesRepo: CategoryRepository,
+    private readonly tasksRepo: TasksRepository
+  ) {}
 
   async getCategories() {
     return this.categoriesRepo.find({});
@@ -97,6 +102,16 @@ export class CategoriesService {
     let res;
     try {
       res = await this.categoriesRepo.findOneAndUpdate({ _id: id }, updateData, { new: true });
+      await this.tasksRepo.updateMany(
+        { 'category._id': id },
+        {
+          $set: {
+            'category.points': updateData.points,
+            'category.accessLevel': updateData.accessLevel,
+            'category.title': updateData.title,
+          },
+        }
+      );
     } catch (err) {
       throw new InternalServerErrorException(exceptions.category.internalError, {
         cause: `Ошибка в методе обновления данных категории findOneAndUpdate: ${err}`,
