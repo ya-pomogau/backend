@@ -1,5 +1,5 @@
 // eslint-disable-next-line max-classes-per-file
-import { UnauthorizedException, UseGuards } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import {
@@ -47,7 +47,7 @@ export class SystemApiGateway implements OnGatewayInit, OnGatewayConnection, OnG
   async handleConnection(@ConnectedSocket() client: Socket) {
     const token = client.handshake.headers.authorization;
     if (!token) {
-      throw new UnauthorizedException(exceptions.auth.unauthorized);
+      throw new WsException(exceptions.auth.unauthorized);
     }
 
     let payload: AnyUserInterface;

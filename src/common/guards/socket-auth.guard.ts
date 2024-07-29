@@ -1,4 +1,4 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { WsException } from '@nestjs/websockets';
@@ -15,7 +15,7 @@ export class SocketAuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const token = context.switchToWs().getClient().handshake.headers.authorization;
     if (!token) {
-      throw new UnauthorizedException(exceptions.auth.unauthorized);
+      throw new WsException(exceptions.auth.unauthorized);
     }
 
     try {
