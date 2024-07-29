@@ -30,6 +30,7 @@ export class AccessControlGuard implements CanActivate {
       return false;
     }
     const { user } = context.switchToHttp().getRequest();
+    if (user.isRoot) return true;
     if (accessControl.isRoot) {
       return (!!user.role && user.role === UserRole.ADMIN && user.isRoot) ?? false;
     }
