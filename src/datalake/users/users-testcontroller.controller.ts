@@ -9,7 +9,9 @@ export class UsersTestcontrollerController {
 
   @Post('create')
   async create(@Body() dto: CreateUserDto | CreateAdminDto) {
+    // eslint-disable-next-line no-console
     console.log('dto:');
+    // eslint-disable-next-line no-console
     console.dir(dto);
     let extras: Partial<CreateUserDto | CreateAdminDto> = {};
     if (dto.role === UserRole.VOLUNTEER) {
@@ -20,7 +22,9 @@ export class UsersTestcontrollerController {
       ...dto,
       ...extras,
     });
+    // eslint-disable-next-line no-console
     console.log('doc');
+    // eslint-disable-next-line no-console
     console.dir(doc);
     return doc;
   }

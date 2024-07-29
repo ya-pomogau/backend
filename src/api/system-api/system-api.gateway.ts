@@ -36,6 +36,7 @@ export class SystemApiGateway implements OnGatewayInit, OnGatewayConnection, OnG
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   afterInit(server: Server) {
+    // eslint-disable-next-line no-console
     console.log('SystemApi socket server was initialized');
   }
 
@@ -81,6 +82,7 @@ export class SystemApiGateway implements OnGatewayInit, OnGatewayConnection, OnG
 
   @SubscribeMessage('test_event')
   handleTestEvent() {
+    // eslint-disable-next-line no-console
     console.log('This is test event');
   }
 
