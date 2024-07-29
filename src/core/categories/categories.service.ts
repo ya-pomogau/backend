@@ -101,14 +101,12 @@ export class CategoriesService {
 
     let res;
     try {
-      res = await this.categoriesRepo.findOneAndUpdate({ _id: id }, updateData, { new: true });
+      res = await this.categoriesRepo.findOneAndUpdate({ _id: id }, updateData, { new: false });
       await this.tasksRepo.updateMany(
         { 'category._id': id },
         {
           $set: {
             'category.points': updateData.points,
-            'category.accessLevel': updateData.accessLevel,
-            'category.title': updateData.title,
           },
         }
       );
