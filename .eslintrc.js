@@ -14,6 +14,8 @@ module.exports = {
     'plugin:import/errors',
     'plugin:import/warnings',
     'plugin:import/typescript',
+    // prettier must be the last in extends
+    'prettier',
   ],
   ignorePatterns: ['.eslintrc.js'],
   env: {
@@ -21,7 +23,9 @@ module.exports = {
     jest: true,
   },
   rules: {
-    'prettier/prettier': ['error', { singleQuote: true, endOfLine: "auto" }],
+    'prettier/prettier': ['error'],
+    semi: 'error',
+    '@typescript-eslint/no-unused-vars': ['error'],
     'import/extensions': [
       'error',
       'ignorePackages',
@@ -41,5 +45,6 @@ module.exports = {
     'no-underscore-dangle': 'off',
     'no-console': ['warn', { allow: ['info'] }],
     'no-shadow': 'off',
+    'consistent-return': 'warn',
   },
 };
