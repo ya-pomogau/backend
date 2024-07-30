@@ -31,9 +31,11 @@ API [https://api.kraev.nomoredomains.xyz/api](https://api.kraev.nomoredomains.xy
 
 Должнен быть установлен NodeJS v16 ^
 
-1. [Форкнуть репозиторий](https://github.com/ya-pomogau/backend/fork)
-2. Склонировать форкнутый репозиторий из **своего** аккаунта
-3. Скопировать `.env.example` в `.env.dev` и внести правки:
+1. [Склонировать репозиторий](https://github.com/ya-pomogau/backend)
+   ```shell
+   git clone git@github.com:ya-pomogau/backend.git
+   ```
+2. Скопировать `.env.example` в `.env.dev` и внести правки:
    ```shell
    SERVER_PORT=3001 # На своё усмотрение
    CONTAINER_PORT=3001 # На своё усмотрение, на этом порту будет слушать сервер
@@ -49,7 +51,7 @@ API [https://api.kraev.nomoredomains.xyz/api](https://api.kraev.nomoredomains.xy
    VK_APP_ID=51798618 # Не трогать, иначе отвалится авторизация VK
    VK_APP_SECRET=898A5ISDAGmscLIFz0JV # Не трогать, иначе отвалится авторизация VK
    ```
-4. Установить docker:
+3. Установить docker:
 
    1. [Windows](https://www.docker.com/products/docker-desktop)
    2. [Ubuntu](https://docs.docker.com/engine/install/ubuntu/):
@@ -78,7 +80,7 @@ API [https://api.kraev.nomoredomains.xyz/api](https://api.kraev.nomoredomains.xy
          sudo apt-get install docker-ce
          ```
 
-5. Собрать и запустить docker-контейнер
+4. Собрать и запустить docker-контейнер
 
    ```shell
    docker compose -f docker-compose.dev.yml --env-file=.env.dev up --build
