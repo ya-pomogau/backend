@@ -11,8 +11,6 @@ export class BlogService {
   ) { }
 
   async create(dto: Partial<PostDTO>, user) {
-    // TODO: Заменить на использование пользователя из запроса позже
-    /* const { name, phone, avatar, address, _id } = await this.userRepo.findById(user.id); */
     const { name, phone, avatar, address, _id } = user;
     return this.blogRepo.create({
       ...dto,
