@@ -34,9 +34,6 @@ export class AccessControlGuard implements CanActivate {
     if (accessControl.isRoot) {
       return (!!user.role && user.role === UserRole.ADMIN && user.isRoot) ?? false;
     }
-    if (user.isRoot && user.role === UserRole.ADMIN) {
-      return true;
-    }
     if (!!accessControl.role && accessControl.role !== UserRole.ADMIN) {
       return accessControl.role === user.role && accessControl.level <= user.status;
     }
