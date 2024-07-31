@@ -8,11 +8,10 @@ export class BlogService {
   constructor(
     private readonly blogRepo: BlogPostRepository,
     private readonly userRepo: UsersRepository
-  ) {}
+  ) { }
 
   async create(dto: Partial<PostDTO>, user) {
-    // TODO: Заменить на использование пользователя из запроса позже
-    const { name, phone, avatar, address, _id } = await this.userRepo.findById(user.id);
+    const { name, phone, avatar, address, _id } = user;
     return this.blogRepo.create({
       ...dto,
       author: {
