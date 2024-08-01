@@ -1,13 +1,10 @@
 import { Injectable, Scope, InternalServerErrorException } from '@nestjs/common';
 import { ChatsRepository } from '../../datalake/chats/chats.repository';
 import { MessagesRepository } from '../../datalake/messages/messages.repository';
-import {
-  MessageInterface,
-  SystemChatInterface,
-} from '../../common/types/chats.types';
+import { MessageInterface, SystemChatInterface } from '../../common/types/chats.types';
 import { TaskDto } from '../../common/dtos/tasks.dto';
 
-export interface ITasksChatEntity {
+export interface ISystemChatEntity {
   createChat(metadata: TaskDto, messages: MessageInterface[]): Promise<this>;
   findChatByParams(params: Partial<SystemChatInterface>): Promise<this>;
   addMessage(chatId: string, message: Partial<MessageInterface>): Promise<this>;
@@ -15,7 +12,7 @@ export interface ITasksChatEntity {
 }
 
 @Injectable({ scope: Scope.REQUEST })
-export class TasksChatEntity {
+export class SystemChatEntity implements ISystemChatEntity {
   private metadata: SystemChatInterface | null;
   private messages: MessageInterface[];
   private chatId: string;

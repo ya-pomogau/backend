@@ -7,7 +7,7 @@ import {
 } from '../../common/types/chats.types';
 import { TaskDto } from '../../common/dtos/tasks.dto';
 
-export interface ITasksChatEntity {
+export interface IConflictChatWithRecipientEntity {
   createChat(metadata: TaskDto, messages: MessageInterface[]): Promise<this>;
   findChatByParams(params: Partial<ConflictChatWithRecipientInterface>): Promise<this>;
   findConflictingChats(params: Partial<ConflictChatWithRecipientInterface>): Promise<this>;
@@ -16,7 +16,7 @@ export interface ITasksChatEntity {
 }
 
 @Injectable({ scope: Scope.REQUEST })
-export class TasksChatEntity {
+export class ConflictChatWithRecipientEntity {
   private metadata: ConflictChatWithRecipientInterface | null;
   private messages: MessageInterface[];
   private chatId: string;

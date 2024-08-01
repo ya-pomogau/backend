@@ -1,17 +1,17 @@
 import { Types } from 'mongoose';
 import { Test, TestingModule } from '@nestjs/testing';
-import { TasksChatEntity } from './tasks-chat.entity';
+import { SystemChatEntity } from './system-chat.entity';
 import { ChatsRepository } from '../../datalake/chats/chats.repository';
 import { MessagesRepository } from '../../datalake/messages/messages.repository';
-import { MessageInterface, TaskChatInterface } from '../../common/types/chats.types';
+import { MessageInterface, SystemChatInterface } from '../../common/types/chats.types';
 import { UserStatus } from '../../common/types/user.types';
 import { TaskDto } from '../../common/dtos/tasks.dto';
 import { PointGeoJSON } from '../../common/schemas/PointGeoJSON.schema';
 import { Category } from '../../datalake/category/schemas/category.schema';
 import { ResolveStatus } from '../../common/types/task.types';
 
-describe('TasksChatEntity', () => {
-  let chatEntity: TasksChatEntity;
+describe('SystemChatEntity', () => {
+  let chatEntity: SystemChatEntity;
   let chatsRepository: Partial<Record<keyof ChatsRepository, jest.Mock>>;
   let messagesRepository: Partial<Record<keyof MessagesRepository, jest.Mock>>;
 
@@ -31,13 +31,13 @@ describe('TasksChatEntity', () => {
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        TasksChatEntity,
+        SystemChatEntity,
         { provide: ChatsRepository, useValue: chatsRepository },
         { provide: MessagesRepository, useValue: messagesRepository },
       ],
     }).compile();
 
-    chatEntity = await module.resolve<TasksChatEntity>(TasksChatEntity);
+    chatEntity = await module.resolve<SystemChatEntity>(SystemChatEntity);
   });
 
   it('should be defined', () => {
@@ -145,12 +145,12 @@ describe('TasksChatEntity', () => {
 
   it('should close a chat', async () => {
     const chatId = new Types.ObjectId().toHexString();
-    const metadata: Partial<TaskChatInterface> = {
+    const metadata: Partial<SystemChatInterface> = {
       _id: chatId,
       isActive: true,
-    } as Partial<TaskChatInterface>;
+    } as Partial<SystemChatInterface>;
 
-    chatEntity['metadata'] = metadata as TaskChatInterface;
+    chatEntity['metadata'] = metadata as SystemChatInterface;
     chatEntity['chatId'] = chatId;
 
     (chatsRepository.findById as jest.Mock).mockResolvedValue(metadata);

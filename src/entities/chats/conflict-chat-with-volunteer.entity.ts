@@ -7,7 +7,7 @@ import {
 } from '../../common/types/chats.types';
 import { TaskDto } from '../../common/dtos/tasks.dto';
 
-export interface ITasksChatEntity {
+export interface IConflictChatWithVolunteerEntity {
   createChat(metadata: TaskDto, messages: MessageInterface[]): Promise<this>;
   findChatByParams(params: Partial<ConflictChatWithVolunteerInterface>): Promise<this>;
   findConflictingChats(params: Partial<ConflictChatWithVolunteerInterface>): Promise<this>;
@@ -16,7 +16,7 @@ export interface ITasksChatEntity {
 }
 
 @Injectable({ scope: Scope.REQUEST })
-export class TasksChatEntity {
+export class ConflictChatWithVolunteerEntity implements IConflictChatWithVolunteerEntity {
   private metadata: ConflictChatWithVolunteerInterface | null;
   private messages: MessageInterface[];
   private chatId: string;
@@ -32,9 +32,7 @@ export class TasksChatEntity {
 
   async createChat(metadata: TaskDto): Promise<this> {
     const chatData = { ...metadata, isActive: true };
-    const chat = (await this.chatsRepository.create(
-      chatData
-    )) as ConflictChatWithVolunteerInterface;
+    const chat = (await this.chatsRepository.create(chatData)) as ConflictChatWithVolunteerInterface;
     if (!chat) {
       throw new InternalServerErrorException('Ошибка создания чата');
     }
