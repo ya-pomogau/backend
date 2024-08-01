@@ -41,4 +41,5 @@ lerna-debug.log*
 obsolete/
 
 # Environment
-.env
+.env*
+!.env.*.example
