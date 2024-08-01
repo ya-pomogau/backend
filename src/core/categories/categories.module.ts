@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { CategoryRepositoryModule } from '../../datalake/category/category-repository.module';
 import { CategoriesService } from './categories.service';
-import { TasksRepositoryModule } from 'src/datalake/task/tasks-repository.module';
+import { TasksModule } from '../tasks/tasks.module';
 
 @Module({
-  imports: [CategoryRepositoryModule, TasksRepositoryModule],
+  imports: [CategoryRepositoryModule, TasksModule],
   providers: [CategoriesService],
   exports: [CategoriesService],
 })

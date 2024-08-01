@@ -454,4 +454,22 @@ export class TasksService {
 
     return updatedTask;
   }
+
+  public async updateTaskPoints(points: number, id: string) {
+    const res = await this.tasksRepo.updateMany(
+      { 'category._id': id, status: { $in: [TaskStatus.ACCEPTED, TaskStatus.CREATED] } },
+      {
+        $set: {
+          'category.points': points,
+        },
+      }
+    );
+    if (!res) {
+      throw new InternalServerErrorException('Internal Server Error', {
+        cause: 'Обновление поинтов задачи не выполнено или выполнено с ошибкой',
+      });
+    }
+
+    return res;
+  }
 }
