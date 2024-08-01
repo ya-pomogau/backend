@@ -1,7 +1,6 @@
-
 Бриф [https://narrow-mountain-bc1.notion.site/3-13-1880e7396a9c4bbda3d1f33103fd01af](https://narrow-mountain-bc1.notion.site/3-13-1880e7396a9c4bbda3d1f33103fd01af)
 
-Backend  [https://api.kraev.nomoredomains.xyz](https://api.kraev.nomoredomains.xyz)
+Backend [https://api.kraev.nomoredomains.xyz](https://api.kraev.nomoredomains.xyz)
 
 IP адрес [84.201.139.237](84.201.139.237)
 
@@ -12,6 +11,7 @@ API [https://api.kraev.nomoredomains.xyz/api](https://api.kraev.nomoredomains.xy
 **Коллекция postman для обновленного api в корне проекта: postman_collection.json**
 
 На текущий момент можно протестировать:
+
 - создание админа, авторизацию;
 - создание, удаление, редактирование постов.
 
@@ -23,59 +23,79 @@ API [https://api.kraev.nomoredomains.xyz/api](https://api.kraev.nomoredomains.xy
 
 После создания поста - id поста сохраняется в переменной и далее отправляется запрос на редактирование данного поста, а потом его удаление.
 
-
 ## Описание
-Проект для волонтерской организации ЯПомогаю. Цель, создать удобное веб-приложение поиска волонтёров для помощи реципиентам. От выгула собак, до помощи людям с ограниченными возможностями.
 
+Проект для волонтерской организации ЯПомогаю. Цель, создать удобное веб-приложение поиска волонтёров для помощи реципиентам. От выгула собак, до помощи людям с ограниченными возможностями.
 
 ## Установка и запуск в режиме разработки
 
 Должнен быть установлен NodeJS v16 ^
 
-1. Клонировать репозиторий
-
-
-
-2. Установить docker
-
-   для windows: [https://www.docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop)
-
-
-
-3. Для Ubuntu
-
-   Установите пакеты, необходимые для использования репозитория через HTTPS:
+1. [Склонировать репозиторий](https://github.com/ya-pomogau/backend)
    ```shell
-   sudo apt-get update
-   sudo apt-get install apt-transport-https ca-certificates curl software-properties-common
+   git clone git@github.com:ya-pomogau/backend.git
    ```
-   Добавьте официальный ключ GPG Docker:
+2. Скопировать `.env.example` в `.env.dev` и внести правки:
    ```shell
-   curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+   SERVER_PORT=3001 # На своё усмотрение
+   CONTAINER_PORT=3001 # На своё усмотрение, на этом порту будет слушать сервер
+   DATABASE_HOST=mongodb # Название сервиса из docker-compose.dev.yml
+   DATABASE_PORT=27017 # На своё усмотрение
+   DATABASE_USERNAME= # Оставить пустым
+   DATABASE_PASSWORD= # Оставить пустым
+   DATABASE_NAME="ya-pomogau-db" # На своё усмотрение
+   SALT=10
+   JWT_KEY=e776c17dcf7b8de11a1647faa49b89c2 # Обязательно поменять!!!
+   JWT_TTL=7d
+   CORS_ORIGINS=*
+   VK_APP_ID=51798618 # Не трогать, иначе отвалится авторизация VK
+   VK_APP_SECRET=898A5ISDAGmscLIFz0JV # Не трогать, иначе отвалится авторизация VK
    ```
+3. Установить docker:
 
-   Добавьте репозиторий Docker к источникам APT:
-   ```shell
-   sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-   ```
+   1. [Windows](https://www.docker.com/products/docker-desktop)
+   2. [Ubuntu](https://docs.docker.com/engine/install/ubuntu/):
 
-   Установите Docker:
-   ```shell
-   sudo apt-get update
-   sudo apt-get install docker-ce
-   ```
+      1. Установите пакеты:
+         ```shell
+         sudo apt-get update
+         sudo apt-get install apt-transport-https ca-certificates curl software-properties-common
+         ```
+      2. Добавьте официальный ключ GPG Docker:
 
+         ```shell
+         curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+         ```
+
+      3. Добавьте репозиторий Docker к источникам APT:
+
+         ```shell
+         sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+         ```
+
+      4. Установите Docker:
+
+         ```shell
+         sudo apt-get update
+         sudo apt-get install docker-ce
+         ```
 
 4. Собрать и запустить docker-контейнер
 
    ```shell
-   docker compose build
-   docker compose up -d
+   docker compose -f docker-compose.dev.yml --env-file=.env.dev up --build
+
+   # Или с помощью Makefile
+   make run-dev
    ```
-   сервер будет доступен на 3001 порту
 
+   Cервер будет доступен на `SERVER_PORT` из `.env.dev`, по дефолту `3001` порт
 
-## Ограничения реализации
+## Не реализована функциональность
 
-не реализована функциональность учетных записей пользователей, чата, редактирования заявок, пользователей.
-не реализована функциональность регистрации, общих страниц и страниц пользователей
+- [ ] учетные записи пользователей
+- [ ] чат
+- [ ] редактирования заявок
+- [ ] регистрации
+- [ ] общие страницы
+- [ ] страницы пользователей

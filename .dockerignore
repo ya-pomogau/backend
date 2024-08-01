@@ -1,10 +1,5 @@
-# Deps
-node_modules/
-
-# Docker
-Dockerfile
-docker-compose.yml
-
-# Dist
-dist/
-build/
+*
+# ignore all except below
+!src/
+!tsconfig*.json
+!package*.json
