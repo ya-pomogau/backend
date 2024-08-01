@@ -102,7 +102,9 @@ export class CategoriesService {
 
     let res;
     try {
-      res = await this.categoriesRepo.findOneAndUpdate({ _id: id }, updateData, { new: false });
+      res = await this.categoriesRepo.findOneAndUpdate({ _id: id }, updateData, { new: true });
+      if (!res) throw new NotFoundException(exceptions.category.notFound);
+
       await this.tasksRepo.updateMany(
         { 'category._id': id, status: { $in: [TaskStatus.ACCEPTED, TaskStatus.CREATED] } },
         {
@@ -116,7 +118,6 @@ export class CategoriesService {
         cause: `Ошибка в методе обновления данных категории findOneAndUpdate: ${err}`,
       });
     }
-    if (!res) throw new NotFoundException(exceptions.category.notFound);
 
     return res;
   }
