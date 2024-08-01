@@ -1,8 +1,10 @@
-import { UnauthorizedException, UseGuards } from '@nestjs/common';
+/* eslint-disable max-classes-per-file */
+import { UnauthorizedException, UseGuards, UsePipes } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import {
   ConnectedSocket,
+  MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
   OnGatewayInit,
@@ -12,10 +14,34 @@ import {
   WsException,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { IsArray, IsNotEmpty, IsObject, IsString } from 'class-validator';
 import { AnyUserInterface } from '../../common/types/user.types';
 import { SocketAuthGuard } from '../../common/guards/socket-auth.guard';
+import { SocketValidationPipe } from '../../common/pipes/socket-validation.pipe';
+
+// Интерфейс и dto созданы для тестирования SocketValidationPipe
+// Удалить на этапе, когда будут реализованы необходимые dto
+interface TestEventMessageInterface {
+  string: string;
+  object: object;
+  array: Array<string>;
+}
+class TestEventMessageDto implements TestEventMessageInterface {
+  @IsString()
+  @IsNotEmpty()
+  string: string;
+
+  @IsObject()
+  @IsNotEmpty()
+  object: object;
+
+  @IsArray()
+  @IsNotEmpty()
+  array: Array<string>;
+}
 
 @UseGuards(SocketAuthGuard)
+@UsePipes(SocketValidationPipe)
 @WebSocketGateway({
   cors: {
     allowedHeaders: '*',
@@ -44,6 +70,7 @@ export class SystemApiGateway implements OnGatewayInit, OnGatewayConnection, OnG
    * @example http://localhost:3001
    * @headers {authorization} value Токен пользователя
    */
+  // eslint-disable-next-line consistent-return
   async handleConnection(@ConnectedSocket() client: Socket): Promise<void> {
     let payload: AnyUserInterface;
     try {
@@ -53,6 +80,7 @@ export class SystemApiGateway implements OnGatewayInit, OnGatewayConnection, OnG
     } catch (error) {
       return this.disconnect(client, { type: UnauthorizedException.name, message: error.message });
     }
+    // eslint-disable-next-line no-console
     console.log('user:', payload);
 
     const participantsIds: Array<string> = [];
@@ -72,9 +100,9 @@ export class SystemApiGateway implements OnGatewayInit, OnGatewayConnection, OnG
   }
 
   @SubscribeMessage('test_event')
-  handleTestEvent() {
+  handleTestEvent(@MessageBody('data') data: TestEventMessageDto) {
     // eslint-disable-next-line no-console
-    console.log('This is test event');
+    console.log('This is test event data:', data);
   }
 
   handleDisconnect(@ConnectedSocket() client: Socket) {
