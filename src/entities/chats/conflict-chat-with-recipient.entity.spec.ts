@@ -3,7 +3,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ConflictChatWithRecipientEntity } from './conflict-chat-with-recipient.entity';
 import { ChatsRepository } from '../../datalake/chats/chats.repository';
 import { MessagesRepository } from '../../datalake/messages/messages.repository';
-import { MessageInterface, ConflictChatWithRecipientInterface } from '../../common/types/chats.types';
+import {
+  MessageInterface,
+  ConflictChatWithRecipientInterface,
+} from '../../common/types/chats.types';
 import { UserStatus } from '../../common/types/user.types';
 import { TaskDto } from '../../common/dtos/tasks.dto';
 import { PointGeoJSON } from '../../common/schemas/PointGeoJSON.schema';
@@ -15,7 +18,7 @@ describe('ConflictChatWithVolunteerEntity', () => {
   let chatsRepository: Partial<Record<keyof ChatsRepository, jest.Mock>>;
   let messagesRepository: Partial<Record<keyof MessagesRepository, jest.Mock>>;
 
-  const chatId = new Types.ObjectId();
+  const chatId = new Types.ObjectId() as any;
 
   beforeEach(async () => {
     chatsRepository = {
@@ -37,7 +40,9 @@ describe('ConflictChatWithVolunteerEntity', () => {
       ],
     }).compile();
 
-    chatEntity = await module.resolve<ConflictChatWithRecipientEntity>(ConflictChatWithRecipientEntity);
+    chatEntity = await module.resolve<ConflictChatWithRecipientEntity>(
+      ConflictChatWithRecipientEntity
+    );
   });
 
   it('should be defined', () => {
@@ -53,7 +58,7 @@ describe('ConflictChatWithVolunteerEntity', () => {
         address: 'volunteer-address',
         vkId: 'volunteer-vkId',
         role: 'volunteer-role',
-        _id: new Types.ObjectId().toHexString(),
+        _id: new Types.ObjectId() as any,
       },
       recipient: {
         name: 'recipient-name',
@@ -62,14 +67,14 @@ describe('ConflictChatWithVolunteerEntity', () => {
         address: 'recipient-address',
         vkId: 'recipient-vkId',
         role: 'recipient-role',
-        _id: new Types.ObjectId().toHexString(),
+        _id: new Types.ObjectId() as any,
       },
       title: '',
       date: null,
       address: '',
       location: { type: 'Point', coordinates: [0, 0] } as PointGeoJSON,
       category: {
-        _id: new Types.ObjectId().toHexString(),
+        _id: new Types.ObjectId(),
         title: 'category-title',
         points: 0,
         accessLevel: UserStatus.ACTIVATED,
@@ -92,7 +97,7 @@ describe('ConflictChatWithVolunteerEntity', () => {
       isActive: true,
     });
     expect(chatEntity['metadata']?._id).toEqual(chatId);
-    expect(chatEntity['chatId']).toEqual(chatId.toString());
+    expect(chatEntity['chatId']).toEqual(chatId);
   });
 
   it('should add a message', async () => {
@@ -131,8 +136,8 @@ describe('ConflictChatWithVolunteerEntity', () => {
 
     (messagesRepository.create as jest.Mock).mockResolvedValue(savedMessage);
 
-    chatEntity['chatId'] = chatId.toString();
-    await chatEntity.addMessage(chatId.toString(), newMessage);
+    chatEntity['chatId'] = chatId;
+    await chatEntity.addMessage(chatId, newMessage);
 
     expect(messagesRepository.create).toHaveBeenCalledWith({
       ...newMessage,
@@ -142,14 +147,13 @@ describe('ConflictChatWithVolunteerEntity', () => {
   });
 
   it('should close a chat', async () => {
-    const chatId = new Types.ObjectId();
     const metadata: Partial<ConflictChatWithRecipientInterface> = {
       _id: chatId,
       isActive: true,
     } as unknown as Partial<ConflictChatWithRecipientInterface>;
 
     chatEntity['metadata'] = metadata as ConflictChatWithRecipientInterface;
-    chatEntity['chatId'] = chatId.toString();
+    chatEntity['chatId'] = chatId;
 
     (chatsRepository.findById as jest.Mock).mockResolvedValue(metadata);
     (chatsRepository.updateOne as jest.Mock).mockResolvedValue({});
@@ -166,7 +170,6 @@ describe('ConflictChatWithVolunteerEntity', () => {
   });
 
   it('should find a chat by params', async () => {
-    const chatId = new Types.ObjectId().toHexString();
     const metadata: ConflictChatWithRecipientInterface = {
       _id: chatId,
       recipient: {
@@ -178,9 +181,9 @@ describe('ConflictChatWithVolunteerEntity', () => {
         role: 'volunteer-role',
         status: UserStatus.ACTIVATED,
         location: undefined,
-        _id: new Types.ObjectId().toHexString(),
-        createdAt: new Date().toString().toString(),
-        updatedAt: new Date().toString().toString(),
+        _id: new Types.ObjectId() as any,
+        createdAt: new Date().toString(),
+        updatedAt: new Date().toString(),
       },
       admin: {
         name: 'admin-name',
@@ -189,27 +192,28 @@ describe('ConflictChatWithVolunteerEntity', () => {
         address: 'admin-address',
         vkId: 'admin-vkId',
         role: 'admin-role',
-        _id: new Types.ObjectId().toHexString(),
-        createdAt: new Date().toString().toString(),
-        updatedAt: new Date().toString().toString(),
+        _id: new Types.ObjectId() as any,
+        createdAt: new Date().toString(),
+        updatedAt: new Date().toString(),
         permissions: [],
         login: '',
         password: '',
         isRoot: false,
-        isActive: false
+        isActive: false,
       },
       isActive: true,
       type: 'TASK_CHAT',
       recipientLastReadAt: null,
       adminLastReadAt: null,
-      createdAt: new Date().toString().toString(),
-      updatedAt: new Date().toString().toString(),
+      createdAt: new Date().toString(),
+      updatedAt: new Date().toString(),
       taskId: new Types.ObjectId() as any,
       opponentChat: new Types.ObjectId() as any,
     };
 
     const messages: MessageInterface[] = [
       {
+        _id: new Types.ObjectId() as any,
         title: 'title',
         body: 'body',
         attaches: ['attaches', 'attaches'],
@@ -235,7 +239,7 @@ describe('ConflictChatWithVolunteerEntity', () => {
           isRoot: false,
           isActive: false,
         },
-        chatId: {},
+        chatId: chatId,
       },
     ];
 
@@ -261,9 +265,8 @@ describe('ConflictChatWithVolunteerEntity', () => {
   });
 
   it('should find conflicting chats', async () => {
-    const chatId = new Types.ObjectId().toHexString();
     const metadata: ConflictChatWithRecipientInterface = {
-      _id: chatId,
+      _id: new Types.ObjectId() as any,
       recipient: {
         name: 'volunteer-name',
         phone: 'volunteer-phone',
@@ -291,7 +294,7 @@ describe('ConflictChatWithVolunteerEntity', () => {
         login: '',
         password: '',
         isRoot: false,
-        isActive: false
+        isActive: false,
       },
       isActive: true,
       type: 'TASK_CHAT',
@@ -300,7 +303,7 @@ describe('ConflictChatWithVolunteerEntity', () => {
       createdAt: new Date().toString(),
       updatedAt: new Date().toString(),
       taskId: new Types.ObjectId() as any,
-      opponentChat: new Types.ObjectId() as any
+      opponentChat: new Types.ObjectId() as any,
     };
 
     const conflictChat = {
@@ -348,7 +351,8 @@ describe('ConflictChatWithVolunteerEntity', () => {
 
     const messages: MessageInterface[] = [
       {
-        _id: {},
+        _id: new Types.ObjectId() as any,
+        chatId: chatId,
         title: 'title',
         body: 'body',
         attaches: ['attaches', 'attaches'],
@@ -365,7 +369,7 @@ describe('ConflictChatWithVolunteerEntity', () => {
           location: undefined,
           keys: false,
           tasksCompleted: 0,
-          _id: new Types.ObjectId().toHexString(),
+          _id: new Types.ObjectId() as any,
           createdAt: new Date().toString(),
           updatedAt: new Date().toString(),
           permissions: [],
