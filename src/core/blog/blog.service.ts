@@ -8,7 +8,7 @@ export class BlogService {
   constructor(
     private readonly blogRepo: BlogPostRepository,
     private readonly userRepo: UsersRepository
-  ) { }
+  ) {}
 
   async create(dto: Partial<PostDTO>, user) {
     const { name, phone, avatar, address, _id } = user;
