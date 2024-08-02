@@ -29,7 +29,7 @@ import { Recipient } from '../../datalake/users/schemas/recipient.schema';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly usersRepo: UsersRepository) {}
+  constructor(private readonly usersRepo: UsersRepository) { }
 
   private static loginRequired: Array<string> = [];
 
@@ -167,10 +167,10 @@ export class UsersService {
           );
         }
         case UserStatus.UNCONFIRMED: {
-          const { name, phone, avatar, address, _id, vkId, role } = user;
+          const { role } = user;
           UsersService.requireLogin(_id);
           return this.usersRepo.findOneAndUpdate(
-            { name, phone, avatar, address, _id, vkId, role },
+            { _id, role },
             { status: UserStatus.CONFIRMED },
             {}
           );
@@ -202,8 +202,9 @@ export class UsersService {
     if (user.role === UserRole.VOLUNTEER || user.role === UserRole.RECIPIENT) {
       const { status } = user as Volunteer | Recipient;
       if (status < UserStatus.ACTIVATED) {
+        const { role } = user;
         UsersService.requireLogin(_id);
-        return this.usersRepo.findByIdAndUpdate(_id, { status: status + 1 }, {});
+        return this.usersRepo.findOneAndUpdate({ _id, role }, { status: status + 1 }, {});
       }
       return user;
     }
@@ -218,8 +219,9 @@ export class UsersService {
     if (user.role === UserRole.VOLUNTEER || user.role === UserRole.RECIPIENT) {
       const { status } = user as Volunteer | Recipient;
       if (status > UserStatus.UNCONFIRMED && status <= UserStatus.ACTIVATED) {
+        const { role } = user;
         UsersService.requireLogin(_id);
-        return this.usersRepo.findByIdAndUpdate(_id, { status: status - 1 }, {});
+        return this.usersRepo.findOneAndUpdate({ _id, role }, { status: status - 1 }, {});
       }
       return user;
     }
@@ -232,8 +234,9 @@ export class UsersService {
       throw new NotFoundException(`Пользователь с _id '${_id}' не найден<`);
     }
     if (user.role === UserRole.VOLUNTEER) {
+      const { role } = user;
       UsersService.requireLogin(_id);
-      return this.usersRepo.findByIdAndUpdate(_id, { keys: true }, {});
+      return this.usersRepo.findOneAndUpdate({ _id, role }, { keys: true }, {});
     }
 
     throw new BadRequestException('Выдать ключи можно только волонтёру!');
@@ -245,8 +248,9 @@ export class UsersService {
       throw new NotFoundException(`Пользователь с _id '${_id}' не найден<`);
     }
     if (user.role === UserRole.VOLUNTEER) {
+      const { role } = user;
       UsersService.requireLogin(_id);
-      return this.usersRepo.findByIdAndUpdate(_id, { keys: false }, {});
+      return this.usersRepo.findOneAndUpdate({ _id, role }, { keys: false }, {});
     }
 
     throw new BadRequestException('Отобрать ключи можно только у волонтёра!');
@@ -274,8 +278,9 @@ export class UsersService {
       throw new NotFoundException(`Пользователь с _id '${_id}' не найден!`);
     }
     if (user.role === UserRole.VOLUNTEER || user.role === UserRole.RECIPIENT) {
+      const { role } = user;
       UsersService.requireLogin(_id);
-      return this.usersRepo.findByIdAndUpdate(_id, { status: UserStatus.BLOCKED }, {});
+      return this.usersRepo.findOneAndUpdate({ _id, role }, { status: UserStatus.BLOCKED }, {});
     }
     if (user.role === UserRole.ADMIN) {
       throw new BadRequestException('Нужен _id волонтёра или реципиента!');
@@ -363,8 +368,8 @@ export class UsersService {
 
     UsersService.requireLogin(userId);
 
-    return this.usersRepo.findByIdAndUpdate(
-      userId,
+    return this.usersRepo.findOneAndUpdate(
+      { userId, role: UserRole.ADMIN },
       { $pull: { permissions: { $in: privileges } } },
       { new: true }
     );
@@ -423,7 +428,14 @@ export class UsersService {
   }
 
   public async updateProfile(userId: string, dto: Partial<UserProfile>) {
-    return this.usersRepo.findByIdAndUpdate(userId, dto, { new: true });
+    const user = await this.usersRepo.findById(userId);
+    if (!user) {
+      throw new NotFoundException('Пользователь не найден!', {
+        cause: `Пользователь с _id '${userId}' не найден`,
+      });
+    }
+    const { role } = user;
+    return this.usersRepo.findOneAndUpdate({ userId, role }, dto, { new: true });
   }
 
   public async updateVolunteerProfile(
