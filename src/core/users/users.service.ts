@@ -29,7 +29,7 @@ import { Recipient } from '../../datalake/users/schemas/recipient.schema';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly usersRepo: UsersRepository) { }
+  constructor(private readonly usersRepo: UsersRepository) {}
 
   private static loginRequired: Array<string> = [];
 
@@ -172,7 +172,7 @@ export class UsersService {
           return this.usersRepo.findOneAndUpdate(
             { _id, role },
             { status: UserStatus.CONFIRMED },
-            {}
+            { new: true }
           );
         }
         case UserStatus.CONFIRMED: {
@@ -204,7 +204,11 @@ export class UsersService {
       if (status < UserStatus.ACTIVATED) {
         const { role } = user;
         UsersService.requireLogin(_id);
-        return this.usersRepo.findOneAndUpdate({ _id, role }, { status: status + 1 }, {});
+        return this.usersRepo.findOneAndUpdate(
+          { _id, role },
+          { status: status + 1 },
+          { new: true }
+        );
       }
       return user;
     }
@@ -221,7 +225,11 @@ export class UsersService {
       if (status > UserStatus.UNCONFIRMED && status <= UserStatus.ACTIVATED) {
         const { role } = user;
         UsersService.requireLogin(_id);
-        return this.usersRepo.findOneAndUpdate({ _id, role }, { status: status - 1 }, {});
+        return this.usersRepo.findOneAndUpdate(
+          { _id, role },
+          { status: status - 1 },
+          { new: true }
+        );
       }
       return user;
     }
@@ -236,7 +244,7 @@ export class UsersService {
     if (user.role === UserRole.VOLUNTEER) {
       const { role } = user;
       UsersService.requireLogin(_id);
-      return this.usersRepo.findOneAndUpdate({ _id, role }, { keys: true }, {});
+      return this.usersRepo.findOneAndUpdate({ _id, role }, { keys: true }, { new: true });
     }
 
     throw new BadRequestException('Выдать ключи можно только волонтёру!');
@@ -250,7 +258,7 @@ export class UsersService {
     if (user.role === UserRole.VOLUNTEER) {
       const { role } = user;
       UsersService.requireLogin(_id);
-      return this.usersRepo.findOneAndUpdate({ _id, role }, { keys: false }, {});
+      return this.usersRepo.findOneAndUpdate({ _id, role }, { keys: false }, { new: true });
     }
 
     throw new BadRequestException('Отобрать ключи можно только у волонтёра!');
@@ -280,7 +288,11 @@ export class UsersService {
     if (user.role === UserRole.VOLUNTEER || user.role === UserRole.RECIPIENT) {
       const { role } = user;
       UsersService.requireLogin(_id);
-      return this.usersRepo.findOneAndUpdate({ _id, role }, { status: UserStatus.BLOCKED }, {});
+      return this.usersRepo.findOneAndUpdate(
+        { _id, role },
+        { status: UserStatus.BLOCKED },
+        { new: true }
+      );
     }
     if (user.role === UserRole.ADMIN) {
       throw new BadRequestException('Нужен _id волонтёра или реципиента!');
