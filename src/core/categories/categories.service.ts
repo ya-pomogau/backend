@@ -83,6 +83,14 @@ export class CategoriesService {
 
     try {
       res = await this.categoriesRepo.bulkWrite(bulkUpdateArr, { ordered: false });
+
+      for (const item of dto.data) {
+        const { id, points } = item;
+        if (points) {
+          await this.tasksService.updateTaskPoints(points, id);
+        }
+      }
+
     } catch (err) {
       throw new InternalServerErrorException(exceptions.category.internalError, {
         cause: `Ошибка в методе массового обновления категорий updateCategoriesByIds: ${err}`,
