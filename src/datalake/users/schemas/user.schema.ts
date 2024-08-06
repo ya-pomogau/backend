@@ -1,7 +1,7 @@
 /* eslint-disable no-use-before-define */
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Document, SchemaTypes } from 'mongoose';
-import { GenericUserModelInterface, UserRole } from '../../../common/types/user.types';
+import { GenericUserModelInterface } from '../../../common/types/user.types';
 
 @Schema({
   timestamps: true,

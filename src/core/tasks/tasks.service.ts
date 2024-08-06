@@ -243,17 +243,16 @@ export class TasksService {
     return this.tasksRepo.find(query);
   }
 
-  public async acceptTask(taskId: string, volunteerId: string) {
-    const volunteer = (await this.usersRepo.findById(volunteerId)) as User & Volunteer;
+  public async acceptTask(taskId: string, volunteer: User & Volunteer) {
     if (![`${UserRole.ADMIN}`, `${UserRole.VOLUNTEER}`].includes(volunteer.role)) {
       throw new ForbiddenException('Только волонтёр или администратор могут создавать заявки', {
-        cause: `Попытка создать заявку пользователем с _id '${volunteerId}' и ролью '${volunteer.role}'`,
+        cause: `Попытка создать заявку пользователем с _id '${volunteer.id}' и ролью '${volunteer.role}'`,
       });
     }
     const task = await this.tasksRepo.findById(taskId);
     if (task.volunteer) {
       throw new ConflictException('Эта заявка уже взята другим волонтёром', {
-        cause: `Попытка повторно взять заявку с _id '${taskId}' пользователем с _id '${volunteerId}' и ролью '${volunteer.role}'`,
+        cause: `Попытка повторно взять заявку с _id '${taskId}' пользователем с _id '${volunteer.id}' и ролью '${volunteer.role}'`,
       });
     }
     if (task.status !== TaskStatus.CREATED) {
@@ -262,11 +261,11 @@ export class TasksService {
           task.status === TaskStatus.COMPLETED ? 'завершённое' : 'исполняемое'
         } задание`,
         {
-          cause: `Попытка взять заявку со статусом '${task.status}' !=== '${TaskStatus.CREATED}' пользователем с _id '${volunteerId}' и ролью '${volunteer.role}'`,
+          cause: `Попытка взять заявку со статусом '${task.status}' !=== '${TaskStatus.CREATED}' пользователем с _id '${volunteer.id}' и ролью '${volunteer.role}'`,
         }
       );
     }
-    if (volunteer.status < task.category.accessLevel) {
+    if (volunteer.role === UserRole.VOLUNTEER && volunteer.status < task.category.accessLevel) {
       throw new ForbiddenException('Вам нельзя брать задачи из этой категории!');
     }
     const { name, phone, avatar, address, _id, vkId, role } = volunteer;
