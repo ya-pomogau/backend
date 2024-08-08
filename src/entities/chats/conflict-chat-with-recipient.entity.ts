@@ -40,10 +40,13 @@ export class ConflictChatWithRecipientEntity implements IConflictChatWithRecipie
     return this.metadata;
   }
 
-  toObject(): object {
+  toObject(): {
+    metadata: ConflictChatWithRecipientInterface | null;
+    messages: MessageInterface[];
+  } {
     return {
       metadata: this.metadata,
-      messages: [this.messages], // Пока не знаю, кортеж с какими массивами должен быть
+      messages: [], // Пока не знаю, кортеж с какими массивами должен быть
     };
   }
 

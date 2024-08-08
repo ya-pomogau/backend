@@ -28,15 +28,18 @@ export class TasksChatEntity {
   }
 
   // добавил get к наименованию, чтобы линтер не ругался
-  get getChatId() {
+  get getChatId(): string {
     return this.chatId;
   }
 
-  get meta(): any {
+  get meta(): TaskChatInterface | null {
     return this.metadata;
   }
 
-  toObject(): any {
+  toObject(): {
+    metadata: TaskChatInterface | null;
+    messages: MessageInterface[];
+  } {
     return {
       metadata: this.metadata,
       messages: this.messages,

@@ -28,18 +28,21 @@ export class SystemChatEntity implements ISystemChatEntity {
   }
 
   // добавил get к наименованию, чтобы линтер не ругался
-  get getChatId() {
+  get getChatId(): string {
     return this.chatId;
   }
 
-  get meta(): any {
+  get meta(): SystemChatInterface | null {
     return this.metadata;
   }
 
-  toObject(): any {
+  toObject(): {
+    metadata: SystemChatInterface | null;
+    messages: MessageInterface[];
+  }  {
     return {
       metadata: this.metadata,
-      messages: [this.messages], // Пока не знаю, массив с какими массивами должен быть
+      messages: [], // Пока не знаю, массив с какими массивами должен быть
     };
   }
 

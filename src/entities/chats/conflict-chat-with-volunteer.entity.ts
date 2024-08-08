@@ -32,18 +32,21 @@ export class ConflictChatWithVolunteerEntity implements IConflictChatWithVolunte
   }
 
   // добавил get к наименованию, чтобы линтер не ругался
-  get getChatId() {
+  get getChatId(): string {
     return this.chatId;
   }
 
-  get meta(): any {
+  get meta(): ConflictChatWithVolunteerInterface | null {
     return this.metadata;
   }
 
-  toObject(): any {
+  toObject(): {
+    metadata: ConflictChatWithVolunteerInterface | null;
+    messages: MessageInterface[];
+  } {
     return {
       metadata: this.metadata,
-      messages: [this.messages], // Пока не знаю, кортеж с какими массивами должен быть
+      messages: [], // Пока не знаю, кортеж с какими массивами должен быть
     };
   }
 
