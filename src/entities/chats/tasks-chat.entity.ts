@@ -5,6 +5,7 @@ import { MessageInterface, TaskChatInterface } from '../../common/types/chats.ty
 import { TaskDto } from '../../common/dtos/tasks.dto';
 
 export interface ITasksChatEntity {
+  getMessages(skip: number, limit?: number): Promise<MessageInterface[]>;
   createChat(metadata: TaskDto, messages: MessageInterface[]): Promise<this>;
   findChatByParams(params: Partial<TaskChatInterface>): Promise<this>;
   addMessage(chatId: string, message: Partial<MessageInterface>): Promise<this>;
@@ -23,7 +24,41 @@ export class TasksChatEntity {
   ) {
     this.metadata = null;
     this.messages = [];
-    this.chatId = '';
+    this.chatId = ''; //наименование this._chatId не принимается типизацией
+  }
+
+  // добавил get к наименованию, чтобы линтер не ругался
+  get getChatId() {
+    return this.chatId;
+  }
+
+  get meta(): any {
+    return this.metadata;
+  }
+
+  toObject(): any {
+    return {
+      metadata: this.metadata,
+      messages: this.messages,
+    };
+  }
+
+  async getMessages(skip: number, limit: number = 20): Promise<MessageInterface[]> {
+    if (!this.chatId) {
+      throw new InternalServerErrorException('Чат не найден');
+    }
+    const messages = (await this.messagesRepository.find(
+      {
+        chatId: this.chatId,
+      },
+      null,
+      {
+        skip,
+        limit,
+      }
+    )) as MessageInterface[];
+    this.messages = messages;
+    return messages;
   }
 
   async createChat(metadata: TaskDto): Promise<this> {

@@ -8,6 +8,7 @@ import {
 import { TaskDto } from '../../common/dtos/tasks.dto';
 
 export interface IConflictChatWithRecipientEntity {
+  getMessages(skip: number, limit?: number): Promise<MessageInterface[]>;
   createChat(metadata: TaskDto, messages: MessageInterface[]): Promise<this>;
   findChatByParams(params: Partial<ConflictChatWithRecipientInterface>): Promise<this>;
   findConflictingChats(params: Partial<ConflictChatWithRecipientInterface>): Promise<this>;
@@ -16,7 +17,7 @@ export interface IConflictChatWithRecipientEntity {
 }
 
 @Injectable({ scope: Scope.REQUEST })
-export class ConflictChatWithRecipientEntity {
+export class ConflictChatWithRecipientEntity implements IConflictChatWithRecipientEntity {
   private metadata: ConflictChatWithRecipientInterface | null;
   private messages: MessageInterface[];
   private chatId: string;
@@ -27,7 +28,41 @@ export class ConflictChatWithRecipientEntity {
   ) {
     this.metadata = null;
     this.messages = [];
-    this.chatId = '';
+    this.chatId = ''; //наименование this._chatId не принимается типизацией
+  }
+
+  // добавил get к наименованию, чтобы линтер не ругался
+  get getChatId(): string {
+    return this.chatId;
+  }
+
+  get meta(): ConflictChatWithRecipientInterface | null {
+    return this.metadata;
+  }
+
+  toObject(): object {
+    return {
+      metadata: this.metadata,
+      messages: [this.messages], // Пока не знаю, кортеж с какими массивами должен быть
+    };
+  }
+
+  async getMessages(skip: number, limit: number = 20): Promise<MessageInterface[]> {
+    if (!this.chatId) {
+      throw new InternalServerErrorException('Чат не найден');
+    }
+    const messages = (await this.messagesRepository.find(
+      {
+        chatId: this.chatId,
+      },
+      null,
+      {
+        skip,
+        limit,
+      }
+    )) as MessageInterface[];
+    this.messages = messages;
+    return messages;
   }
 
   async createChat(metadata: TaskDto): Promise<this> {
