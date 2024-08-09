@@ -8,8 +8,12 @@ import {
 import { TaskDto } from '../../common/dtos/tasks.dto';
 
 export interface IConflictChatWithRecipientEntity {
+  chatId: string;
+  meta: ConflictChatWithRecipientInterface | null;
+  messages: MessageInterface[];
+  toObject(): { metadata: ConflictChatWithRecipientInterface | null; messages: MessageInterface[] };
   getMessages(skip: number, limit?: number): Promise<MessageInterface[]>;
-  createChat(metadata: TaskDto, messages: MessageInterface[]): Promise<this>;
+  createChat(metadata: TaskDto, messages?: MessageInterface[]): Promise<this>;
   findChatByParams(params: Partial<ConflictChatWithRecipientInterface>): Promise<this>;
   findConflictingChats(params: Partial<ConflictChatWithRecipientInterface>): Promise<this>;
   addMessage(chatId: string, message: Partial<MessageInterface>): Promise<this>;
@@ -18,26 +22,29 @@ export interface IConflictChatWithRecipientEntity {
 
 @Injectable({ scope: Scope.REQUEST })
 export class ConflictChatWithRecipientEntity implements IConflictChatWithRecipientEntity {
-  private metadata: ConflictChatWithRecipientInterface | null;
-  private messages: MessageInterface[];
-  private chatId: string;
+  private _meta: ConflictChatWithRecipientInterface | null;
+  private _messages: MessageInterface[];
+  private _chatId: string;
 
   constructor(
     private readonly chatsRepository: ChatsRepository,
     private readonly messagesRepository: MessagesRepository
   ) {
-    this.metadata = null;
-    this.messages = [];
-    this.chatId = ''; //наименование this._chatId не принимается типизацией
+    this._meta = null;
+    this._messages = [];
+    this._chatId = '';
   }
 
-  // добавил get к наименованию, чтобы линтер не ругался
-  get getChatId(): string {
-    return this.chatId;
+  get chatId(): string {
+    return this._chatId;
   }
 
   get meta(): ConflictChatWithRecipientInterface | null {
-    return this.metadata;
+    return this._meta;
+  }
+
+  get messages(): MessageInterface[] {
+    return this._messages;
   }
 
   toObject(): {
@@ -45,18 +52,18 @@ export class ConflictChatWithRecipientEntity implements IConflictChatWithRecipie
     messages: MessageInterface[];
   } {
     return {
-      metadata: this.metadata,
+      metadata: this._meta,
       messages: [], // Пока не знаю, кортеж с какими массивами должен быть
     };
   }
 
   async getMessages(skip: number, limit: number = 20): Promise<MessageInterface[]> {
-    if (!this.chatId) {
+    if (!this._chatId) {
       throw new InternalServerErrorException('Чат не найден');
     }
     const messages = (await this.messagesRepository.find(
       {
-        chatId: this.chatId,
+        chatId: this._chatId,
       },
       null,
       {
@@ -64,7 +71,7 @@ export class ConflictChatWithRecipientEntity implements IConflictChatWithRecipie
         limit,
       }
     )) as MessageInterface[];
-    this.messages = messages;
+    this._messages = messages;
     return messages;
   }
 
@@ -76,46 +83,46 @@ export class ConflictChatWithRecipientEntity implements IConflictChatWithRecipie
     if (!chat) {
       throw new InternalServerErrorException('Ошибка создания чата');
     }
-    this.metadata = chat;
-    this.chatId = chat._id;
+    this._meta = chat;
+    this._chatId = chat._id;
     return this;
   }
 
   async findChatByParams(params: Partial<ConflictChatWithRecipientInterface>): Promise<this> {
     const chats = (await this.chatsRepository.find(params)) as ConflictChatWithRecipientInterface[];
     if (chats.length > 0) {
-      this.metadata = chats[0];
-      this.messages = (await this.messagesRepository.find({
-        chatId: this.metadata._id,
+      this._meta = chats[0];
+      this._messages = (await this.messagesRepository.find({
+        chatId: this._meta._id,
       })) as MessageInterface[];
     } else {
-      this.metadata = null;
-      this.messages = [];
+      this._meta = null;
+      this._messages = [];
     }
     return this;
   }
 
   async findConflictingChats(params: Partial<ConflictChatWithRecipientInterface>): Promise<this> {
     await this.findChatByParams(params);
-    if (!this.metadata) {
+    if (!this._meta) {
       return this;
     }
-    const { taskId, _id } = this.metadata;
+    const { taskId, _id } = this._meta;
     const conflictChats = (await this.chatsRepository.find({
       taskId,
       _id: { $ne: _id },
     })) as ConflictChatWithRecipientInterface[];
     if (conflictChats.length > 0) {
-      this.metadata = conflictChats[0];
-      this.messages = (await this.messagesRepository.find({
-        chatId: this.metadata._id,
+      this._meta = conflictChats[0];
+      this._messages = (await this.messagesRepository.find({
+        chatId: this._meta._id,
       })) as MessageInterface[];
     }
     return this;
   }
 
   async addMessage(chatId: string, message: Partial<MessageInterface>): Promise<this> {
-    if (!this.chatId) {
+    if (!this._chatId) {
       throw new InternalServerErrorException({
         message: 'Идентификатор чата не определён',
       });
@@ -124,20 +131,20 @@ export class ConflictChatWithRecipientEntity implements IConflictChatWithRecipie
       ...message,
       chatId,
     })) as MessageInterface;
-    this.messages.push(newMessage);
+    this._messages.push(newMessage);
     return this;
   }
 
   async closeChat(): Promise<this> {
-    if (!this.chatId) {
+    if (!this._chatId) {
       throw new InternalServerErrorException('Чат не найден');
     }
-    const chat = await this.chatsRepository.findById(this.chatId);
+    const chat = await this.chatsRepository.findById(this._chatId);
     if (!chat) {
       throw new InternalServerErrorException('Чат не найден');
     }
-    await this.chatsRepository.updateOne({ _id: this.chatId }, { isActive: false }, {});
-    this.metadata.isActive = false;
+    await this.chatsRepository.updateOne({ _id: this._chatId }, { isActive: false }, {});
+    this._meta.isActive = false;
     return this;
   }
 }
