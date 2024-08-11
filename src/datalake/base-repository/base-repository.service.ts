@@ -22,7 +22,7 @@ export abstract class BaseRepositoryService<T extends Document, M = {}, V = {}> 
     query: FilterQuery<T>,
     projection?: Record<string, unknown>,
     options?: Record<string, unknown>
-  ): Promise<Array<POJOType<T>>> {
+  ): Promise<Array<T>> {
     return this.entityModel.find(
       query,
       {
