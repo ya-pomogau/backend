@@ -170,4 +170,28 @@ export class ChatEntity<T extends ChatType> {
     }
     return this._messages;
   }
+
+  public async findChatByParams(params: Record<string, unknown>): Promise<MetadataType | null> {
+    const chat = await this.chatsRepository.findOne(params);
+    if (!chat) {
+      throw new InternalServerErrorException('Чат по указанным параметрам не найден.', {
+        cause: `Данные, вернувшиеся из базы данных: ${chat}`,
+      });
+    }
+    switch (this._kind) {
+      case ChatTypes.TASK_CHAT as T:
+        return chat as TaskChatMetaInterface;
+      case ChatTypes.SYSTEM_CHAT as T:
+        return chat as SystemChatMetaInterface;
+      case (ChatTypes.CONFLICT_CHAT_WITH_RECIPIENT || ChatTypes.CONFLICT_CHAT_WITH_VOLUNTEER) as T:
+        return chat as ConflictChatsTupleMetaInterface;
+      default:
+        throw new InternalServerErrorException(
+          'Ошибка на сервере при запросе сообщений чата из базы данных!',
+          {
+            cause: `Передан неизвестный тип чата! kind: ${this._kind}`,
+          }
+        );
+    }
+  }
 }
