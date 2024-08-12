@@ -174,7 +174,7 @@ export class TasksService {
     dto: Partial<GetTasksDto>,
     user?: AnyUserInterface
   ) {
-    const { location: center, distance, start, end, categoryId } = dto;
+    const { location: center, distance, start, end /* , categoryId */ } = dto;
     const query: FilterQuery<TaskInterface> = {
       status: taskStatus,
       location: {
@@ -183,13 +183,16 @@ export class TasksService {
           $maxDistance: distance,
         },
       },
+      //     category: {},
     };
-    if (categoryId) {
+    /*   if (categoryId) {
+      console.dir(`categoryId = ${categoryId}.`);
       query.category._id = categoryId;
     }
     if (!!user && !!user.status) {
       query.category.accessLevel = { $lte: user.status };
     }
+ */
     if (!!start && !!end) {
       query.date = {
         $gte: start,
@@ -204,7 +207,13 @@ export class TasksService {
         $lte: end,
       };
     }
-    return this.tasksRepo.find(query);
+    const res = await this.tasksRepo.find(query);
+    return res.filter((tsk) => {
+      if (tsk && tsk.category && user && user.status) {
+        return tsk.category.accessLevel <= user.status;
+      }
+      return true;
+    });
   }
 
   public async getOwnTasks(user: AnyUserInterface, status: TaskStatus, dto?: GetTasksDto) {
