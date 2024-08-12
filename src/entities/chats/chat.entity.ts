@@ -1,5 +1,5 @@
 import { Injectable, Scope, InternalServerErrorException } from '@nestjs/common';
-import { mongo, ObjectId } from 'mongoose';
+import { type ObjectId } from 'mongoose';
 import {
   ChatType,
   ChatTypes,
@@ -37,9 +37,9 @@ export class ChatEntity<T extends ChatType> {
 
   private _messages: MessagesType<T> | null = null;
 
-  private _chatId: mongo.ObjectId | null = null;
+  private _chatId: string | ObjectId | null = null;
 
-  private _taskId: ObjectId | string | null = null;
+  private _taskId: string | ObjectId | null = null;
 
   private _volunteer: VolunteerInterface | null = null;
 
@@ -59,7 +59,7 @@ export class ChatEntity<T extends ChatType> {
     };
   }
 
-  get chatId(): mongo.ObjectId | null {
+  get chatId(): string | ObjectId | null {
     return this._chatId;
   }
 
@@ -169,16 +169,21 @@ export class ChatEntity<T extends ChatType> {
           cause: `Передан неизвестный тип чата! kind: ${kind}`,
         });
     }
+
     const dto = { ...metadata, isActive: true };
+
     const chatEntity = (await this.chatsRepository.create(dto)) as {
-      _id: mongo.ObjectId;
+      _id: ObjectId;
     } & MetadataType;
+
     if (!chatEntity) {
       throw new InternalServerErrorException('Ошибка сервера!', {
         cause: `Данные, вернувшиеся из базы данных: ${chatEntity}`,
       });
     }
+
     this._chatId = chatEntity._id;
+
     return this;
   }
 
@@ -266,6 +271,30 @@ export class ChatEntity<T extends ChatType> {
             cause: `Передан неизвестный тип чата! kind: ${this._kind}`,
           }
         );
+    }
+
+    return this;
+  }
+
+  public async closeChat(): Promise<this> {
+    if (!this._chatId) {
+      throw new InternalServerErrorException('Ошибка сервера!', {
+        cause: `Не определён id чата! chatId: ${this._chatId}`,
+      });
+    }
+
+    const updatedChat = await this.chatsRepository.findByIdAndUpdate(
+      this._chatId,
+      { isActive: false },
+      { new: true }
+    );
+
+    if (!updatedChat) {
+      throw new InternalServerErrorException('Чат не найден');
+    }
+
+    if (this._metadata) {
+      this._metadata = { ...this._metadata, isActive: false };
     }
 
     return this;
