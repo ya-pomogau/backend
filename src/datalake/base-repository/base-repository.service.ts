@@ -82,7 +82,7 @@ export abstract class BaseRepositoryService<T extends Document, M = {}, V = {}> 
   async findOneAndUpdate(
     query: FilterQuery<T>,
     updateDto: UpdateQuery<unknown>,
-    options: Record<string, unknown>
+    options?: Record<string, unknown>
   ): Promise<T> {
     const doc: Document<T> = await this.entityModel.findOneAndUpdate(query, updateDto, {
       new: true,
