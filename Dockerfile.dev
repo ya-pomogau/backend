@@ -14,4 +14,4 @@ COPY --from=ghcr.io/ufoscout/docker-compose-wait:latest /wait /wait
 
 EXPOSE 3001
 
-CMD /wait && npm start
+CMD /wait && npm run start:debug
