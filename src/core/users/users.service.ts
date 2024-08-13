@@ -447,7 +447,7 @@ export class UsersService {
       });
     }
     const { role } = user;
-    return this.usersRepo.findOneAndUpdate({ userId, role }, dto, { new: true });
+    return this.usersRepo.findOneAndUpdate({ _id: userId, role }, dto, { new: true });
   }
 
   public async updateVolunteerProfile(
