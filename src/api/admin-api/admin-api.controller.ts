@@ -11,7 +11,11 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
-import { InternalServerErrorException, MethodNotAllowedException } from '@nestjs/common/exceptions';
+import {
+  InternalServerErrorException,
+  MethodNotAllowedException,
+  NotFoundException,
+} from '@nestjs/common/exceptions';
 import { ApiTags } from '@nestjs/swagger';
 
 import { UsersService } from '../../core/users/users.service';
@@ -175,10 +179,14 @@ export class AdminApiController {
   @ApiTags('Get all tasks of regular user. Limited access.')
   @AccessControlList({ role: UserRole.ADMIN })
   async getTasks(@Param('id') _id: string): Promise<TaskInterface[]> {
-    const user = (await this.usersService.getProfile(_id)) as unknown as AnyUserInterface;
+    const user = await this.usersService.getProfile(_id).catch((err) => {
+      throw new NotFoundException(`Пользователь с _id '${_id}' не найден: ${err.message}`);
+    });
 
     const results: TaskInterface[][] = await Promise.all(
-      Object.values(TaskStatus).map((status) => this.tasksService.getOwnTasks(user, status))
+      Object.values(TaskStatus).map((status) =>
+        this.tasksService.getOwnTasks(user as unknown as AnyUserInterface, status)
+      )
     ).catch((err) => {
       throw new InternalServerErrorException(err.message);
     });
