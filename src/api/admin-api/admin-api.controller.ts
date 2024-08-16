@@ -11,7 +11,7 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
-import { MethodNotAllowedException } from '@nestjs/common/exceptions';
+import { InternalServerErrorException, MethodNotAllowedException } from '@nestjs/common/exceptions';
 import { ApiTags } from '@nestjs/swagger';
 
 import { UsersService } from '../../core/users/users.service';
@@ -24,7 +24,7 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { AccessControlList } from '../../common/decorators/access-control-list.decorator';
 import { AnyUserInterface, UserRole } from '../../common/types/user.types';
 import { AccessRights } from '../../common/types/access-rights.types';
-import { ResolveResult, TaskStatus } from '../../common/types/task.types';
+import { ResolveResult, TaskInterface, TaskStatus } from '../../common/types/task.types';
 import { UpdateContactsRequestDto } from '../../common/dto/contacts.dto';
 import { NewAdminDto } from './dto/new-admin.dto';
 import { PostDTO } from './dto/new-post.dto';
@@ -168,15 +168,21 @@ export class AdminApiController {
   @Get('users/:id/tasks')
   @ApiTags('Get all tasks of regular user. Limited access.')
   @AccessControlList({ role: UserRole.ADMIN })
-  async getTasks(@Param('id') _id: string) {
+  async getTasks(@Param('id') _id: string): Promise<TaskInterface[]> {
     const user = (await this.usersService.getProfile(_id)) as unknown as AnyUserInterface;
 
-    const created = await this.tasksService.getOwnTasks(user, TaskStatus.CREATED);
-    const accepted = await this.tasksService.getOwnTasks(user, TaskStatus.ACCEPTED);
-    const completed = await this.tasksService.getOwnTasks(user, TaskStatus.COMPLETED);
-    const conflicted = await this.tasksService.getOwnTasks(user, TaskStatus.CONFLICTED);
+    const results: TaskInterface[][] = await Promise.all(
+      Object.values(TaskStatus).map((status) => this.tasksService.getOwnTasks(user, status))
+    ).catch((err) => {
+      throw new InternalServerErrorException(err.message);
+    });
 
-    return Promise.resolve([...created, ...accepted, ...completed, ...conflicted]);
+    let tasks = [];
+    results.forEach((arr) => {
+      tasks = [...tasks, ...arr];
+    });
+
+    return Promise.resolve(tasks);
   }
 
   @Post('blog')
