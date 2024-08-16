@@ -96,7 +96,7 @@ export class CategoriesService {
 
     let res;
     try {
-      res = await this.categoriesRepo.findOneAndUpdate({ _id: id }, updateData, { new: true });
+      res = await this.categoriesRepo.findOneAndUpdate({ _id: id }, updateData);
     } catch (err) {
       throw new InternalServerErrorException(exceptions.category.internalError, {
         cause: `Ошибка в методе обновления данных категории findOneAndUpdate: ${err}`,
