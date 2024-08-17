@@ -117,6 +117,12 @@ export class AdminApiController {
     return this.usersService.updatePrivileges(req.user as AnyUserInterface, userId, privileges);
   }
 
+  @Get('users/:id')
+  @AccessControlList({ role: UserRole.ADMIN, rights: [AccessRights.createTask] })
+  async user(@Param('id') _id: string) {
+    return this.usersService.getProfile(_id);
+  }
+
   @Put('users/:id/confirm')
   @ApiTags('Confirm regular user. Limited access.')
   @AccessControlList({ role: UserRole.ADMIN, rights: [AccessRights.confirmUser] })

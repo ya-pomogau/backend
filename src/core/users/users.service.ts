@@ -169,11 +169,7 @@ export class UsersService {
         case UserStatus.UNCONFIRMED: {
           const { role } = user;
           UsersService.requireLogin(_id);
-          return this.usersRepo.findOneAndUpdate(
-            { _id, role },
-            { status: UserStatus.CONFIRMED },
-            { new: true }
-          );
+          return this.usersRepo.findOneAndUpdate({ _id, role }, { status: UserStatus.CONFIRMED });
         }
         case UserStatus.CONFIRMED: {
           return user;
@@ -204,11 +200,7 @@ export class UsersService {
       if (status < UserStatus.ACTIVATED) {
         const { role } = user;
         UsersService.requireLogin(_id);
-        return this.usersRepo.findOneAndUpdate(
-          { _id, role },
-          { status: status + 1 },
-          { new: true }
-        );
+        return this.usersRepo.findOneAndUpdate({ _id, role }, { status: status + 1 });
       }
       return user;
     }
@@ -225,11 +217,7 @@ export class UsersService {
       if (status > UserStatus.UNCONFIRMED && status <= UserStatus.ACTIVATED) {
         const { role } = user;
         UsersService.requireLogin(_id);
-        return this.usersRepo.findOneAndUpdate(
-          { _id, role },
-          { status: status - 1 },
-          { new: true }
-        );
+        return this.usersRepo.findOneAndUpdate({ _id, role }, { status: status - 1 });
       }
       return user;
     }
@@ -244,7 +232,7 @@ export class UsersService {
     if (user.role === UserRole.VOLUNTEER) {
       const { role } = user;
       UsersService.requireLogin(_id);
-      return this.usersRepo.findOneAndUpdate({ _id, role }, { keys: true }, { new: true });
+      return this.usersRepo.findOneAndUpdate({ _id, role }, { keys: true });
     }
 
     throw new BadRequestException('Выдать ключи можно только волонтёру!');
@@ -258,7 +246,7 @@ export class UsersService {
     if (user.role === UserRole.VOLUNTEER) {
       const { role } = user;
       UsersService.requireLogin(_id);
-      return this.usersRepo.findOneAndUpdate({ _id, role }, { keys: false }, { new: true });
+      return this.usersRepo.findOneAndUpdate({ _id, role }, { keys: false });
     }
 
     throw new BadRequestException('Отобрать ключи можно только у волонтёра!');
@@ -271,11 +259,7 @@ export class UsersService {
     }
     if (user.role === UserRole.ADMIN) {
       UsersService.requireLogin(_id);
-      return this.usersRepo.findOneAndUpdate(
-        { _id, role: UserRole.ADMIN },
-        { isActive: true },
-        { new: true }
-      );
+      return this.usersRepo.findOneAndUpdate({ _id, role: UserRole.ADMIN }, { isActive: true });
     }
     throw new BadRequestException('Можно активировать только администратора');
   }
@@ -288,11 +272,7 @@ export class UsersService {
     if (user.role === UserRole.VOLUNTEER || user.role === UserRole.RECIPIENT) {
       const { role } = user;
       UsersService.requireLogin(_id);
-      return this.usersRepo.findOneAndUpdate(
-        { _id, role },
-        { status: UserStatus.BLOCKED },
-        { new: true }
-      );
+      return this.usersRepo.findOneAndUpdate({ _id, role }, { status: UserStatus.BLOCKED });
     }
     if (user.role === UserRole.ADMIN) {
       throw new BadRequestException('Нужен _id волонтёра или реципиента!');
@@ -310,11 +290,7 @@ export class UsersService {
     }
     if (user.role === UserRole.ADMIN) {
       UsersService.requireLogin(_id);
-      return this.usersRepo.findOneAndUpdate(
-        { _id, role: UserRole.ADMIN },
-        { isActive: false },
-        { new: true }
-      );
+      return this.usersRepo.findOneAndUpdate({ _id, role: UserRole.ADMIN }, { isActive: false });
     }
     if (user.role === UserRole.VOLUNTEER || user.role === UserRole.RECIPIENT) {
       throw new BadRequestException('Нужен _id администратора!');
@@ -351,8 +327,7 @@ export class UsersService {
 
     return this.usersRepo.findOneAndUpdate(
       { _id: userId, role: UserRole.ADMIN },
-      { $addToSet: { permissions: { $each: privileges } } },
-      { new: true }
+      { $addToSet: { permissions: { $each: privileges } } }
     );
   }
 
@@ -382,8 +357,7 @@ export class UsersService {
 
     return this.usersRepo.findOneAndUpdate(
       { userId, role: UserRole.ADMIN },
-      { $pull: { permissions: { $in: privileges } } },
-      { new: true }
+      { $pull: { permissions: { $in: privileges } } }
     );
   }
 
@@ -413,8 +387,7 @@ export class UsersService {
 
     return this.usersRepo.findOneAndUpdate(
       { _id: userId, role: UserRole.ADMIN },
-      { $set: { permissions: privileges } },
-      { new: true }
+      { $set: { permissions: privileges } }
     );
   }
 
@@ -447,16 +420,17 @@ export class UsersService {
       });
     }
     const { role } = user;
-    return this.usersRepo.findOneAndUpdate({ userId, role }, dto, { new: true });
+    return this.usersRepo.findOneAndUpdate({ _id: userId, role }, dto);
   }
 
   public async updateVolunteerProfile(
     userId: string,
     dto: Partial<VolunteerInterface>
   ): Promise<User & Volunteer> {
-    return this.usersRepo.findOneAndUpdate({ _id: userId, role: UserRole.VOLUNTEER }, dto, {
-      new: true,
-    }) as Promise<User & Volunteer>;
+    return this.usersRepo.findOneAndUpdate(
+      { _id: userId, role: UserRole.VOLUNTEER },
+      dto
+    ) as Promise<User & Volunteer>;
   }
 
   private static requireLogin(userId: string) {
