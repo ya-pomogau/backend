@@ -288,7 +288,7 @@ describe('ChatEntity', () => {
     expect(chatEntity).toBeDefined();
   });
 
-  it('should create, load messages, close a task chat', async () => {
+  it('Should create, load messages, add message, find by params and close a task chat', async () => {
     (chatsRepository.create as jest.Mock).mockResolvedValue({
       _id: chatId,
       ...taskChatMetadata,
@@ -308,6 +308,20 @@ describe('ChatEntity', () => {
       limit: 20,
     });
 
+    const params = { taskId };
+    (chatsRepository.findOne as jest.Mock).mockResolvedValue(taskChatMetadata);
+    const foundChat = await chatEntity.findChatByParams(params);
+    expect(foundChat).toEqual(taskChatMetadata);
+    expect(chatsRepository.findOne).toHaveBeenCalledWith(params);
+
+    (messagesRepository.create as jest.Mock).mockResolvedValue(volunteerMessage);
+    await chatEntity.addMessage(volunteerMessage);
+    expect(chatEntity.messages).toContainEqual(volunteerMessage);
+    expect(messagesRepository.create).toHaveBeenCalledWith({
+      ...volunteerMessage,
+      chatId: chatEntity.chatId,
+    });
+
     (chatsRepository.findByIdAndUpdate as jest.Mock).mockResolvedValue({
       ...taskChatMetadata,
       isActive: false,
@@ -321,7 +335,7 @@ describe('ChatEntity', () => {
     );
   });
 
-  it('should create, load messages, close a system chat', async () => {
+  it('Should create, load messages, add message, find by params and close a system chat', async () => {
     (chatsRepository.create as jest.Mock).mockResolvedValue({
       _id: chatId,
       ...systemChatMetadata,
@@ -341,6 +355,20 @@ describe('ChatEntity', () => {
       limit: 20,
     });
 
+    const params = { taskId };
+    (chatsRepository.findOne as jest.Mock).mockResolvedValue(systemChatMetadata);
+    const foundChat = await chatEntity.findChatByParams(params);
+    expect(foundChat).toEqual(systemChatMetadata);
+    expect(chatsRepository.findOne).toHaveBeenCalledWith(params);
+
+    (messagesRepository.create as jest.Mock).mockResolvedValue(volunteerMessage);
+    await chatEntity.addMessage(volunteerMessage);
+    expect(chatEntity.messages).toContainEqual(volunteerMessage);
+    expect(messagesRepository.create).toHaveBeenCalledWith({
+      ...volunteerMessage,
+      chatId: chatEntity.chatId,
+    });
+
     (chatsRepository.findByIdAndUpdate as jest.Mock).mockResolvedValue({
       ...systemChatMetadata,
       isActive: false,
@@ -354,7 +382,7 @@ describe('ChatEntity', () => {
     );
   });
 
-  it('should create, load messages, close a conflict chat with recipient', async () => {
+  it('Should create, load messages, add message, find by params and close a conflict chat with recipient', async () => {
     (chatsRepository.create as jest.Mock).mockResolvedValue({
       _id: chatId,
       ...conflictChatsMetadata,
@@ -379,6 +407,28 @@ describe('ChatEntity', () => {
     expect(messagesRepository.find).toHaveBeenCalledWith({ chatId: chatId }, null, {
       skip: 0,
       limit: 20,
+    });
+
+    const params = { taskId };
+    (chatsRepository.findOne as jest.Mock).mockResolvedValue(conflictChatsMetadata);
+    const foundChat = await chatEntity.findChatByParams(params);
+    expect(foundChat).toEqual(conflictChatsMetadata);
+    expect(chatsRepository.findOne).toHaveBeenCalledWith(params);
+
+    (messagesRepository.create as jest.Mock).mockResolvedValue(volunteerMessage);
+    await chatEntity.addMessage(volunteerMessage);
+    expect(chatEntity.messages[0]).toContainEqual(volunteerMessage); // сообщение волонтера
+    expect(messagesRepository.create).toHaveBeenCalledWith({
+      ...volunteerMessage,
+      chatId: chatEntity.chatId,
+    });
+
+    (messagesRepository.create as jest.Mock).mockResolvedValue(recipientMessage);
+    await chatEntity.addMessage(recipientMessage);
+    expect(chatEntity.messages[1]).toContainEqual(recipientMessage); // сообщение получателя
+    expect(messagesRepository.create).toHaveBeenCalledWith({
+      ...recipientMessage,
+      chatId: chatEntity.chatId,
     });
 
     (chatsRepository.findByIdAndUpdate as jest.Mock).mockResolvedValue({
