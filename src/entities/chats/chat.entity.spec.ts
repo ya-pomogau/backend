@@ -29,6 +29,7 @@ describe('ChatEntity', () => {
       findById: jest.fn(),
       findOneAndUpdate: jest.fn(),
       findOne: jest.fn(),
+      findByIdAndUpdate: jest.fn(),
     };
     messagesRepository = {
       create: jest.fn(),
@@ -50,7 +51,7 @@ describe('ChatEntity', () => {
     expect(chatEntity).toBeDefined();
   });
 
-  it('should create a task chat', async () => {
+  it('should create, close a task chat', async () => {
     const metadata: TaskChatMetaInterface = {
       isActive: true,
       volunteer: {
@@ -98,18 +99,26 @@ describe('ChatEntity', () => {
 
     await chatEntity.createChat(ChatTypes.TASK_CHAT as any, metadata);
 
-    expect(chatsRepository.create).toHaveBeenCalledWith({
-      ...metadata,
-      isActive: true,
-    });
-
-    expect(chatEntity.chatId).toEqual(chatId);
-    expect(chatEntity.metadata).toEqual(metadata);
+    expect(chatEntity['_chatId']).toEqual(chatId);
     expect(chatEntity['_taskId']).toEqual(taskId);
     expect(chatEntity['_volunteer']).toEqual(metadata.volunteer);
     expect(chatEntity['_recipient']).toEqual(metadata.recipient);
+    expect(chatEntity['_metadata']['isActive']).toEqual(true);
+
+    (chatsRepository.findByIdAndUpdate as jest.Mock).mockResolvedValue({
+      ...metadata,
+      isActive: false,
+    });
+    await chatEntity.closeChat();
+    expect(chatEntity['_metadata']['isActive']).toEqual(false);
+    expect(chatsRepository.findByIdAndUpdate).toHaveBeenCalledWith(
+      chatId,
+      { isActive: false },
+      { new: true }
+    );
   });
-  it('should create a system chat', async () => {
+
+  it('should create, close a system chat', async () => {
     const metadata: SystemChatMetaInterface = {
       isActive: true,
       user: {
@@ -156,19 +165,26 @@ describe('ChatEntity', () => {
 
     await chatEntity.createChat(ChatTypes.SYSTEM_CHAT as any, metadata);
 
-    expect(chatsRepository.create).toHaveBeenCalledWith({
-      ...metadata,
-      isActive: true,
-    });
-
-    expect(chatEntity.chatId).toEqual(chatId);
-    expect(chatEntity.metadata).toEqual(metadata);
+    expect(chatEntity['_chatId']).toEqual(chatId);
     expect(chatEntity['_volunteer']).toBeNull();
     expect(chatEntity['_recipient']).toEqual(metadata.user);
     expect(chatEntity['_admin']).toEqual(metadata.admin);
+    expect(chatEntity['_metadata']['isActive']).toEqual(true);
+
+    (chatsRepository.findByIdAndUpdate as jest.Mock).mockResolvedValue({
+      ...metadata,
+      isActive: false,
+    });
+    await chatEntity.closeChat();
+    expect(chatEntity['_metadata']['isActive']).toEqual(false);
+    expect(chatsRepository.findByIdAndUpdate).toHaveBeenCalledWith(
+      chatId,
+      { isActive: false },
+      { new: true }
+    );
   });
 
-  it('should create a conflict chat with recipient', async () => {
+  it('should create, close a conflict chat with recipient', async () => {
     const metadata: ConflictChatsTupleMetaInterface = {
       taskId: taskId,
       moderator: {
@@ -239,7 +255,7 @@ describe('ChatEntity', () => {
       adminVolunteerWatermark: 'watermark',
       adminVolunteerUnreads: 0,
       adminRecipientWatermark: 'watermark',
-      adminRecipientUnreads: 0
+      adminRecipientUnreads: 0,
     };
 
     (chatsRepository.create as jest.Mock).mockResolvedValue({
@@ -249,16 +265,23 @@ describe('ChatEntity', () => {
 
     await chatEntity.createChat(ChatTypes.CONFLICT_CHAT_WITH_RECIPIENT as any, metadata);
 
-    expect(chatsRepository.create).toHaveBeenCalledWith({
-      ...metadata,
-      isActive: true,
-    });
-
-    expect(chatEntity.chatId).toEqual(chatId);
-    expect(chatEntity.metadata).toEqual(metadata);
+    expect(chatEntity['_chatId']).toEqual(chatId);
     expect(chatEntity['_taskId']).toEqual(taskId);
     expect(chatEntity['_volunteer']).toEqual(metadata.meta[0].volunteer);
     expect(chatEntity['_recipient']).toEqual(metadata.meta[1].recipient);
     expect(chatEntity['_admin']).toEqual(metadata.moderator);
+    expect(chatEntity['_metadata']['isActive']).toEqual(true);
+
+    (chatsRepository.findByIdAndUpdate as jest.Mock).mockResolvedValue({
+      ...metadata,
+      isActive: false,
+    });
+    await chatEntity.closeChat();
+    expect(chatEntity['_metadata']['isActive']).toEqual(false);
+    expect(chatsRepository.findByIdAndUpdate).toHaveBeenCalledWith(
+      chatId,
+      { isActive: false },
+      { new: true }
+    );
   });
 });

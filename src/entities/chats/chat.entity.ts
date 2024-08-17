@@ -202,6 +202,8 @@ export class ChatEntity<T extends ChatType> implements IChatEntity<T> {
 
     this._chatId = chatEntity._id;
 
+    this._metadata = { ...this._metadata, isActive: true };
+
     return this;
   }
 
