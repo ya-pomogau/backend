@@ -77,7 +77,7 @@ export class ChatEntity<T extends ChatType> implements IChatEntity<T> {
     };
   }
 
-  get chatId(): string | ObjectId | null {
+  public get chatId(): string | ObjectId | null {
     return this._chatId;
   }
 
@@ -85,57 +85,7 @@ export class ChatEntity<T extends ChatType> implements IChatEntity<T> {
     return this._metadata;
   }
 
-  get messages(): MessagesType<T> | null {
-    return this._messages;
-  }
-
-  public async loadMessages(skip: number, limit: number = 20): Promise<MessagesType<T>> {
-    if (!this._chatId) {
-      throw new InternalServerErrorException('Ошибка сервера!', {
-        cause: `Не определён id чата! chatId: ${this._chatId}`,
-      });
-    }
-
-    if (skip < 0 || limit < 0) {
-      throw new InternalServerErrorException('Ошибка сервера!', {
-        cause: `Параметры skip и limit не могут быть отрицательными! skip: ${skip}, limit: ${limit}.`,
-      });
-    }
-
-    // Если limit равен 0, не ограничиваем количество загружаемых сообщений
-    const queryOptions = limit === 0 ? { skip } : { skip, limit };
-
-    const messages = (await this.messagesRepository.find(
-      {
-        chatId: this._chatId,
-      },
-      null,
-      queryOptions
-    )) as MessageInterface[];
-
-    switch (this._kind) {
-      case ChatTypes.CONFLICT_CHAT_WITH_RECIPIENT as T:
-      case ChatTypes.CONFLICT_CHAT_WITH_VOLUNTEER as T: {
-        const volunteerMessages = messages.filter((msg) => {
-          return msg.author.role === UserRole.VOLUNTEER;
-        });
-        const recipientMessages = messages.filter((msg) => {
-          return msg.author.role === UserRole.RECIPIENT;
-        });
-        this._messages = [volunteerMessages, recipientMessages] as MessagesType<T>;
-        break;
-      }
-      case ChatTypes.SYSTEM_CHAT as T:
-      case ChatTypes.TASK_CHAT as T: {
-        this._messages = messages as MessagesType<T>;
-        break;
-      }
-      default:
-        throw new InternalServerErrorException('Ошибка сервера!', {
-          cause: `Передан неизвестный тип чата! kind: ${this._kind}`,
-        });
-    }
-
+  public get messages(): MessagesType<T> | null {
     return this._messages;
   }
 
@@ -146,6 +96,7 @@ export class ChatEntity<T extends ChatType> implements IChatEntity<T> {
       });
     }
 
+    this._kind = kind;
     this._metadata = metadata;
 
     switch (kind) {
@@ -205,6 +156,56 @@ export class ChatEntity<T extends ChatType> implements IChatEntity<T> {
     this._metadata = { ...this._metadata, isActive: true };
 
     return this;
+  }
+
+  public async loadMessages(skip: number, limit: number = 20): Promise<MessagesType<T>> {
+    if (!this._chatId) {
+      throw new InternalServerErrorException('Ошибка сервера!', {
+        cause: `Не определён id чата! chatId: ${this._chatId}`,
+      });
+    }
+
+    if (skip < 0 || limit < 0) {
+      throw new InternalServerErrorException('Ошибка сервера!', {
+        cause: `Параметры skip и limit не могут быть отрицательными! skip: ${skip}, limit: ${limit}.`,
+      });
+    }
+
+    // Если limit равен 0, не ограничиваем количество загружаемых сообщений
+    const queryOptions = limit === 0 ? { skip } : { skip, limit };
+
+    const messages = (await this.messagesRepository.find(
+      {
+        chatId: this._chatId,
+      },
+      null,
+      queryOptions
+    )) as MessageInterface[];
+
+    switch (this._kind) {
+      case ChatTypes.CONFLICT_CHAT_WITH_RECIPIENT as T:
+      case ChatTypes.CONFLICT_CHAT_WITH_VOLUNTEER as T: {
+        const volunteerMessages = messages.filter(
+          (msg) => msg.author && msg.author.role === UserRole.VOLUNTEER
+        );
+        const recipientMessages = messages.filter(
+          (msg) => msg.author && msg.author.role === UserRole.RECIPIENT
+        );
+        this._messages = [volunteerMessages, recipientMessages] as MessagesType<T>;
+        break;
+      }
+      case ChatTypes.SYSTEM_CHAT as T:
+      case ChatTypes.TASK_CHAT as T: {
+        this._messages = messages as MessagesType<T>;
+        break;
+      }
+      default:
+        throw new InternalServerErrorException('Ошибка сервера!', {
+          cause: `Передан неизвестный тип чата! kind: ${this._kind}`,
+        });
+    }
+
+    return this._messages;
   }
 
   public async findChatByParams(params: Record<string, unknown>): Promise<MetadataType | null> {
