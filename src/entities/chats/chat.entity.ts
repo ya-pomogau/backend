@@ -18,7 +18,7 @@ import {
 } from '../../common/types/user.types';
 import { UserRole } from '../../common/types/user.types';
 
-export interface IChatEntity<T extends ChatType> {
+export interface ChatEntityInterface<T extends ChatType> {
   chatId: string | ObjectId | null;
   metadata: MetadataType | null;
   messages: MessagesType<T> | null;
@@ -27,9 +27,9 @@ export interface IChatEntity<T extends ChatType> {
 
   loadMessages(skip: number, limit?: number): Promise<MessagesType<T>>;
 
-  createChat(kind: T, metadata: MetadataType | null): Promise<IChatEntity<T>>;
+  createChat(kind: T, metadata: MetadataType | null): Promise<ChatEntityInterface<T>>;
 
-  findChatByParams(params: Record<string, unknown>): Promise<IChatEntity<T> | null>;
+  findChatByParams(params: Record<string, unknown>): Promise<ChatEntityInterface<T> | null>;
 
   addMessage(newMessage: Partial<MessageInterface>): Promise<this>;
 
@@ -48,7 +48,7 @@ type MessagesType<T extends ChatType> = T extends
   : MessageInterface[];
 
 @Injectable({ scope: Scope.REQUEST })
-export class ChatEntity<T extends ChatType> implements IChatEntity<T> {
+export class ChatEntity<T extends ChatType> implements ChatEntityInterface<T> {
   private _kind: T;
 
   private _metadata: MetadataType = null;
@@ -89,7 +89,7 @@ export class ChatEntity<T extends ChatType> implements IChatEntity<T> {
     return this._messages;
   }
 
-  public async createChat(kind: T, metadata: MetadataType | null): Promise<IChatEntity<T>> {
+  public async createChat(kind: T, metadata: MetadataType | null): Promise<ChatEntityInterface<T>> {
     if (!metadata) {
       throw new InternalServerErrorException('Ошибка сервера!', {
         cause: `Некорректно переданы метаданные! metadata: ${kind}`,
@@ -195,7 +195,7 @@ export class ChatEntity<T extends ChatType> implements IChatEntity<T> {
     return this._messages;
   }
 
-  public async findChatByParams(params: Record<string, unknown>): Promise<IChatEntity<T> | null> {
+  public async findChatByParams(params: Record<string, unknown>): Promise<ChatEntityInterface<T> | null> {
     const data = await this.chatsRepository.findOne(params);
     if (!data) {
       throw new InternalServerErrorException('Ошибка сервера!', {
