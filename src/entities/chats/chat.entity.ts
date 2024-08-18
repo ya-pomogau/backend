@@ -27,9 +27,9 @@ export interface IChatEntity<T extends ChatType> {
 
   loadMessages(skip: number, limit?: number): Promise<MessagesType<T>>;
 
-  createChat(kind: T, metadata: MetadataType | null): Promise<this>;
+  createChat(kind: T, metadata: MetadataType | null): Promise<IChatEntity<T>>;
 
-  findChatByParams(params: Record<string, unknown>): Promise<MetadataType | null>;
+  findChatByParams(params: Record<string, unknown>): Promise<IChatEntity<T> | null>;
 
   addMessage(newMessage: Partial<MessageInterface>): Promise<this>;
 
@@ -89,16 +89,14 @@ export class ChatEntity<T extends ChatType> implements IChatEntity<T> {
     return this._messages;
   }
 
-  public async createChat(kind: T, metadata: MetadataType | null): Promise<this> {
+  public async createChat(kind: T, metadata: MetadataType | null): Promise<IChatEntity<T>> {
     if (!metadata) {
       throw new InternalServerErrorException('Ошибка сервера!', {
         cause: `Некорректно переданы метаданные! metadata: ${kind}`,
       });
     }
-
     this._kind = kind;
     this._metadata = metadata;
-
     switch (kind) {
       case ChatTypes.TASK_CHAT as T: {
         const taskMetadata = metadata as TaskChatMetaInterface;
@@ -138,23 +136,17 @@ export class ChatEntity<T extends ChatType> implements IChatEntity<T> {
           cause: `Передан неизвестный тип чата! kind: ${kind}`,
         });
     }
-
     const dto = { ...metadata, isActive: true };
-
     const chatEntity = (await this.chatsRepository.create(dto)) as {
       _id: ObjectId;
     } & MetadataType;
-
     if (!chatEntity) {
       throw new InternalServerErrorException('Ошибка сервера!', {
         cause: `Данные, вернувшиеся из базы данных: ${chatEntity}`,
       });
     }
-
     this._chatId = chatEntity._id;
-
     this._metadata = { ...this._metadata, isActive: true };
-
     return this;
   }
 
@@ -164,16 +156,13 @@ export class ChatEntity<T extends ChatType> implements IChatEntity<T> {
         cause: `Не определён id чата! chatId: ${this._chatId}`,
       });
     }
-
     if (skip < 0 || limit < 0) {
       throw new InternalServerErrorException('Ошибка сервера!', {
         cause: `Параметры skip и limit не могут быть отрицательными! skip: ${skip}, limit: ${limit}.`,
       });
     }
-
     // Если limit равен 0, не ограничиваем количество загружаемых сообщений
     const queryOptions = limit === 0 ? { skip } : { skip, limit };
-
     const messages = (await this.messagesRepository.find(
       {
         chatId: this._chatId,
@@ -181,7 +170,6 @@ export class ChatEntity<T extends ChatType> implements IChatEntity<T> {
       null,
       queryOptions
     )) as MessageInterface[];
-
     switch (this._kind) {
       case ChatTypes.CONFLICT_CHAT_WITH_RECIPIENT as T:
       case ChatTypes.CONFLICT_CHAT_WITH_VOLUNTEER as T: {
@@ -204,30 +192,58 @@ export class ChatEntity<T extends ChatType> implements IChatEntity<T> {
           cause: `Передан неизвестный тип чата! kind: ${this._kind}`,
         });
     }
-
     return this._messages;
   }
 
-  public async findChatByParams(params: Record<string, unknown>): Promise<MetadataType | null> {
+  public async findChatByParams(params: Record<string, unknown>): Promise<IChatEntity<T> | null> {
     const data = await this.chatsRepository.findOne(params);
     if (!data) {
       throw new InternalServerErrorException('Ошибка сервера!', {
         cause: `Данные, вернувшиеся из базы данных: ${data}`,
       });
     }
+    this._metadata = data as MetadataType;
+    this._chatId = (data as any)._id;
     switch (this._kind) {
-      case ChatTypes.TASK_CHAT as T:
-        return data as TaskChatMetaInterface;
-      case ChatTypes.SYSTEM_CHAT as T:
-        return data as SystemChatMetaInterface;
+      case ChatTypes.TASK_CHAT as T: {
+        const taskMetadata = data as TaskChatMetaInterface;
+        this._taskId = taskMetadata.taskId;
+        this._volunteer = taskMetadata.volunteer;
+        this._recipient = taskMetadata.recipient;
+        break;
+      }
+      case ChatTypes.SYSTEM_CHAT as T: {
+        const systemMetadata = data as SystemChatMetaInterface;
+        switch (systemMetadata.user.role) {
+          case UserRole.VOLUNTEER:
+            this._volunteer = systemMetadata.user as VolunteerInterface;
+            break;
+          case UserRole.RECIPIENT:
+            this._recipient = systemMetadata.user as RecipientInterface;
+            break;
+          default:
+            throw new InternalServerErrorException('Ошибка сервера!', {
+              cause: `Невозможно определить роль пользователя! systemMetadata.user.role: ${systemMetadata.user.role}`,
+            });
+        }
+        this._admin = systemMetadata.admin;
+        break;
+      }
       case ChatTypes.CONFLICT_CHAT_WITH_RECIPIENT as T:
-      case ChatTypes.CONFLICT_CHAT_WITH_VOLUNTEER as T:
-        return data as ConflictChatsTupleMetaInterface;
+      case ChatTypes.CONFLICT_CHAT_WITH_VOLUNTEER as T: {
+        const conflictMetadata = data as ConflictChatsTupleMetaInterface;
+        this._taskId = conflictMetadata.taskId;
+        this._admin = conflictMetadata.moderator;
+        this._volunteer = conflictMetadata.meta[0]?.volunteer;
+        this._recipient = conflictMetadata.meta[1]?.recipient;
+        break;
+      }
       default:
         throw new InternalServerErrorException('Ошибка сервера!', {
           cause: `Передан неизвестный тип чата! kind: ${this._kind}`,
         });
     }
+    return this;
   }
 
   public async addMessage(newMessage: Partial<MessageInterface>): Promise<this> {
@@ -236,18 +252,15 @@ export class ChatEntity<T extends ChatType> implements IChatEntity<T> {
         cause: `Не определён id чата! chatId: ${this._chatId}`,
       });
     }
-
     if (!newMessage.author || !newMessage.body) {
       throw new InternalServerErrorException('Ошибка сервера!', {
         cause: `Некорректное сообщение!`,
       });
     }
-
     const savedMessage = (await this.messagesRepository.create({
       ...newMessage,
       chatId: this._chatId,
     })) as MessageInterface;
-
     if (this._messages === null) {
       switch (this._kind) {
         case ChatTypes.CONFLICT_CHAT_WITH_RECIPIENT as T:
@@ -293,7 +306,6 @@ export class ChatEntity<T extends ChatType> implements IChatEntity<T> {
           }
         );
     }
-
     return this;
   }
 
@@ -309,15 +321,12 @@ export class ChatEntity<T extends ChatType> implements IChatEntity<T> {
       { isActive: false },
       { new: true }
     );
-
     if (!updatedChat) {
       throw new InternalServerErrorException('Чат не найден');
     }
-
     if (this._metadata) {
       this._metadata = { ...this._metadata, isActive: false };
     }
-
     return this;
   }
 }

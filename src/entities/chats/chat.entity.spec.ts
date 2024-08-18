@@ -5,7 +5,6 @@ import { ChatsRepository } from '../../datalake/chats/chats.repository';
 import { MessagesRepository } from '../../datalake/messages/messages.repository';
 import {
   MessageInterface,
-  ConflictChatContentTuple,
   TaskChatMetaInterface,
   SystemChatMetaInterface,
   ConflictChatsTupleMetaInterface,
@@ -21,10 +20,9 @@ describe('ChatEntity', () => {
   let messagesRepository: Partial<Record<keyof MessagesRepository, jest.Mock>>;
 
   const chatId = new Types.ObjectId().toHexString();
-
   const taskId = new Types.ObjectId().toHexString();
 
-  const recipientMessage = {
+  const recipientMessage: MessageInterface = {
     _id: new Types.ObjectId().toHexString() as any,
     title: 'title',
     body: 'Hello',
@@ -54,7 +52,7 @@ describe('ChatEntity', () => {
     chatId: chatId as any,
   };
 
-  const volunteerMessage = {
+  const volunteerMessage: MessageInterface = {
     _id: new Types.ObjectId().toHexString() as any,
     title: 'title',
     body: 'Hello',
@@ -132,6 +130,7 @@ describe('ChatEntity', () => {
   ];
 
   const systemChatMetadata: SystemChatMetaInterface = {
+    _id: chatId,
     isActive: true,
     user: {
       name: 'name',
@@ -163,11 +162,10 @@ describe('ChatEntity', () => {
       isActive: false,
     },
     type: ChatTypes.SYSTEM_CHAT as any,
-    _id: chatId,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
     watermark: 'watermark',
     unreads: 0,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   };
 
   const systemСhatMessages: MessageInterface[] = [
@@ -309,9 +307,14 @@ describe('ChatEntity', () => {
     });
 
     const params = { taskId };
-    (chatsRepository.findOne as jest.Mock).mockResolvedValue(taskChatMetadata);
+    (chatsRepository.findOne as jest.Mock).mockResolvedValue({
+      ...taskChatMetadata,
+      _id: chatId,
+    });
     const foundChat = await chatEntity.findChatByParams(params);
-    expect(foundChat).toEqual(taskChatMetadata);
+    expect(foundChat).toBeInstanceOf(ChatEntity);
+    expect(foundChat!.chatId).toEqual(chatId);
+    expect(foundChat!.metadata).toEqual(taskChatMetadata);
     expect(chatsRepository.findOne).toHaveBeenCalledWith(params);
 
     (messagesRepository.create as jest.Mock).mockResolvedValue(volunteerMessage);
@@ -356,9 +359,14 @@ describe('ChatEntity', () => {
     });
 
     const params = { taskId };
-    (chatsRepository.findOne as jest.Mock).mockResolvedValue(systemChatMetadata);
+    (chatsRepository.findOne as jest.Mock).mockResolvedValue({
+      ...systemChatMetadata,
+      _id: chatId,
+    });
     const foundChat = await chatEntity.findChatByParams(params);
-    expect(foundChat).toEqual(systemChatMetadata);
+    expect(foundChat).toBeInstanceOf(ChatEntity);
+    expect(foundChat!.chatId).toEqual(chatId);
+    expect(foundChat!.metadata).toEqual(systemChatMetadata);
     expect(chatsRepository.findOne).toHaveBeenCalledWith(params);
 
     (messagesRepository.create as jest.Mock).mockResolvedValue(volunteerMessage);
@@ -410,14 +418,24 @@ describe('ChatEntity', () => {
     });
 
     const params = { taskId };
-    (chatsRepository.findOne as jest.Mock).mockResolvedValue(conflictChatsMetadata);
+    (chatsRepository.findOne as jest.Mock).mockResolvedValue({
+      ...conflictChatsMetadata,
+      _id: chatId,
+    });
     const foundChat = await chatEntity.findChatByParams(params);
-    expect(foundChat).toEqual(conflictChatsMetadata);
+    expect(foundChat).toBeInstanceOf(ChatEntity);
+    expect(foundChat!.chatId).toEqual(chatId);
+
+    const expectedMetadata = {
+      ...conflictChatsMetadata,
+      _id: chatId,
+    };
+    expect(foundChat!.metadata).toEqual(expectedMetadata);
     expect(chatsRepository.findOne).toHaveBeenCalledWith(params);
 
     (messagesRepository.create as jest.Mock).mockResolvedValue(volunteerMessage);
     await chatEntity.addMessage(volunteerMessage);
-    expect(chatEntity.messages[0]).toContainEqual(volunteerMessage); // сообщение волонтера
+    expect(chatEntity.messages[0]).toContainEqual(volunteerMessage);
     expect(messagesRepository.create).toHaveBeenCalledWith({
       ...volunteerMessage,
       chatId: chatEntity.chatId,
@@ -425,7 +443,7 @@ describe('ChatEntity', () => {
 
     (messagesRepository.create as jest.Mock).mockResolvedValue(recipientMessage);
     await chatEntity.addMessage(recipientMessage);
-    expect(chatEntity.messages[1]).toContainEqual(recipientMessage); // сообщение получателя
+    expect(chatEntity.messages[1]).toContainEqual(recipientMessage);
     expect(messagesRepository.create).toHaveBeenCalledWith({
       ...recipientMessage,
       chatId: chatEntity.chatId,
