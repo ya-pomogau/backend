@@ -19,20 +19,14 @@ import {
 import { UserRole } from '../../common/types/user.types';
 
 export interface ChatEntityInterface<T extends ChatType> {
-  chatId: string | ObjectId | null;
-  metadata: MetadataType | null;
-  messages: MessagesType<T> | null;
-
+  get chatId(): string | ObjectId | null;
+  get metadata(): MetadataType | null;
+  get messages(): MessagesType<T> | null;
   toObject(): { metadata: MetadataType; messages: MessagesType<T> | null };
-
   loadMessages(skip: number, limit?: number): Promise<MessagesType<T>>;
-
   createChat(kind: T, metadata: MetadataType | null): Promise<ChatEntityInterface<T>>;
-
   findChatByParams(params: Record<string, unknown>): Promise<ChatEntityInterface<T> | null>;
-
   addMessage(newMessage: Partial<MessageInterface>): Promise<this>;
-
   closeChat(): Promise<this>;
 }
 
@@ -195,7 +189,9 @@ export class ChatEntity<T extends ChatType> implements ChatEntityInterface<T> {
     return this._messages;
   }
 
-  public async findChatByParams(params: Record<string, unknown>): Promise<ChatEntityInterface<T> | null> {
+  public async findChatByParams(
+    params: Record<string, unknown>
+  ): Promise<ChatEntityInterface<T> | null> {
     const data = await this.chatsRepository.findOne(params);
     if (!data) {
       throw new InternalServerErrorException('Ошибка сервера!', {
