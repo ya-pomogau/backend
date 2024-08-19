@@ -109,7 +109,8 @@ export class TasksService {
       {
         adminResolve: ResolveStatus.PENDING,
         moderator: { name, phone, avatar, address, _id, vkId, role },
-      }
+      },
+      {}
     );
   }
 
@@ -165,7 +166,7 @@ export class TasksService {
     if (role === UserRole.RECIPIENT) {
       query.recipient = { _id: userId, address, avatar, name, phone };
     }
-    return this.tasksRepo.findOneAndUpdate(query, dto);
+    return this.tasksRepo.findOneAndUpdate(query, dto, { new: true });
   }
 
   public async getTasksByStatus(
