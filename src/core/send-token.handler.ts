@@ -6,7 +6,7 @@ import { SystemApiGateway } from '../api/system-api/system-api.gateway';
 export class SendTokenHandler implements ICommandHandler<SendTokenCommand> {
   constructor(private readonly systemApiGateway: SystemApiGateway) {}
 
-  async execute({ user, token }: SendTokenCommand) {
-    return this.systemApiGateway.sendToken(user, token);
+  async execute({ userId, token }: SendTokenCommand) {
+    return this.systemApiGateway.sendToken(userId, token);
   }
 }

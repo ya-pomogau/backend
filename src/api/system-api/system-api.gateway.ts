@@ -19,9 +19,7 @@ import { IsArray, IsNotEmpty, IsObject, IsString } from 'class-validator';
 import { AnyUserInterface } from '../../common/types/user.types';
 import { SocketAuthGuard } from '../../common/guards/socket-auth.guard';
 import { SocketValidationPipe } from '../../common/pipes/socket-validation.pipe';
-import { Recipient } from '../../datalake/users/schemas/recipient.schema';
-import { Admin } from '../../datalake/users/schemas/admin.schema';
-import { Volunteer } from '../../datalake/users/schemas/volunteer.schema';
+import { wsMessage } from '../../common/types/websockets.types';
 
 // Интерфейс и dto созданы для тестирования SocketValidationPipe
 // Удалить на этапе, когда будут реализованы необходимые dto
@@ -103,21 +101,26 @@ export class SystemApiGateway implements OnGatewayInit, OnGatewayConnection, OnG
     this.connectedUsers.set(client.id, payload);
   }
 
-  sendToken(user: Recipient | Admin | Volunteer | Record<string, unknown>, token: string) {
+  sendToken(userId: string, token: string) {
     let clientId: string;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     this.connectedUsers.forEach((value, key, map) => {
-      if (value._id === user._id) {
+      if (value._id === userId) {
         clientId = key;
       }
     });
 
     if (clientId) {
-      this.server.sockets.sockets.get(clientId).emit('new_token', {
-        data: {
-          message: `The user's status has changed. The token must be replaced.`,
+      const message: wsMessage = {
+        kind: 'REFRESH_TOKEN_COMMAND',
+        payload: {
+          userId,
           token,
         },
+      };
+
+      this.server.sockets.sockets.get(clientId).emit('new_token', {
+        data: message,
       });
     }
   }
