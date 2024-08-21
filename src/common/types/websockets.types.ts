@@ -4,6 +4,7 @@ import {
   SystemChatMetaInterface,
   TaskChatMetaInterface,
 } from './chats.types';
+import { AnyUserInterface } from './user.types';
 
 export const wsMessageKind = {
   REFRESH_TOKEN_COMMAND: 'RefreshToken',
@@ -44,6 +45,10 @@ export type wsPayloadType =
   | wsMessagesPayload;
 
 export type wsMessage = {
-  kind: wsMessageKind;
   payload: wsPayloadType;
+};
+
+export type wsConnectedUserData = {
+  user: AnyUserInterface;
+  sockets: Array<string>;
 };
