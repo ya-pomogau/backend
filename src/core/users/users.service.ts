@@ -6,6 +6,10 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InternalServerErrorException, NotFoundException } from '@nestjs/common/exceptions';
+import { CommandBus } from '@nestjs/cqrs';
+
+import { AuthenticateCommand } from '../../common/commands/authenticate.command';
+import { SendTokenCommand } from '../../common/commands/send-token.command';
 import { CreateAdminDto, CreateUserDto } from '../../common/dto/users.dto';
 import {
   AdminInterface,
@@ -29,7 +33,10 @@ import { Recipient } from '../../datalake/users/schemas/recipient.schema';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly usersRepo: UsersRepository) {}
+  constructor(
+    private readonly usersRepo: UsersRepository,
+    private readonly commandBus: CommandBus
+  ) {}
 
   private static loginRequired: Array<string> = [];
 
@@ -153,7 +160,7 @@ export class UsersService {
     });
   }
 
-  async confirm(_id: string) {
+  async confirm(_id: string): Promise<User & (Recipient | Admin | Volunteer)> {
     const user = (await this.usersRepo.findById(_id)) as User & (Recipient | Admin | Volunteer);
     if (!user) {
       throw new NotFoundException(`Пользователь с _id '${_id}' не найден<`);
@@ -169,7 +176,22 @@ export class UsersService {
         case UserStatus.UNCONFIRMED: {
           const { role } = user;
           UsersService.requireLogin(_id);
-          return this.usersRepo.findOneAndUpdate({ _id, role }, { status: UserStatus.CONFIRMED });
+          const updatedUser = (await this.usersRepo.findOneAndUpdate(
+            { _id, role },
+            { status: UserStatus.CONFIRMED }
+          )) as User & (Recipient | Admin | Volunteer);
+
+          let token: string;
+          if (updatedUser) {
+            token = await this.commandBus.execute<AuthenticateCommand, string>(
+              new AuthenticateCommand(updatedUser)
+            );
+            this.commandBus.execute<SendTokenCommand, string>(
+              new SendTokenCommand(updatedUser, token)
+            );
+          }
+
+          return Promise.resolve(updatedUser);
         }
         case UserStatus.CONFIRMED: {
           return user;
@@ -190,7 +212,7 @@ export class UsersService {
     throw new BadRequestException('Повысить можно только волонтёра или реципиента');
   }
 
-  async upgrade(_id: string) {
+  async upgrade(_id: string): Promise<User & (Recipient | Admin | Volunteer)> {
     const user = (await this.usersRepo.findById(_id)) as User & (Recipient | Admin | Volunteer);
     if (!user) {
       throw new NotFoundException(`Пользователь с _id '${_id}' не найден<`);
@@ -200,14 +222,29 @@ export class UsersService {
       if (status < UserStatus.ACTIVATED) {
         const { role } = user;
         UsersService.requireLogin(_id);
-        return this.usersRepo.findOneAndUpdate({ _id, role }, { status: status + 1 });
+        const updatedUser = (await this.usersRepo.findOneAndUpdate(
+          { _id, role },
+          { status: status + 1 }
+        )) as User & (Recipient | Admin | Volunteer);
+
+        let token: string;
+        if (updatedUser) {
+          token = await this.commandBus.execute<AuthenticateCommand, string>(
+            new AuthenticateCommand(updatedUser)
+          );
+          this.commandBus.execute<SendTokenCommand, string>(
+            new SendTokenCommand(updatedUser, token)
+          );
+        }
+
+        return Promise.resolve(updatedUser);
       }
       return user;
     }
     throw new BadRequestException('Повысить можно только волонтёра или реципиента');
   }
 
-  async downgrade(_id: string) {
+  async downgrade(_id: string): Promise<User & (Recipient | Admin | Volunteer)> {
     const user = (await this.usersRepo.findById(_id)) as User & (Recipient | Admin | Volunteer);
     if (!user) {
       throw new NotFoundException(`Пользователь с _id '${_id}' не найден<`);
@@ -217,14 +254,29 @@ export class UsersService {
       if (status > UserStatus.UNCONFIRMED && status <= UserStatus.ACTIVATED) {
         const { role } = user;
         UsersService.requireLogin(_id);
-        return this.usersRepo.findOneAndUpdate({ _id, role }, { status: status - 1 });
+        const updatedUser = (await this.usersRepo.findOneAndUpdate(
+          { _id, role },
+          { status: status - 1 }
+        )) as User & (Recipient | Admin | Volunteer);
+
+        let token: string;
+        if (updatedUser) {
+          token = await this.commandBus.execute<AuthenticateCommand, string>(
+            new AuthenticateCommand(updatedUser)
+          );
+          this.commandBus.execute<SendTokenCommand, string>(
+            new SendTokenCommand(updatedUser, token)
+          );
+        }
+
+        return Promise.resolve(updatedUser);
       }
       return user;
     }
     throw new BadRequestException('Понизить статус можно только волонтёру или реципиенту');
   }
 
-  async grantKeys(_id: string) {
+  async grantKeys(_id: string): Promise<User & (Recipient | Admin | Volunteer)> {
     const user = (await this.usersRepo.findById(_id)) as User & (Recipient | Admin | Volunteer);
     if (!user) {
       throw new NotFoundException(`Пользователь с _id '${_id}' не найден<`);
@@ -232,13 +284,26 @@ export class UsersService {
     if (user.role === UserRole.VOLUNTEER) {
       const { role } = user;
       UsersService.requireLogin(_id);
-      return this.usersRepo.findOneAndUpdate({ _id, role }, { keys: true });
+      const updatedUser = (await this.usersRepo.findOneAndUpdate(
+        { _id, role },
+        { keys: true }
+      )) as User & (Recipient | Admin | Volunteer);
+
+      let token: string;
+      if (updatedUser) {
+        token = await this.commandBus.execute<AuthenticateCommand, string>(
+          new AuthenticateCommand(updatedUser)
+        );
+        this.commandBus.execute<SendTokenCommand, string>(new SendTokenCommand(updatedUser, token));
+      }
+
+      return Promise.resolve(updatedUser);
     }
 
     throw new BadRequestException('Выдать ключи можно только волонтёру!');
   }
 
-  async revokeKeys(_id: string) {
+  async revokeKeys(_id: string): Promise<User & (Recipient | Admin | Volunteer)> {
     const user = (await this.usersRepo.findById(_id)) as User & (Recipient | Admin | Volunteer);
     if (!user) {
       throw new NotFoundException(`Пользователь с _id '${_id}' не найден<`);
@@ -246,20 +311,46 @@ export class UsersService {
     if (user.role === UserRole.VOLUNTEER) {
       const { role } = user;
       UsersService.requireLogin(_id);
-      return this.usersRepo.findOneAndUpdate({ _id, role }, { keys: false });
+      const updatedUser = (await this.usersRepo.findOneAndUpdate(
+        { _id, role },
+        { keys: false }
+      )) as User & (Recipient | Admin | Volunteer);
+
+      let token: string;
+      if (updatedUser) {
+        token = await this.commandBus.execute<AuthenticateCommand, string>(
+          new AuthenticateCommand(updatedUser)
+        );
+        this.commandBus.execute<SendTokenCommand, string>(new SendTokenCommand(updatedUser, token));
+      }
+
+      return Promise.resolve(updatedUser);
     }
 
     throw new BadRequestException('Отобрать ключи можно только у волонтёра!');
   }
 
-  async activate(_id: string) {
+  async activate(_id: string): Promise<User & (Recipient | Admin | Volunteer)> {
     const user = (await this.usersRepo.findById(_id)) as User & (Recipient | Admin | Volunteer);
     if (!user) {
       throw new NotFoundException(`Пользователь с _id '${_id}' не найден!`);
     }
     if (user.role === UserRole.ADMIN) {
       UsersService.requireLogin(_id);
-      return this.usersRepo.findOneAndUpdate({ _id, role: UserRole.ADMIN }, { isActive: true });
+      const updatedUser = (await this.usersRepo.findOneAndUpdate(
+        { _id, role: UserRole.ADMIN },
+        { isActive: true }
+      )) as User & (Recipient | Admin | Volunteer);
+
+      let token: string;
+      if (updatedUser) {
+        token = await this.commandBus.execute<AuthenticateCommand, string>(
+          new AuthenticateCommand(updatedUser)
+        );
+        this.commandBus.execute<SendTokenCommand, string>(new SendTokenCommand(updatedUser, token));
+      }
+
+      return Promise.resolve(updatedUser);
     }
     throw new BadRequestException('Можно активировать только администратора');
   }
@@ -306,7 +397,7 @@ export class UsersService {
     admin: AnyUserInterface,
     userId: string,
     privileges: Array<AdminPermission>
-  ) {
+  ): Promise<User & Admin> {
     if (!checkIsEnoughRights(admin, [], true)) {
       throw new ForbiddenException(exceptions.users.onlyForAdmins);
     }
@@ -325,10 +416,20 @@ export class UsersService {
 
     UsersService.requireLogin(userId);
 
-    return this.usersRepo.findOneAndUpdate(
+    const updatedUser = (await this.usersRepo.findOneAndUpdate(
       { _id: userId, role: UserRole.ADMIN },
       { $addToSet: { permissions: { $each: privileges } } }
-    );
+    )) as User & Admin;
+
+    let token: string;
+    if (updatedUser) {
+      token = await this.commandBus.execute<AuthenticateCommand, string>(
+        new AuthenticateCommand(updatedUser)
+      );
+      this.commandBus.execute<SendTokenCommand, string>(new SendTokenCommand(updatedUser, token));
+    }
+
+    return Promise.resolve(updatedUser);
   }
 
   // Удаление привилегий администратора. Только root
@@ -336,7 +437,7 @@ export class UsersService {
     admin: AnyUserInterface,
     userId: string,
     privileges: Array<AdminPermission>
-  ) {
+  ): Promise<User & Admin> {
     if (!checkIsEnoughRights(admin, [], true)) {
       throw new ForbiddenException(exceptions.users.onlyForAdmins);
     }
@@ -355,10 +456,20 @@ export class UsersService {
 
     UsersService.requireLogin(userId);
 
-    return this.usersRepo.findOneAndUpdate(
-      { userId, role: UserRole.ADMIN },
+    const updatedUser = (await this.usersRepo.findOneAndUpdate(
+      { _id: userId, role: UserRole.ADMIN },
       { $pull: { permissions: { $in: privileges } } }
-    );
+    )) as User & Admin;
+
+    let token: string;
+    if (updatedUser) {
+      token = await this.commandBus.execute<AuthenticateCommand, string>(
+        new AuthenticateCommand(updatedUser)
+      );
+      this.commandBus.execute<SendTokenCommand, string>(new SendTokenCommand(updatedUser, token));
+    }
+
+    return Promise.resolve(updatedUser);
   }
 
   // Обновление привилегий администратора. Только root
@@ -366,7 +477,7 @@ export class UsersService {
     admin: AnyUserInterface,
     userId: string,
     privileges: Array<AdminPermission>
-  ) {
+  ): Promise<User & Admin> {
     if (!checkIsEnoughRights(admin, [], true)) {
       throw new ForbiddenException(exceptions.users.onlyForAdmins);
     }
@@ -385,10 +496,20 @@ export class UsersService {
 
     UsersService.requireLogin(userId);
 
-    return this.usersRepo.findOneAndUpdate(
+    const updatedUser = (await this.usersRepo.findOneAndUpdate(
       { _id: userId, role: UserRole.ADMIN },
       { $set: { permissions: privileges } }
-    );
+    )) as User & Admin;
+
+    let token: string;
+    if (updatedUser) {
+      token = await this.commandBus.execute<AuthenticateCommand, string>(
+        new AuthenticateCommand(updatedUser)
+      );
+      this.commandBus.execute<SendTokenCommand, string>(new SendTokenCommand(updatedUser, token));
+    }
+
+    return Promise.resolve(updatedUser);
   }
 
   public async getUsersByRole(role: UserRole) {
@@ -412,7 +533,10 @@ export class UsersService {
     return this.usersRepo.findById(userId);
   }
 
-  public async updateProfile(userId: string, dto: Partial<UserProfile>) {
+  public async updateProfile(
+    userId: string,
+    dto: Partial<UserProfile>
+  ): Promise<User & (Admin | Recipient | Volunteer)> {
     const user = await this.usersRepo.findById(userId);
     if (!user) {
       throw new NotFoundException('Пользователь не найден!', {
@@ -420,17 +544,40 @@ export class UsersService {
       });
     }
     const { role } = user;
-    return this.usersRepo.findOneAndUpdate({ _id: userId, role }, dto);
+    const updatedUser = (await this.usersRepo.findOneAndUpdate(
+      { _id: userId, role },
+      dto
+    )) as User & (Recipient | Admin | Volunteer);
+
+    let token: string;
+    if (updatedUser) {
+      token = await this.commandBus.execute<AuthenticateCommand, string>(
+        new AuthenticateCommand(updatedUser)
+      );
+      this.commandBus.execute<SendTokenCommand, string>(new SendTokenCommand(updatedUser, token));
+    }
+
+    return Promise.resolve(updatedUser);
   }
 
   public async updateVolunteerProfile(
     userId: string,
     dto: Partial<VolunteerInterface>
   ): Promise<User & Volunteer> {
-    return this.usersRepo.findOneAndUpdate(
+    const updatedUser = (await this.usersRepo.findOneAndUpdate(
       { _id: userId, role: UserRole.VOLUNTEER },
       dto
-    ) as Promise<User & Volunteer>;
+    )) as User & Volunteer;
+
+    let token: string;
+    if (updatedUser) {
+      token = await this.commandBus.execute<AuthenticateCommand, string>(
+        new AuthenticateCommand(updatedUser)
+      );
+      this.commandBus.execute<SendTokenCommand, string>(new SendTokenCommand(updatedUser, token));
+    }
+
+    return Promise.resolve(updatedUser);
   }
 
   private static requireLogin(userId: string) {

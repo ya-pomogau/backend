@@ -15,9 +15,13 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { IsArray, IsNotEmpty, IsObject, IsString } from 'class-validator';
+
 import { AnyUserInterface } from '../../common/types/user.types';
 import { SocketAuthGuard } from '../../common/guards/socket-auth.guard';
 import { SocketValidationPipe } from '../../common/pipes/socket-validation.pipe';
+import { Recipient } from '../../datalake/users/schemas/recipient.schema';
+import { Admin } from '../../datalake/users/schemas/admin.schema';
+import { Volunteer } from '../../datalake/users/schemas/volunteer.schema';
 
 // Интерфейс и dto созданы для тестирования SocketValidationPipe
 // Удалить на этапе, когда будут реализованы необходимые dto
@@ -99,7 +103,7 @@ export class SystemApiGateway implements OnGatewayInit, OnGatewayConnection, OnG
     this.connectedUsers.set(client.id, payload);
   }
 
-  sendToken(user: AnyUserInterface, token: string) {
+  sendToken(user: Recipient | Admin | Volunteer | Record<string, unknown>, token: string) {
     let clientId: string;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     this.connectedUsers.forEach((value, key, map) => {
@@ -109,7 +113,7 @@ export class SystemApiGateway implements OnGatewayInit, OnGatewayConnection, OnG
     });
 
     if (clientId) {
-      this.server.sockets[clientId].emit('new_token', {
+      this.server.sockets.sockets.get(clientId).emit('new_token', {
         data: {
           message: `The user's status has changed. The token must be replaced.`,
           token,
@@ -134,6 +138,8 @@ export class SystemApiGateway implements OnGatewayInit, OnGatewayConnection, OnG
         } has dropped connection recently!`,
       },
     });
+
+    this.connectedUsers.delete(client.id);
   }
 
   private disconnect(socket: Socket, error: Record<string, unknown>) {
