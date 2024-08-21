@@ -99,6 +99,25 @@ export class SystemApiGateway implements OnGatewayInit, OnGatewayConnection, OnG
     this.connectedUsers.set(client.id, payload);
   }
 
+  sendToken(user: AnyUserInterface, token: string) {
+    let clientId: string;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    this.connectedUsers.forEach((value, key, map) => {
+      if (value._id === user._id) {
+        clientId = key;
+      }
+    });
+
+    if (clientId) {
+      this.server.sockets[clientId].emit('new_token', {
+        data: {
+          message: `The user's status has changed. The token must be replaced.`,
+          token,
+        },
+      });
+    }
+  }
+
   @SubscribeMessage('test_event')
   handleTestEvent(@MessageBody('data') data: TestEventMessageDto) {
     // eslint-disable-next-line no-console
