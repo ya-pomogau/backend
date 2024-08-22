@@ -510,7 +510,7 @@ export class UsersService {
       const token: string = await this.commandBus.execute<AuthenticateCommand, string>(
         new AuthenticateCommand(user)
       );
-      this.commandBus.execute<SendTokenCommand, string>(new SendTokenCommand(user._id, token));
+      this.commandBus.execute<SendTokenCommand, string>(new SendTokenCommand(user, token));
     }
   }
 

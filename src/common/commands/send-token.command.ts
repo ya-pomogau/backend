@@ -1,3 +1,5 @@
+import { AnyUserInterface } from '../types/user.types';
+
 export class SendTokenCommand {
-  constructor(public readonly userId: string, public readonly token: string) {}
+  constructor(public readonly user: AnyUserInterface, public readonly token: string) {}
 }

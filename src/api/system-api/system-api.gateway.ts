@@ -16,11 +16,17 @@ import {
 import { Server, Socket } from 'socket.io';
 import { IsArray, IsNotEmpty, IsObject, IsString } from 'class-validator';
 
-import { AnyUserInterface } from '../../common/types/user.types';
+import configuration from '../../config/configuration';
 import { SocketAuthGuard } from '../../common/guards/socket-auth.guard';
 import { SocketValidationPipe } from '../../common/pipes/socket-validation.pipe';
-import { wsMessage, wsMessageKind, wsConnectedUserData } from '../../common/types/websockets.types';
-import configuration from '../../config/configuration';
+import { AnyUserInterface } from '../../common/types/user.types';
+import {
+  wsMessageData,
+  wsMessageKind,
+  wsConnectedUserData,
+  wsDisconnectionPayload,
+  wsTokenPayload,
+} from '../../common/types/websockets.types';
 
 // Интерфейс и dto созданы для тестирования SocketValidationPipe
 // Удалить на этапе, когда будут реализованы необходимые dto
@@ -86,13 +92,6 @@ export class SystemApiGateway implements OnGatewayInit, OnGatewayConnection, OnG
     // eslint-disable-next-line no-console
     console.log('user:', user);
 
-    client.emit('connect_user', {
-      data: { message: 'Hello!', participants: Array.from(this.connectedUsers.keys()) },
-    });
-    client.broadcast.emit('connection', {
-      data: { message: `Hello, world! ${user.name} is online from now on!` },
-    });
-
     if (this.connectedUsers.has(user._id)) {
       const currentSockets = this.connectedUsers.get(user._id).sockets;
       this.connectedUsers.set(user._id, { user, sockets: [...currentSockets, client.id] });
@@ -100,29 +99,23 @@ export class SystemApiGateway implements OnGatewayInit, OnGatewayConnection, OnG
     this.connectedUsers.set(user._id, { user, sockets: [client.id] });
   }
 
-  sendToken(userId: string, token: string) {
-    const clientIds: Array<string> = this.connectedUsers.get(userId)?.sockets || [];
+  sendToken(user: AnyUserInterface, token: string) {
+    const connectedUserData: wsConnectedUserData = this.connectedUsers.get(user._id);
 
-    if (clientIds.length > 0) {
-      const message: wsMessage = {
-        payload: {
-          userId,
-          token,
-        },
-      };
-      // если пользователь залогинен одновременно с нескольких устройств, то отправка произойдет на все устройства
-      clientIds.forEach((clientId) => {
+    // если пользователь подключен, то отправляем токен на все устройства, с которых залогинен
+    if (connectedUserData) {
+      connectedUserData.sockets.forEach((clientId) => {
         this.server.sockets.sockets.get(clientId).emit(wsMessageKind.REFRESH_TOKEN_COMMAND, {
-          data: message,
-        });
+          data: {
+            userId: user._id,
+            token,
+          } as wsTokenPayload,
+        } as wsMessageData);
       });
-    }
-  }
 
-  @SubscribeMessage('test_event')
-  handleTestEvent(@MessageBody('data') data: TestEventMessageDto) {
-    // eslint-disable-next-line no-console
-    console.log('This is test event data:', data);
+      // обновление объекта подключенного пользователя
+      this.connectedUsers.set(user._id, { user, ...connectedUserData });
+    }
   }
 
   async handleDisconnect(@ConnectedSocket() client: Socket) {
@@ -133,11 +126,11 @@ export class SystemApiGateway implements OnGatewayInit, OnGatewayConnection, OnG
       }
     );
 
-    client.broadcast.emit('disconnection', {
+    client.broadcast.emit(wsMessageKind.DISCONNECTION_EVENT, {
       data: {
-        message: `Hello, world! ${user?.name || client.id} has dropped connection recently!`,
-      },
-    });
+        userId: user._id,
+      } as wsDisconnectionPayload,
+    } as wsMessageData);
 
     const sockets = this.connectedUsers
       .get(user._id)
@@ -146,12 +139,17 @@ export class SystemApiGateway implements OnGatewayInit, OnGatewayConnection, OnG
     if (sockets.length > 0) {
       this.connectedUsers.set(user._id, { user, sockets });
     }
-
     this.connectedUsers.delete(user._id);
   }
 
   private disconnect(socket: Socket, error: Record<string, unknown>) {
     socket.emit('error', new WsException(error));
     socket.disconnect();
+  }
+
+  @SubscribeMessage('test_event')
+  handleTestEvent(@MessageBody('data') data: TestEventMessageDto) {
+    // eslint-disable-next-line no-console
+    console.log('This is test event data:', data);
   }
 }

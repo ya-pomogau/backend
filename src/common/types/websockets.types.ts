@@ -15,6 +15,7 @@ export const wsMessageKind = {
   NEW_BLOG_POST_COMMAND: 'NewPost',
   CHAT_PAGE_QUERY: `PageQuery`,
   CHAT_PAGE_CONTENT: 'ChatPage',
+  DISCONNECTION_EVENT: 'Disconnection',
 } as const;
 
 export type wsMessageKind = keyof typeof wsMessageKind;
@@ -38,14 +39,19 @@ export type wsChatPageQueryPayload = {
 
 export type wsMessagesPayload = { messages: Array<MessageInterface> };
 
+export type wsDisconnectionPayload = {
+  userId: string;
+};
+
 export type wsPayloadType =
   | wsTokenPayload
   | wsMetaPayload
   | wsChatPageQueryPayload
-  | wsMessagesPayload;
+  | wsMessagesPayload
+  | wsDisconnectionPayload;
 
-export type wsMessage = {
-  payload: wsPayloadType;
+export type wsMessageData = {
+  data: wsPayloadType;
 };
 
 export type wsConnectedUserData = {
