@@ -21,7 +21,7 @@ export const wsMessageKind = {
 export type wsMessageKind = keyof typeof wsMessageKind;
 
 export type wsTokenPayload = {
-  userId: string;
+  user: AnyUserInterface;
   token: string;
 };
 

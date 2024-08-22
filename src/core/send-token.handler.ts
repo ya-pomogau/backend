@@ -7,6 +7,6 @@ export class SendTokenHandler implements ICommandHandler<SendTokenCommand> {
   constructor(private readonly systemApiGateway: SystemApiGateway) {}
 
   async execute({ user, token }: SendTokenCommand) {
-    return this.systemApiGateway.sendToken(user, token);
+    return this.systemApiGateway.sendTokenAndUpdatedUser(user, token);
   }
 }

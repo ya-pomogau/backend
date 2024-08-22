@@ -99,7 +99,7 @@ export class SystemApiGateway implements OnGatewayInit, OnGatewayConnection, OnG
     this.connectedUsers.set(user._id, { user, sockets: [client.id] });
   }
 
-  sendToken(user: AnyUserInterface, token: string) {
+  sendTokenAndUpdatedUser(user: AnyUserInterface, token: string) {
     const connectedUserData: wsConnectedUserData = this.connectedUsers.get(user._id);
 
     // если пользователь подключен, то отправляем токен на все устройства, с которых залогинен
@@ -107,7 +107,7 @@ export class SystemApiGateway implements OnGatewayInit, OnGatewayConnection, OnG
       connectedUserData.sockets.forEach((clientId) => {
         this.server.sockets.sockets.get(clientId).emit(wsMessageKind.REFRESH_TOKEN_COMMAND, {
           data: {
-            userId: user._id,
+            user,
             token,
           } as wsTokenPayload,
         } as wsMessageData);
