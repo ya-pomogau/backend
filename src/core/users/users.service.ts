@@ -172,7 +172,6 @@ export class UsersService {
         }
         case UserStatus.UNCONFIRMED: {
           const { role } = user;
-          UsersService.requireLogin(_id);
           const updatedUser = (await this.usersRepo.findOneAndUpdate(
             { _id, role },
             { status: UserStatus.CONFIRMED }
@@ -210,7 +209,6 @@ export class UsersService {
       const { status } = user;
       if (status < UserStatus.ACTIVATED) {
         const { role } = user;
-        UsersService.requireLogin(_id);
         const updatedUser = (await this.usersRepo.findOneAndUpdate(
           { _id, role },
           { status: status + 1 }
@@ -234,7 +232,6 @@ export class UsersService {
       const { status } = user;
       if (status > UserStatus.UNCONFIRMED && status <= UserStatus.ACTIVATED) {
         const { role } = user;
-        UsersService.requireLogin(_id);
         const updatedUser = (await this.usersRepo.findOneAndUpdate(
           { _id, role },
           { status: status - 1 }
@@ -256,7 +253,6 @@ export class UsersService {
     }
     if (user.role === UserRole.VOLUNTEER) {
       const { role } = user;
-      UsersService.requireLogin(_id);
       const updatedUser = (await this.usersRepo.findOneAndUpdate(
         { _id, role },
         { keys: true }
@@ -277,7 +273,6 @@ export class UsersService {
     }
     if (user.role === UserRole.VOLUNTEER) {
       const { role } = user;
-      UsersService.requireLogin(_id);
       const updatedUser = (await this.usersRepo.findOneAndUpdate(
         { _id, role },
         { keys: false }
@@ -297,7 +292,6 @@ export class UsersService {
       throw new NotFoundException(`Пользователь с _id '${_id}' не найден!`);
     }
     if (user.role === UserRole.ADMIN) {
-      UsersService.requireLogin(_id);
       const updatedUser = (await this.usersRepo.findOneAndUpdate(
         { _id, role: UserRole.ADMIN },
         { isActive: true }
@@ -369,8 +363,6 @@ export class UsersService {
       });
     }
 
-    UsersService.requireLogin(userId);
-
     const updatedUser = (await this.usersRepo.findOneAndUpdate(
       { _id: userId, role: UserRole.ADMIN },
       { $addToSet: { permissions: { $each: privileges } } }
@@ -403,8 +395,6 @@ export class UsersService {
       });
     }
 
-    UsersService.requireLogin(userId);
-
     const updatedUser = (await this.usersRepo.findOneAndUpdate(
       { _id: userId, role: UserRole.ADMIN },
       { $pull: { permissions: { $in: privileges } } }
@@ -436,8 +426,6 @@ export class UsersService {
         cause: `Попытка дать права  ${privileges} пользователю с _id '${userId}' и ролью '${user.role}'`,
       });
     }
-
-    UsersService.requireLogin(userId);
 
     const updatedUser = (await this.usersRepo.findOneAndUpdate(
       { _id: userId, role: UserRole.ADMIN },
