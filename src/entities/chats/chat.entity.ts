@@ -1,5 +1,6 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import { type ObjectId } from 'mongoose';
+import { MongooseIdAndTimestampsInterface } from '../../common/types/system.types';
 import {
   ChatType,
   ChatTypes,
@@ -119,9 +120,7 @@ public async createChat(kind: T, metadata: MetadataType | null): Promise<ChatEnt
             });
     }
     const dto = { ...metadata, isActive: true };
-    const chatEntity = (await this.chatsRepository.create(dto)) as {
-        _id: ObjectId;
-    } & MetadataType;
+    const chatEntity = (await this.chatsRepository.create(dto)) as MongooseIdAndTimestampsInterface;
     if (!chatEntity) {
         throw new InternalServerErrorException('Ошибка сервера!', {
             cause: `Данные, вернувшиеся из базы данных: ${chatEntity}`,
