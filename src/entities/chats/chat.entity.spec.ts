@@ -339,8 +339,7 @@ describe('ChatEntity', () => {
     });
     await chatEntity.createChat(ChatTypes.SYSTEM_CHAT as any, systemChatMetadata);
     expect(chatEntity['_chatId']).toEqual(chatId);
-    expect(chatEntity['_volunteer']).toBeNull();
-    expect(chatEntity['_recipient']).toEqual(systemChatMetadata.user);
+    expect(chatEntity['_user']).toEqual(systemChatMetadata.user); // Проверка _user
     expect(chatEntity['_admin']).toEqual(systemChatMetadata.admin);
     expect(chatEntity['_metadata']['isActive']).toEqual(true);
 
@@ -389,10 +388,7 @@ describe('ChatEntity', () => {
       _id: chatId,
       ...conflictChatsMetadata,
     });
-    await chatEntity.createChat(
-      ChatTypes.CONFLICT_CHAT as any,
-      conflictChatsMetadata
-    );
+    await chatEntity.createChat(ChatTypes.CONFLICT_CHAT as any, conflictChatsMetadata);
     expect(chatEntity['_chatId']).toEqual(chatId);
     expect(chatEntity['_taskId']).toEqual(taskId);
     expect(chatEntity['_volunteer']).toEqual(conflictChatsMetadata.meta[0].volunteer);
