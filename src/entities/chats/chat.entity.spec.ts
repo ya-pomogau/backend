@@ -195,7 +195,7 @@ describe('ChatEntity', () => {
     meta: [
       {
         isActive: true,
-        type: ChatTypes.CONFLICT_CHAT as any,
+        type: ChatTypes.CONFLICT_CHAT_WITH_VOLUNTEER as any,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         _id: new Types.ObjectId().toHexString(),
@@ -220,7 +220,7 @@ describe('ChatEntity', () => {
       },
       {
         isActive: true,
-        type: ChatTypes.CONFLICT_CHAT as any,
+        type: ChatTypes.CONFLICT_CHAT_WITH_RECIPIENT as any,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         _id: new Types.ObjectId().toHexString(),
@@ -387,7 +387,9 @@ describe('ChatEntity', () => {
     (chatsRepository.create as jest.Mock).mockResolvedValue({
       _id: chatId,
       ...conflictChatsMetadata,
+      isActive: true,
     });
+
     await chatEntity.createChat(ChatTypes.CONFLICT_CHAT as any, conflictChatsMetadata);
     expect(chatEntity['_chatId']).toEqual(chatId);
     expect(chatEntity['_taskId']).toEqual(taskId);

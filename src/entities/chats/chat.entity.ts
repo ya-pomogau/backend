@@ -36,28 +36,19 @@ type MetadataType =
   | SystemChatMetaInterface
   | TaskChatMetaInterface;
 
-type MessagesType<T extends ChatType> = T extends
-  typeof ChatTypes.CONFLICT_CHAT
+type MessagesType<T extends ChatType> = T extends typeof ChatTypes.CONFLICT_CHAT
   ? ConflictChatContentTuple
   : MessageInterface[];
 
 export class ChatEntity<T extends ChatType> implements ChatEntityInterface<T> {
   private _kind: T;
-
   private _metadata: MetadataType = null;
-
   private _messages: MessagesType<T> | null = null;
-
   private _chatId: string | ObjectId | null = null;
-
   private _taskId: string | ObjectId | null = null;
-
   private _volunteer: VolunteerInterface | null = null;
-
   private _recipient: RecipientInterface | null = null;
-  
   private _user: VolunteerInterface | RecipientInterface | null = null;
-
   private _admin: AdminInterface | null = null;
 
   constructor(
@@ -84,52 +75,53 @@ export class ChatEntity<T extends ChatType> implements ChatEntityInterface<T> {
     return this._messages;
   }
 
-public async createChat(kind: T, metadata: MetadataType | null): Promise<ChatEntityInterface<T>> {
+  public async createChat(kind: T, metadata: MetadataType | null): Promise<ChatEntityInterface<T>> {
     if (!metadata) {
-        throw new InternalServerErrorException('Ошибка сервера!', {
-            cause: `Некорректно переданы метаданные! metadata: ${kind}`,
-        });
+      throw new InternalServerErrorException('Ошибка сервера!', {
+        cause: `Некорректно переданы метаданные! metadata: ${kind}`,
+      });
     }
     this._kind = kind;
-    this._metadata = metadata;
-    switch (kind) {
-        case ChatTypes.TASK_CHAT as T: {
-            const taskMetadata = metadata as TaskChatMetaInterface;
-            this._taskId = taskMetadata.taskId;
-            this._volunteer = taskMetadata.volunteer;
-            this._recipient = taskMetadata.recipient;
-            break;
-        }
-        case ChatTypes.SYSTEM_CHAT as T: {
-            const systemMetadata = metadata as SystemChatMetaInterface;
-            this._user = systemMetadata.user;
-            this._admin = systemMetadata.admin;
-            break;
-        }
-        case ChatTypes.CONFLICT_CHAT as T: {
-            const conflictMetadata = metadata as ConflictChatsTupleMetaInterface;
-            this._taskId = conflictMetadata.taskId;
-            this._admin = conflictMetadata.moderator;
-            this._volunteer = conflictMetadata.meta[0]?.volunteer;
-            this._recipient = conflictMetadata.meta[1]?.recipient;
-            break;
-        }
-        default:
-            throw new InternalServerErrorException('Ошибка сервера!', {
-                cause: `Передан неизвестный тип чата! kind: ${kind}`,
-            });
-    }
     const dto = { ...metadata, isActive: true };
-    const chatEntity = (await this.chatsRepository.create(dto)) as MongooseIdAndTimestampsInterface;
+    const chatEntity = (await this.chatsRepository.create(
+      dto
+    )) as MongooseIdAndTimestampsInterface & MetadataType;
     if (!chatEntity) {
-        throw new InternalServerErrorException('Ошибка сервера!', {
-            cause: `Данные, вернувшиеся из базы данных: ${chatEntity}`,
-        });
+      throw new InternalServerErrorException('Ошибка сервера!', {
+        cause: `Данные, вернувшиеся из базы данных: ${chatEntity}`,
+      });
     }
     this._chatId = chatEntity._id;
-    this._metadata = { ...this._metadata, isActive: true };
+    this._metadata = { ...chatEntity };
+    switch (kind) {
+      case ChatTypes.TASK_CHAT as T: {
+        const taskMetadata = chatEntity as TaskChatMetaInterface;
+        this._taskId = taskMetadata.taskId;
+        this._volunteer = taskMetadata.volunteer;
+        this._recipient = taskMetadata.recipient;
+        break;
+      }
+      case ChatTypes.SYSTEM_CHAT as T: {
+        const systemMetadata = chatEntity as SystemChatMetaInterface;
+        this._user = systemMetadata.user;
+        this._admin = systemMetadata.admin;
+        break;
+      }
+      case ChatTypes.CONFLICT_CHAT as T: {
+        const conflictMetadata = chatEntity as ConflictChatsTupleMetaInterface;
+        this._taskId = conflictMetadata.taskId;
+        this._admin = conflictMetadata.moderator;
+        this._volunteer = conflictMetadata.meta[0]?.volunteer;
+        this._recipient = conflictMetadata.meta[1]?.recipient;
+        break;
+      }
+      default:
+        throw new InternalServerErrorException('Ошибка сервера!', {
+          cause: `Передан неизвестный тип чата! kind: ${kind}`,
+        });
+    }
     return this;
-}
+  }
 
   public async loadMessages(skip: number, limit: number = 20): Promise<MessagesType<T>> {
     if (!this._chatId) {
@@ -176,7 +168,7 @@ public async createChat(kind: T, metadata: MetadataType | null): Promise<ChatEnt
   }
 
   public async findChatByParams(
-    params: Record<string, unknown>
+    params: Record<string, string | ObjectId | ChatType>
   ): Promise<ChatEntityInterface<T> | null> {
     const data = await this.chatsRepository.findOne(params);
     if (!data) {
