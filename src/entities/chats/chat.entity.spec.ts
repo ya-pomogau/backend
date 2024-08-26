@@ -195,7 +195,7 @@ describe('ChatEntity', () => {
     meta: [
       {
         isActive: true,
-        type: ChatTypes.CONFLICT_CHAT_WITH_VOLUNTEER as any,
+        type: ChatTypes.CONFLICT_CHAT as any,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         _id: new Types.ObjectId().toHexString(),
@@ -220,7 +220,7 @@ describe('ChatEntity', () => {
       },
       {
         isActive: true,
-        type: ChatTypes.CONFLICT_CHAT_WITH_VOLUNTEER as any,
+        type: ChatTypes.CONFLICT_CHAT as any,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         _id: new Types.ObjectId().toHexString(),
@@ -390,7 +390,7 @@ describe('ChatEntity', () => {
       ...conflictChatsMetadata,
     });
     await chatEntity.createChat(
-      ChatTypes.CONFLICT_CHAT_WITH_RECIPIENT as any,
+      ChatTypes.CONFLICT_CHAT as any,
       conflictChatsMetadata
     );
     expect(chatEntity['_chatId']).toEqual(chatId);

@@ -36,8 +36,7 @@ type MetadataType =
   | TaskChatMetaInterface;
 
 type MessagesType<T extends ChatType> = T extends
-  | typeof ChatTypes.CONFLICT_CHAT_WITH_VOLUNTEER
-  | typeof ChatTypes.CONFLICT_CHAT_WITH_RECIPIENT
+  typeof ChatTypes.CONFLICT_CHAT
   ? ConflictChatContentTuple
   : MessageInterface[];
 
@@ -115,8 +114,7 @@ export class ChatEntity<T extends ChatType> implements ChatEntityInterface<T> {
         this._admin = systemMetadata.admin;
         break;
       }
-      case ChatTypes.CONFLICT_CHAT_WITH_RECIPIENT as T:
-      case ChatTypes.CONFLICT_CHAT_WITH_VOLUNTEER as T: {
+      case ChatTypes.CONFLICT_CHAT as T: {
         const conflictMetadata = metadata as ConflictChatsTupleMetaInterface;
         this._taskId = conflictMetadata.taskId;
         this._admin = conflictMetadata.moderator;
@@ -164,8 +162,7 @@ export class ChatEntity<T extends ChatType> implements ChatEntityInterface<T> {
       queryOptions
     )) as MessageInterface[];
     switch (this._kind) {
-      case ChatTypes.CONFLICT_CHAT_WITH_RECIPIENT as T:
-      case ChatTypes.CONFLICT_CHAT_WITH_VOLUNTEER as T: {
+      case ChatTypes.CONFLICT_CHAT as T: {
         const volunteerMessages = messages.filter(
           (msg) => msg.author && msg.author.role === UserRole.VOLUNTEER
         );
@@ -224,8 +221,7 @@ export class ChatEntity<T extends ChatType> implements ChatEntityInterface<T> {
         this._admin = systemMetadata.admin;
         break;
       }
-      case ChatTypes.CONFLICT_CHAT_WITH_RECIPIENT as T:
-      case ChatTypes.CONFLICT_CHAT_WITH_VOLUNTEER as T: {
+      case ChatTypes.CONFLICT_CHAT as T: {
         const conflictMetadata = data as ConflictChatsTupleMetaInterface;
         this._taskId = conflictMetadata.taskId;
         this._admin = conflictMetadata.moderator;
@@ -258,8 +254,7 @@ export class ChatEntity<T extends ChatType> implements ChatEntityInterface<T> {
     })) as MessageInterface;
     if (this._messages === null) {
       switch (this._kind) {
-        case ChatTypes.CONFLICT_CHAT_WITH_RECIPIENT as T:
-        case ChatTypes.CONFLICT_CHAT_WITH_VOLUNTEER as T: {
+        case ChatTypes.CONFLICT_CHAT as T: {
           this._messages = [[], []] as unknown as MessagesType<T>;
           break;
         }
@@ -279,8 +274,7 @@ export class ChatEntity<T extends ChatType> implements ChatEntityInterface<T> {
     }
 
     switch (this._kind) {
-      case ChatTypes.CONFLICT_CHAT_WITH_RECIPIENT as T:
-      case ChatTypes.CONFLICT_CHAT_WITH_VOLUNTEER as T: {
+      case ChatTypes.CONFLICT_CHAT as T: {
         if (savedMessage.author.role === UserRole.VOLUNTEER) {
           (this._messages[0] as unknown as MessageInterface[]).push(savedMessage);
         } else if (savedMessage.author.role === UserRole.RECIPIENT) {
