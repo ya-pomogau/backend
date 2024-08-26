@@ -1,4 +1,4 @@
-import { Injectable, Scope, InternalServerErrorException } from '@nestjs/common';
+import { InternalServerErrorException } from '@nestjs/common';
 import { type ObjectId } from 'mongoose';
 import {
   ChatType,
@@ -41,7 +41,6 @@ type MessagesType<T extends ChatType> = T extends
   ? ConflictChatContentTuple
   : MessageInterface[];
 
-@Injectable({ scope: Scope.REQUEST })
 export class ChatEntity<T extends ChatType> implements ChatEntityInterface<T> {
   private _kind: T;
 
