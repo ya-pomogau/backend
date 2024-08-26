@@ -1,5 +1,4 @@
 import { Types } from 'mongoose';
-import { Test, TestingModule } from '@nestjs/testing';
 import { ChatEntity } from './chat.entity';
 import { ChatsRepository } from '../../datalake/chats/chats.repository';
 import { MessagesRepository } from '../../datalake/messages/messages.repository';
@@ -271,15 +270,10 @@ describe('ChatEntity', () => {
       find: jest.fn(),
     };
 
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        ChatEntity,
-        { provide: ChatsRepository, useValue: chatsRepository },
-        { provide: MessagesRepository, useValue: messagesRepository },
-      ],
-    }).compile();
-
-    chatEntity = await module.resolve<ChatEntity<ChatType>>(ChatEntity);
+    chatEntity = new ChatEntity<ChatType>(
+      chatsRepository as unknown as ChatsRepository,
+      messagesRepository as unknown as MessagesRepository
+    );
   });
 
   it('should be defined', () => {
