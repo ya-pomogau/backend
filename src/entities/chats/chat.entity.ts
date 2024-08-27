@@ -40,15 +40,27 @@ type MessagesType<T extends ChatType> = T extends typeof ChatTypes.CONFLICT_CHAT
   ? ConflictChatContentTuple
   : MessageInterface[];
 
+type VolunteerType<T extends ChatType> = T extends typeof ChatTypes.SYSTEM_CHAT
+  ? VolunteerInterface | never // если оставить never, то ломается типизация
+  : VolunteerInterface;
+
+type RecipientType<T extends ChatType> = T extends typeof ChatTypes.SYSTEM_CHAT
+  ? RecipientInterface | never // если оставить never, то ломается типизация
+  : RecipientInterface;
+  
+type UserType<T extends ChatType> = T extends typeof ChatTypes.SYSTEM_CHAT
+  ? VolunteerInterface | RecipientInterface | null  
+  : VolunteerInterface | RecipientInterface | never; // если оставить только never, то ломается типизация
+
 export class ChatEntity<T extends ChatType> implements ChatEntityInterface<T> {
   private _kind: T;
   private _metadata: MetadataType = null;
   private _messages: MessagesType<T> | null = null;
   private _chatId: string | ObjectId | null = null;
   private _taskId: string | ObjectId | null = null;
-  private _volunteer: VolunteerInterface | null = null;
-  private _recipient: RecipientInterface | null = null;
-  private _user: VolunteerInterface | RecipientInterface | null = null;
+  private _volunteer: VolunteerType<T> = null;
+  private _recipient: RecipientType<T> = null;
+  private _user: UserType<T> = null;
   private _admin: AdminInterface | null = null;
 
   constructor(
@@ -190,10 +202,10 @@ export class ChatEntity<T extends ChatType> implements ChatEntityInterface<T> {
         const systemMetadata = data as SystemChatMetaInterface;
         switch (systemMetadata.user.role) {
           case UserRole.VOLUNTEER:
-            this._volunteer = systemMetadata.user as VolunteerInterface;
+            this._user = systemMetadata.user as VolunteerInterface;
             break;
           case UserRole.RECIPIENT:
-            this._recipient = systemMetadata.user as RecipientInterface;
+            this._user = systemMetadata.user as RecipientInterface;
             break;
           default:
             throw new InternalServerErrorException('Ошибка сервера!', {
