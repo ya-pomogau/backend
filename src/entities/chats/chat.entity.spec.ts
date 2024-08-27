@@ -293,9 +293,9 @@ describe('ChatEntity', () => {
     expect(chatEntity['_metadata']['isActive']).toEqual(true);
 
     (messagesRepository.find as jest.Mock).mockResolvedValue(taskСhatMessages);
-    const loadedMessages = await chatEntity.loadMessages(0, 20);
+    const loadedMessages = await chatEntity.loadMessages([chatId], 0, 20);
     expect(loadedMessages).toEqual(taskСhatMessages);
-    expect(messagesRepository.find).toHaveBeenCalledWith({ chatId: chatId }, null, {
+    expect(messagesRepository.find).toHaveBeenCalledWith({ chatId: { $in: [chatId] } }, null, {
       skip: 0,
       limit: 20,
     });
@@ -344,9 +344,9 @@ describe('ChatEntity', () => {
     expect(chatEntity['_metadata']['isActive']).toEqual(true);
 
     (messagesRepository.find as jest.Mock).mockResolvedValue(systemСhatMessages);
-    const loadedMessages = await chatEntity.loadMessages(0, 20);
+    const loadedMessages = await chatEntity.loadMessages([chatId], 0, 20);
     expect(loadedMessages).toEqual(systemСhatMessages);
-    expect(messagesRepository.find).toHaveBeenCalledWith({ chatId: chatId }, null, {
+    expect(messagesRepository.find).toHaveBeenCalledWith({ chatId: { $in: [chatId] } }, null, {
       skip: 0,
       limit: 20,
     });
@@ -399,12 +399,12 @@ describe('ChatEntity', () => {
     expect(chatEntity['_metadata']['isActive']).toEqual(true);
 
     (messagesRepository.find as jest.Mock).mockResolvedValue(conflictСhatMessages);
-    const loadedMessages = await chatEntity.loadMessages(0, 20);
+    const loadedMessages = await chatEntity.loadMessages([chatId], 0, 20);
     expect(loadedMessages).toEqual([
       [volunteerMessage, volunteerMessage],
       [recipientMessage, recipientMessage, recipientMessage, recipientMessage, recipientMessage],
     ]);
-    expect(messagesRepository.find).toHaveBeenCalledWith({ chatId: chatId }, null, {
+    expect(messagesRepository.find).toHaveBeenCalledWith({ chatId: { $in: [chatId] } }, null, {
       skip: 0,
       limit: 20,
     });

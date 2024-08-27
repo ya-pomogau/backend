@@ -24,7 +24,7 @@ export interface ChatEntityInterface<T extends ChatType> {
   get metadata(): MetadataType | null;
   get messages(): MessagesType<T> | null;
   toObject(): { metadata: MetadataType; messages: MessagesType<T> | null };
-  loadMessages(skip: number, limit?: number): Promise<MessagesType<T>>;
+  loadMessages(chatIds: Array<string | ObjectId>, skip: number, limit?: number): Promise<MessagesType<T>>;
   createChat(kind: T, metadata: MetadataType | null): Promise<ChatEntityInterface<T>>;
   findChatByParams(params: Record<string, unknown>): Promise<ChatEntityInterface<T> | null>;
   addMessage(newMessage: Partial<MessageInterface>): Promise<this>;
@@ -41,13 +41,13 @@ type MessagesType<T extends ChatType> = T extends typeof ChatTypes.CONFLICT_CHAT
   : MessageInterface[];
 
 type VolunteerType<T extends ChatType> = T extends typeof ChatTypes.SYSTEM_CHAT
-  ? VolunteerInterface | never // если оставить never, то ломается типизация
+  ? VolunteerInterface | never // если оставить только never, то ломается типизация
   : VolunteerInterface;
 
 type RecipientType<T extends ChatType> = T extends typeof ChatTypes.SYSTEM_CHAT
-  ? RecipientInterface | never // если оставить never, то ломается типизация
+  ? RecipientInterface | never // если оставить только never, то ломается типизация
   : RecipientInterface;
-  
+
 type UserType<T extends ChatType> = T extends typeof ChatTypes.SYSTEM_CHAT
   ? VolunteerInterface | RecipientInterface | null  
   : VolunteerInterface | RecipientInterface | never; // если оставить только never, то ломается типизация
@@ -135,10 +135,10 @@ export class ChatEntity<T extends ChatType> implements ChatEntityInterface<T> {
     return this;
   }
 
-  public async loadMessages(skip: number, limit: number = 20): Promise<MessagesType<T>> {
-    if (!this._chatId) {
+  public async loadMessages(chatIds: Array<string | ObjectId>, skip: number, limit: number = 20): Promise<MessagesType<T>> {
+    if (!chatIds || chatIds.length === 0) {
       throw new InternalServerErrorException('Ошибка сервера!', {
-        cause: `Не определён id чата! chatId: ${this._chatId}`,
+        cause: `chatIds не могут быть пустыми!`,
       });
     }
     if (skip < 0 || limit < 0) {
@@ -150,11 +150,12 @@ export class ChatEntity<T extends ChatType> implements ChatEntityInterface<T> {
     const queryOptions = limit === 0 ? { skip } : { skip, limit };
     const messages = (await this.messagesRepository.find(
       {
-        chatId: this._chatId,
+        chatId: { $in: chatIds },
       },
       null,
       queryOptions
     )) as MessageInterface[];
+    
     switch (this._kind) {
       case ChatTypes.CONFLICT_CHAT as T: {
         const volunteerMessages = messages.filter(
