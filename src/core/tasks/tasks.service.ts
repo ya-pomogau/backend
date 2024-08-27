@@ -373,7 +373,7 @@ export class TasksService {
       });
     }
 
-    let volunteerUpdateResult: PromiseSettledResult<User & Volunteer>;
+    let volunteerUpdateResult: PromiseSettledResult<User & AnyUserInterface>;
     let taskUpdateResult: PromiseSettledResult<Task>;
     if (userIndex) {
       [volunteerUpdateResult, taskUpdateResult] = await Promise.allSettled([
