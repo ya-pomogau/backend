@@ -24,7 +24,11 @@ export interface ChatEntityInterface<T extends ChatType> {
   get metadata(): MetadataType | null;
   get messages(): MessagesType<T> | null;
   toObject(): { metadata: MetadataType; messages: MessagesType<T> | null };
-  loadMessages(chatIds: Array<string | ObjectId>, skip: number, limit?: number): Promise<MessagesType<T>>;
+  loadMessages(
+    chatIds: Array<string | ObjectId>,
+    skip: number,
+    limit?: number
+  ): Promise<MessagesType<T>>;
   createChat(kind: T, metadata: MetadataType | null): Promise<ChatEntityInterface<T>>;
   findChatByParams(params: Record<string, unknown>): Promise<ChatEntityInterface<T> | null>;
   addMessage(newMessage: Partial<MessageInterface>): Promise<this>;
@@ -49,7 +53,7 @@ type RecipientType<T extends ChatType> = T extends typeof ChatTypes.SYSTEM_CHAT
   : RecipientInterface;
 
 type UserType<T extends ChatType> = T extends typeof ChatTypes.SYSTEM_CHAT
-  ? VolunteerInterface | RecipientInterface | null  
+  ? VolunteerInterface | RecipientInterface | null
   : VolunteerInterface | RecipientInterface | never; // если оставить только never, то ломается типизация
 
 export class ChatEntity<T extends ChatType> implements ChatEntityInterface<T> {
@@ -76,14 +80,29 @@ export class ChatEntity<T extends ChatType> implements ChatEntityInterface<T> {
   }
 
   public get chatId(): string | ObjectId | null {
+    if (!this._chatId) {
+      throw new InternalServerErrorException('Ошибка сервера!', {
+        cause: 'ID чата не инициализирован!',
+      });
+    }
     return this._chatId;
   }
 
   public get metadata(): MetadataType | null {
+    if (!this._metadata) {
+      throw new InternalServerErrorException('Ошибка сервера!', {
+        cause: 'Метаданные не инициализированы!',
+      });
+    }
     return this._metadata;
   }
 
   public get messages(): MessagesType<T> | null {
+    if (!this._messages) {
+      throw new InternalServerErrorException('Ошибка сервера!', {
+        cause: 'Сообщения не были загружены!',
+      });
+    }
     return this._messages;
   }
 
@@ -135,7 +154,11 @@ export class ChatEntity<T extends ChatType> implements ChatEntityInterface<T> {
     return this;
   }
 
-  public async loadMessages(chatIds: Array<string | ObjectId>, skip: number, limit: number = 20): Promise<MessagesType<T>> {
+  public async loadMessages(
+    chatIds: Array<string | ObjectId>,
+    skip: number,
+    limit: number = 20
+  ): Promise<MessagesType<T>> {
     if (!chatIds || chatIds.length === 0) {
       throw new InternalServerErrorException('Ошибка сервера!', {
         cause: `chatIds не могут быть пустыми!`,
@@ -155,7 +178,7 @@ export class ChatEntity<T extends ChatType> implements ChatEntityInterface<T> {
       null,
       queryOptions
     )) as MessageInterface[];
-    
+
     switch (this._kind) {
       case ChatTypes.CONFLICT_CHAT as T: {
         const volunteerMessages = messages.filter(
