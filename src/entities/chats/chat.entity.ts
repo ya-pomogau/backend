@@ -155,11 +155,12 @@ export class ChatEntity<T extends ChatType> implements ChatEntityInterface<T> {
   }
 
   public async loadMessages(
-    chatIds: Array<string | ObjectId>,
+    chatIds: string | ObjectId | Array<string | ObjectId>,
     skip: number,
     limit: number = 20
   ): Promise<MessagesType<T>> {
-    if (!chatIds || chatIds.length === 0) {
+    const chatIdsArray = Array.isArray(chatIds) ? chatIds : [chatIds];
+    if (!chatIdsArray || chatIdsArray.length === 0) {
       throw new InternalServerErrorException('Ошибка сервера!', {
         cause: `chatIds не могут быть пустыми!`,
       });
@@ -173,12 +174,11 @@ export class ChatEntity<T extends ChatType> implements ChatEntityInterface<T> {
     const queryOptions = limit === 0 ? { skip } : { skip, limit };
     const messages = (await this.messagesRepository.find(
       {
-        chatId: { $in: chatIds },
+        chatId: { $in: chatIdsArray },
       },
       null,
       queryOptions
     )) as MessageInterface[];
-
     switch (this._kind) {
       case ChatTypes.CONFLICT_CHAT as T: {
         const volunteerMessages = messages.filter(
@@ -290,7 +290,6 @@ export class ChatEntity<T extends ChatType> implements ChatEntityInterface<T> {
           );
       }
     }
-
     switch (this._kind) {
       case ChatTypes.CONFLICT_CHAT as T: {
         if (savedMessage.author.role === UserRole.VOLUNTEER) {
@@ -322,7 +321,6 @@ export class ChatEntity<T extends ChatType> implements ChatEntityInterface<T> {
         cause: `Не определён id чата! chatId: ${this._chatId}`,
       });
     }
-
     const updatedChat = await this.chatsRepository.findByIdAndUpdate(
       this._chatId,
       { isActive: false },
