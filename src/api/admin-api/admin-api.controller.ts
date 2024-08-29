@@ -173,7 +173,7 @@ export class AdminApiController {
     const results: TaskInterface[][] = await Promise.all(
       Object.values(TaskStatus).map((status) => this.tasksService.getOwnTasks(user, status))
     );
-    return Promise.resolve(results.reduce((arr, resArr) => [...arr, ...resArr], []));
+    return Promise.resolve(results.flat());
   }
 
   @Post('blog')
