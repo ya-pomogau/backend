@@ -72,7 +72,7 @@ export class AuthApiController {
     if (req.user) {
       // TODO: Вынести в сервис в core после решения проблемы с типизацией Users
       const token = await this.commandBus.execute<AuthenticateCommand, string>(
-        new AuthenticateCommand(req.user as Record<string, unknown>)
+        new AuthenticateCommand(req.user as AnyUserInterface)
       ); // this.authService.authenticate(req.user as Record<string, unknown>);
       return { token, user: req.user };
     }
@@ -87,7 +87,7 @@ export class AuthApiController {
     const user = await this.usersService.checkVKCredential(mockId);
     if (user) {
       // TODO: Вынести в сервис в core после решения проблемы с типизацией Users
-      const token = await this.authService.authenticate(user as Record<string, unknown>);
+      const token = await this.authService.authenticate(user);
       return { token, user };
     }
     throw new UnauthorizedException('Неверное имя пользователя или пароль');
