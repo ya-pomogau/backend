@@ -457,7 +457,10 @@ export class TasksService {
 
   public async updateTaskPoints(points: number, id: string) {
     const res = await this.tasksRepo.updateMany(
-      { 'category._id': id, status: { $in: [TaskStatus.ACCEPTED, TaskStatus.CREATED] } },
+      {
+        'category._id': id,
+        status: { $in: [TaskStatus.ACCEPTED, TaskStatus.CREATED, TaskStatus.CONFLICTED] },
+      },
       {
         $set: {
           'category.points': points,

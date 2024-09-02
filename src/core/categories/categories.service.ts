@@ -4,19 +4,23 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
+import { CommandBus } from '@nestjs/cqrs';
+import { UpdatePointsInTasksCommand } from '../../common/commands/update-points.command';
+import { ApiUpdateCategoryDto } from '../../api/admin-api/dto/update-category.dto';
 import { ApiBulkUpdateCategoriesDto } from '../../api/admin-api/dto/bulk-update-categories.dto';
 import exceptions from '../../common/constants/exceptions';
-import { CreateCategoryDto, UpdateCategoryDto } from '../../common/dto/category.dto';
+import { CreateCategoryDto } from '../../common/dto/category.dto';
 import { AdminPermission, AdminInterface } from '../../common/types/user.types';
 import { checkIsEnoughRights } from '../../common/helpers/checkIsEnoughRights';
 import { CategoryRepository } from '../../datalake/category/category.repository';
-import { TasksService } from '../tasks/tasks.service';
+// import { TasksService } from '../tasks/tasks.service';
 
 @Injectable()
 export class CategoriesService {
   constructor(
     private readonly categoriesRepo: CategoryRepository,
-    private readonly tasksService: TasksService
+    // private readonly tasksService: TasksService,
+    private readonly commandBus: CommandBus
   ) {}
 
   async getCategories() {
@@ -84,13 +88,14 @@ export class CategoriesService {
     try {
       res = await this.categoriesRepo.bulkWrite(bulkUpdateArr, { ordered: false });
 
-      for (const item of dto.data) {
+      dto.data.map(async (item) => {
         const { id, points } = item;
         if (points) {
-          await this.tasksService.updateTaskPoints(points, id);
-        }
-      }
+          // await this.tasksService.updateTaskPoints(points, id);
 
+          await this.commandBus.execute(new UpdatePointsInTasksCommand({ points, id }));
+        }
+      });
     } catch (err) {
       throw new InternalServerErrorException(exceptions.category.internalError, {
         cause: `Ошибка в методе массового обновления категорий updateCategoriesByIds: ${err}`,
@@ -101,7 +106,7 @@ export class CategoriesService {
   }
 
   // Только админы с правами AdminPermission.CATEGORIES
-  async updateCategoryById(id: string, updateData: UpdateCategoryDto, user: AdminInterface) {
+  async updateCategoryById(id: string, updateData: ApiUpdateCategoryDto, user: AdminInterface) {
     if (!checkIsEnoughRights(user, [AdminPermission.CATEGORIES])) {
       throw new ForbiddenException(exceptions.category.notEnoughRights);
     }
@@ -109,14 +114,20 @@ export class CategoriesService {
     let res;
     try {
       res = await this.categoriesRepo.findOneAndUpdate({ _id: id }, updateData, { new: true });
+
       if (!res) throw new NotFoundException(exceptions.category.notFound);
 
-      await this.tasksService.updateTaskPoints(updateData.points, id);
+      const { points } = updateData;
+
+      // await this.tasksService.updateTaskPoints(updateData.points, id);
+
+      await this.commandBus.execute(new UpdatePointsInTasksCommand({ points, id }));
     } catch (err) {
       throw new InternalServerErrorException(exceptions.category.internalError, {
         cause: `Ошибка в методе обновления данных категории findOneAndUpdate: ${err}`,
       });
     }
+    if (!res) throw new NotFoundException(exceptions.category.notFound);
 
     return res;
   }
