@@ -109,8 +109,7 @@ export class TasksService {
       {
         adminResolve: ResolveStatus.PENDING,
         moderator: { name, phone, avatar, address, _id, vkId, role },
-      },
-      {}
+      }
     );
   }
 
@@ -166,7 +165,7 @@ export class TasksService {
     if (role === UserRole.RECIPIENT) {
       query.recipient = { _id: userId, address, avatar, name, phone };
     }
-    return this.tasksRepo.findOneAndUpdate(query, dto, { new: true });
+    return this.tasksRepo.findOneAndUpdate(query, dto);
   }
 
   public async getTasksByStatus(
@@ -174,7 +173,7 @@ export class TasksService {
     dto: Partial<GetTasksDto>,
     user?: AnyUserInterface
   ) {
-    const { location: center, distance, start, end, categoryId } = dto;
+    const { location: center, distance, start, end /* , categoryId */ } = dto;
     const query: FilterQuery<TaskInterface> = {
       status: taskStatus,
       location: {
@@ -183,13 +182,16 @@ export class TasksService {
           $maxDistance: distance,
         },
       },
+      //     category: {},
     };
-    if (categoryId) {
+    /*   if (categoryId) {
+      console.dir(`categoryId = ${categoryId}.`);
       query.category._id = categoryId;
     }
     if (!!user && !!user.status) {
       query.category.accessLevel = { $lte: user.status };
     }
+ */
     if (!!start && !!end) {
       query.date = {
         $gte: start,
@@ -204,7 +206,13 @@ export class TasksService {
         $lte: end,
       };
     }
-    return this.tasksRepo.find(query);
+    const res = await this.tasksRepo.find(query);
+    return res.filter((tsk) => {
+      if (tsk && tsk.category && user && user.status) {
+        return tsk.category.accessLevel <= user.status;
+      }
+      return true;
+    });
   }
 
   public async getOwnTasks(user: AnyUserInterface, status: TaskStatus, dto?: GetTasksDto) {
@@ -243,17 +251,16 @@ export class TasksService {
     return this.tasksRepo.find(query);
   }
 
-  public async acceptTask(taskId: string, volunteerId: string) {
-    const volunteer = (await this.usersRepo.findById(volunteerId)) as User & Volunteer;
+  public async acceptTask(taskId: string, volunteer: User & Volunteer) {
     if (![`${UserRole.ADMIN}`, `${UserRole.VOLUNTEER}`].includes(volunteer.role)) {
       throw new ForbiddenException('Только волонтёр или администратор могут создавать заявки', {
-        cause: `Попытка создать заявку пользователем с _id '${volunteerId}' и ролью '${volunteer.role}'`,
+        cause: `Попытка создать заявку пользователем с _id '${volunteer.id}' и ролью '${volunteer.role}'`,
       });
     }
     const task = await this.tasksRepo.findById(taskId);
     if (task.volunteer) {
       throw new ConflictException('Эта заявка уже взята другим волонтёром', {
-        cause: `Попытка повторно взять заявку с _id '${taskId}' пользователем с _id '${volunteerId}' и ролью '${volunteer.role}'`,
+        cause: `Попытка повторно взять заявку с _id '${taskId}' пользователем с _id '${volunteer.id}' и ролью '${volunteer.role}'`,
       });
     }
     if (task.status !== TaskStatus.CREATED) {
@@ -262,11 +269,11 @@ export class TasksService {
           task.status === TaskStatus.COMPLETED ? 'завершённое' : 'исполняемое'
         } задание`,
         {
-          cause: `Попытка взять заявку со статусом '${task.status}' !=== '${TaskStatus.CREATED}' пользователем с _id '${volunteerId}' и ролью '${volunteer.role}'`,
+          cause: `Попытка взять заявку со статусом '${task.status}' !=== '${TaskStatus.CREATED}' пользователем с _id '${volunteer.id}' и ролью '${volunteer.role}'`,
         }
       );
     }
-    if (volunteer.status < task.category.accessLevel) {
+    if (volunteer.role === UserRole.VOLUNTEER && volunteer.status < task.category.accessLevel) {
       throw new ForbiddenException('Вам нельзя брать задачи из этой категории!');
     }
     const { name, phone, avatar, address, _id, vkId, role } = volunteer;
@@ -366,7 +373,7 @@ export class TasksService {
       });
     }
 
-    let volunteerUpdateResult: PromiseSettledResult<User & Volunteer>;
+    let volunteerUpdateResult: PromiseSettledResult<User & AnyUserInterface>;
     let taskUpdateResult: PromiseSettledResult<Task>;
     if (userIndex) {
       [volunteerUpdateResult, taskUpdateResult] = await Promise.allSettled([

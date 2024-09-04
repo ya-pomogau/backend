@@ -15,9 +15,18 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { IsArray, IsNotEmpty, IsObject, IsString } from 'class-validator';
-import { AnyUserInterface } from '../../common/types/user.types';
+
+import configuration from '../../config/configuration';
 import { SocketAuthGuard } from '../../common/guards/socket-auth.guard';
 import { SocketValidationPipe } from '../../common/pipes/socket-validation.pipe';
+import { AnyUserInterface } from '../../common/types/user.types';
+import {
+  wsMessageData,
+  wsMessageKind,
+  wsConnectedUserData,
+  wsDisconnectionPayload,
+  wsTokenPayload,
+} from '../../common/types/websockets.types';
 
 // Интерфейс и dto созданы для тестирования SocketValidationPipe
 // Удалить на этапе, когда будут реализованы необходимые dto
@@ -42,7 +51,7 @@ class TestEventMessageDto implements TestEventMessageInterface {
 
 @UseGuards(SocketAuthGuard)
 @UsePipes(SocketValidationPipe)
-@WebSocketGateway({
+@WebSocketGateway(configuration().server.ws_port, {
   cors: {
     allowedHeaders: '*',
   },
@@ -56,7 +65,7 @@ export class SystemApiGateway implements OnGatewayInit, OnGatewayConnection, OnG
   @WebSocketServer()
   public server: Server;
 
-  private connectedUsers: Map<string, AnyUserInterface> = new Map();
+  private connectedUsers: Map<string, wsConnectedUserData> = new Map();
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   afterInit(server: Server) {
@@ -72,53 +81,75 @@ export class SystemApiGateway implements OnGatewayInit, OnGatewayConnection, OnG
    */
   // eslint-disable-next-line consistent-return
   async handleConnection(@ConnectedSocket() client: Socket): Promise<void> {
-    let payload: AnyUserInterface;
+    let user: AnyUserInterface;
     try {
-      payload = await this.jwtService.verifyAsync(client.handshake.headers.authorization, {
+      user = await this.jwtService.verifyAsync(client.handshake.headers.authorization, {
         secret: this.configService.get<string>('jwt.key'),
       });
     } catch (error) {
       return this.disconnect(client, { type: UnauthorizedException.name, message: error.message });
     }
     // eslint-disable-next-line no-console
-    console.log('user:', payload);
+    console.log('user:', user);
 
-    const participantsIds: Array<string> = [];
-    if (this.connectedUsers.size > 0) {
-      // eslint-disable-next-line no-restricted-syntax
-      for (const user of this.connectedUsers.values()) {
-        participantsIds.push(user._id);
-      }
+    if (this.connectedUsers.has(user._id)) {
+      const currentSockets = this.connectedUsers.get(user._id).sockets;
+      this.connectedUsers.set(user._id, { user, sockets: [...currentSockets, client.id] });
     }
+    this.connectedUsers.set(user._id, { user, sockets: [client.id] });
+  }
 
-    client.emit('connect_user', { data: { message: 'Hello!', participants: participantsIds } });
-    client.broadcast.emit('connection', {
-      data: { message: `Hello, world! ${payload.name} is online from now on!` },
-    });
+  sendTokenAndUpdatedUser(user: AnyUserInterface, token: string) {
+    const connectedUserData: wsConnectedUserData = this.connectedUsers.get(user._id);
 
-    this.connectedUsers.set(client.id, payload);
+    // если пользователь подключен, то отправляем токен на все устройства, с которых залогинен
+    if (connectedUserData) {
+      connectedUserData.sockets.forEach((clientId) => {
+        this.server.sockets.sockets.get(clientId).emit(wsMessageKind.REFRESH_TOKEN_COMMAND, {
+          data: {
+            user,
+            token,
+          } as wsTokenPayload,
+        } as wsMessageData);
+      });
+
+      // обновление объекта подключенного пользователя
+      this.connectedUsers.set(user._id, { user, ...connectedUserData });
+    }
+  }
+
+  async handleDisconnect(@ConnectedSocket() client: Socket) {
+    const user: AnyUserInterface = await this.jwtService.verifyAsync(
+      client.handshake.headers.authorization,
+      {
+        secret: this.configService.get<string>('jwt.key'),
+      }
+    );
+
+    client.broadcast.emit(wsMessageKind.DISCONNECTION_EVENT, {
+      data: {
+        userId: user._id,
+      } as wsDisconnectionPayload,
+    } as wsMessageData);
+
+    const sockets = this.connectedUsers
+      .get(user._id)
+      .sockets.filter((socket) => socket !== client.id);
+
+    if (sockets.length > 0) {
+      this.connectedUsers.set(user._id, { user, sockets });
+    }
+    this.connectedUsers.delete(user._id);
+  }
+
+  private disconnect(socket: Socket, error: Record<string, unknown>) {
+    socket.emit('error', new WsException(error));
+    socket.disconnect();
   }
 
   @SubscribeMessage('test_event')
   handleTestEvent(@MessageBody('data') data: TestEventMessageDto) {
     // eslint-disable-next-line no-console
     console.log('This is test event data:', data);
-  }
-
-  handleDisconnect(@ConnectedSocket() client: Socket) {
-    const connectedUser = this.connectedUsers.get(client.id);
-
-    client.broadcast.emit('disconnection', {
-      data: {
-        message: `Hello, world! ${
-          connectedUser?.name || client.id
-        } has dropped connection recently!`,
-      },
-    });
-  }
-
-  private disconnect(socket: Socket, error: Record<string, unknown>) {
-    socket.emit('error', new WsException(error));
-    socket.disconnect();
   }
 }

@@ -5,6 +5,8 @@ import { UsersService } from '../../core/users/users.service';
 import { TasksService } from '../../core/tasks/tasks.service';
 import { AccessControlList } from '../../common/decorators/access-control-list.decorator';
 import { AnyUserInterface, UserRole, UserStatus } from '../../common/types/user.types';
+import { User } from '../../datalake/users/schemas/user.schema';
+import { Volunteer } from '../../datalake/users/schemas/volunteer.schema';
 import { GetTasksSearchDto } from '../recipient-api/dto/get-tasks-query.dto';
 import { TaskReport, TaskStatus } from '../../common/types/task.types';
 
@@ -19,20 +21,23 @@ export class VolunteerApiController {
 
   @AccessControlList({ role: UserRole.VOLUNTEER, level: UserStatus.UNCONFIRMED })
   @Get('tasks/virgin')
-  public async getNewTasks(@Query() query: GetTasksSearchDto) {
+  public async getNewTasks(@Req() req: Express.Request, @Query() query: GetTasksSearchDto) {
     const { latitude, longitude, distance, ...data } = query;
-    return this.tasksService.getTasksByStatus(TaskStatus.CREATED, {
-      ...data,
-      location: [longitude, latitude],
-      distance,
-    });
+    return this.tasksService.getTasksByStatus(
+      TaskStatus.CREATED,
+      {
+        ...data,
+        location: [longitude, latitude],
+        distance,
+      },
+      req.user as AnyUserInterface
+    );
   }
 
   @AccessControlList({ role: UserRole.VOLUNTEER, level: UserStatus.CONFIRMED })
   @Put('tasks/:id/accept')
   public async accept(@Req() req: Express.Request, @Param('id') taskId: string) {
-    const { _id: volunteerId } = req.user as AnyUserInterface;
-    return this.tasksService.acceptTask(taskId, volunteerId);
+    return this.tasksService.acceptTask(taskId, req.user as User & Volunteer);
   }
 
   @Put('/tasks/:id/fulfill')

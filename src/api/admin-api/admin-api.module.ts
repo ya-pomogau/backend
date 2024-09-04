@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
-import { AdminApiController } from './admin-api.controller';
+import { CqrsModule } from '@nestjs/cqrs';
+
 import { UsersService } from '../../core/users/users.service';
 import { UsersModule } from '../../core/users/users.module';
 import { HashModule } from '../../common/hash/hash.module';
@@ -10,6 +11,7 @@ import { BlogModule } from '../../core/blog/blog.module';
 import { CategoriesModule } from '../../core/categories/categories.module';
 import { TasksModule } from '../../core/tasks/tasks.module';
 import { ContactsModule } from '../../core/contacts/contacts.module';
+import { AdminApiController } from './admin-api.controller';
 
 @Module({
   imports: [
@@ -20,6 +22,7 @@ import { ContactsModule } from '../../core/contacts/contacts.module';
     CategoriesModule,
     TasksModule,
     ContactsModule,
+    CqrsModule,
   ],
   controllers: [AdminApiController],
   providers: [UsersService, JwtStrategy, LocalStrategy],

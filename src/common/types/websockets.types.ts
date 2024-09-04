@@ -4,6 +4,7 @@ import {
   SystemChatMetaInterface,
   TaskChatMetaInterface,
 } from './chats.types';
+import { AnyUserInterface } from './user.types';
 
 export const wsMessageKind = {
   REFRESH_TOKEN_COMMAND: 'RefreshToken',
@@ -14,12 +15,13 @@ export const wsMessageKind = {
   NEW_BLOG_POST_COMMAND: 'NewPost',
   CHAT_PAGE_QUERY: `PageQuery`,
   CHAT_PAGE_CONTENT: 'ChatPage',
+  DISCONNECTION_EVENT: 'Disconnection',
 } as const;
 
 export type wsMessageKind = keyof typeof wsMessageKind;
 
 export type wsTokenPayload = {
-  userId: string;
+  user: AnyUserInterface;
   token: string;
 };
 
@@ -37,13 +39,22 @@ export type wsChatPageQueryPayload = {
 
 export type wsMessagesPayload = { messages: Array<MessageInterface> };
 
+export type wsDisconnectionPayload = {
+  userId: string;
+};
+
 export type wsPayloadType =
   | wsTokenPayload
   | wsMetaPayload
   | wsChatPageQueryPayload
-  | wsMessagesPayload;
+  | wsMessagesPayload
+  | wsDisconnectionPayload;
 
-export type wsMessage = {
-  kind: wsMessageKind;
-  payload: wsPayloadType;
+export type wsMessageData = {
+  data: wsPayloadType;
+};
+
+export type wsConnectedUserData = {
+  user: AnyUserInterface;
+  sockets: Array<string>;
 };
