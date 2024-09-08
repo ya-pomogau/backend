@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ObjectId } from "mongoose";
 
-import { ConflictChatsTupleMetaInterface,
+import { ChatTypes, ConflictChatsTupleMetaInterface,
   MessageInterface,
   SystemChatMetaInterface,
   TaskChatMetaInterface
@@ -100,43 +100,74 @@ export class ChatService {
     return response;
   }
 
-  async getConflictChatsByAdmin(admin: AdminInterface) {
+  // TODO: Нужно изменить:
+  // 1) Сущность, чтобы возвращать не один чат?
+  // 2) Добавить или изменить в вебсокете типизацию, чтобы можно было отправлять массив массивов сообщений из чатов?
+  async getConflictChatsByAdmin(userId: ObjectId) {
+    const chatEntity = new ChatEntity(
+      this._chatRepository,
+      this._messageRepository
+    );
+
+    const conflictChatsInfo = [];
+
+    const conflictChats = chatEntity.findChatByParams({
+      type: "CONFLICT_CHAT",
+      'moderator._id': userId
+    });
+  }
+
+  async getConflictClosedChats(chatId: ObjectId) {
 
   }
 
-  async getConflictClosedChats() {
+  async getOpenSystemChats(chatId: ObjectId) {
 
   }
 
-  async getOpenSystemChats() {
+  async getClosedSystemChats(chatId: ObjectId) {
 
   }
 
-  async getClosedSystemChats() {
+  async getSystemChatsByUser(userId: ObjectId) {
 
   }
 
-  async getSystemChatsByUser() {
+  async getOpenSystemChatsByAdmin(userId: ObjectId) {
 
   }
 
-  async getOpenSystemChatsByAdmin() {
-
-  }
-
-  async getClosedSystemChatsByAdmin() {
+  async getClosedSystemChatsByAdmin(userId: ObjectId) {
 
   }
 
   async closeChatByTask(taskId: ObjectId) {
+    const chatEntity = new ChatEntity(
+      this._chatRepository,
+      this._messageRepository
+    );
 
+    const chat = await chatEntity.findChatByParams({ taskId: taskId });
+    chat.closeChat();
   }
 
-  async closeConflictChats(taskId: ObjectId) {
+  async closeConflictChats(chatId: ObjectId) {
+    const chatEntity = new ChatEntity(
+      this._chatRepository,
+      this._messageRepository
+    );
 
+    const chat = await chatEntity.findChatByParams({ chatId: chatId });
+    chat.closeChat();
   }
 
   async closeSystemChat(chatId: ObjectId) {
+    const chatEntity = new ChatEntity(
+      this._chatRepository,
+      this._messageRepository
+    );
 
+    const chat = await chatEntity.findChatByParams({ chatId: chatId });
+    chat.closeChat();
   }
 }
