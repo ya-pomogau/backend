@@ -1,10 +1,6 @@
 import { BadRequestException, Injectable, PipeTransform } from '@nestjs/common';
 import { Types } from 'mongoose';
 
-// interface ArgumentMetadata {
-//   type: 'param';
-// }
-
 @Injectable()
 export class ParamsIdValidationPipe implements PipeTransform {
   transform(value: Types.ObjectId) {
