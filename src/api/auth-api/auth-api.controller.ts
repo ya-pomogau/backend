@@ -4,6 +4,7 @@ import {
   Get,
   InternalServerErrorException,
   Post,
+  Req,
   UnauthorizedException,
   UseGuards,
   Headers,
@@ -100,15 +101,13 @@ export class AuthApiController {
   })
   @ApiUnauthorizedResponse({ description: 'Неверное имя пользователя или пароль' })
   @HttpCode(HTTP_STATUS_OK)
-  async administrative(@Body() dto: AdminLoginDto) {
-    const { login, password } = dto;
-    const admin = await this.usersService.checkAdminCredentials(login, password);
-    if (admin) {
+  async administrative(@Req() req: Express.Request) {
+    if (req.user) {
       // TODO: Вынести в сервис в core после решения проблемы с типизацией Users
       const token = await this.commandBus.execute<AuthenticateCommand, string>(
-        new AuthenticateCommand(admin as AnyUserInterface)
+        new AuthenticateCommand(req.user as AnyUserInterface)
       ); // this.authService.authenticate(req.user as Record<string, unknown>);
-      return { token, user: admin };
+      return { token, user: req.user };
     }
     throw new UnauthorizedException('Неверное имя пользователя или пароль');
   }
