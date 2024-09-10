@@ -1,9 +1,22 @@
 /* eslint-disable max-classes-per-file */
 
-import { IsIn, IsNotEmpty, IsOptional, IsPhoneNumber, IsString, IsUrl } from 'class-validator';
+import {
+  IsEnum,
+  IsIn,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsPhoneNumber,
+  IsString,
+  IsUrl,
+  ValidateNested,
+} from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import { NewProfileInterface } from '../types/api.types';
 import { GeoCoordinates, PointGeoJSONInterface } from '../types/point-geojson.types';
 import { IsCoords } from '../decorators/is-coords';
+import { AdminPermission, UserRole, UserStatus } from '../types/user.types';
 
 export class PointGeoJSONDto implements PointGeoJSONInterface {
   @IsCoords()
@@ -30,4 +43,119 @@ export class NewProfileDto implements NewProfileInterface {
   @IsString()
   @IsPhoneNumber('RU')
   phone: string;
+}
+
+export class UserDto {
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  address: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  avatar?: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  name: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  phone: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  vkId: string;
+
+  @ApiProperty()
+  @IsEnum(UserRole)
+  role: UserRole;
+
+  @ApiProperty()
+  @IsEnum(UserStatus)
+  status?: UserStatus;
+
+  @ApiProperty()
+  @ValidateNested({ each: true })
+  @Type(() => PointGeoJSONDto)
+  location: PointGeoJSONDto;
+
+  @ApiProperty()
+  @ApiProperty()
+  keys?: boolean;
+
+  @ApiProperty()
+  @IsNumber()
+  score?: number;
+}
+export class AnswerOkDto {
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  token: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  user: UserDto;
+}
+
+export class AdminDto {
+  @ApiProperty()
+  _id: string;
+
+  @ApiProperty()
+  permissions: Array<AdminPermission>;
+
+  @ApiProperty()
+  login: string;
+
+  @ApiProperty()
+  isRoot: boolean;
+
+  @ApiProperty()
+  isActive: true;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  address: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  avatar?: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  name: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  phone: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  vkId: string;
+
+  @ApiProperty()
+  @IsEnum(UserRole)
+  role: UserRole;
+}
+
+export class AnswerAdminOkDto {
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  token: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  user: AdminDto;
 }

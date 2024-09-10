@@ -12,9 +12,19 @@ import {
 } from '@nestjs/common';
 import { constants } from 'http2';
 import { CommandBus /* , QueryBus */ } from '@nestjs/cqrs';
+import {
+  ApiBadRequestResponse,
+  ApiBody,
+  ApiCreatedResponse,
+  ApiInternalServerErrorResponse,
+  ApiOperation,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
+import { AnswerAdminOkDto, AnswerOkDto, UserDto } from '../../common/dto/api.dto';
 import { VkLoginDto } from './dto/vk-login.dto';
 import { AuthService } from '../../core/auth/auth.service';
 import { VKNewUserDto } from './dto/vk-new.dto';
+import { MockLoginDto } from './dto/vk-mock-login.dto';
 import { UsersService } from '../../core/users/users.service';
 import { Public } from '../../common/decorators/public.decorator';
 import { AdminLoginAuthGuard } from '../../common/guards/local-auth.guard';
@@ -28,9 +38,9 @@ import { AnyUserInterface } from '../../common/types/user.types';
 
 const { HTTP_STATUS_OK, HTTP_STATUS_CREATED } = constants;
 
-type mockLoginDto = {
+/* type mockLoginDto = {
   vkId: string;
-};
+}; */
 
 @Controller('auth')
 export class AuthApiController {
@@ -42,6 +52,13 @@ export class AuthApiController {
 
   @Public()
   @Post('vk')
+  @ApiOperation({ summary: 'Авторизация пользователя' })
+  @ApiBody({ type: VkLoginDto })
+  @ApiCreatedResponse({
+    description: 'Авторизация прошла успешно.',
+    type: AnswerOkDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Неверное имя пользователя или пароль' })
   @HttpCode(HTTP_STATUS_OK)
   async vkLogin(@Body() dto: VkLoginDto) {
     // return this.authService.loginVK(dto);
@@ -51,6 +68,14 @@ export class AuthApiController {
   @Public()
   @Post('new')
   @HttpCode(HTTP_STATUS_CREATED)
+  @ApiOperation({ summary: 'Создает нового пользователя: волонтер или реципиент' })
+  @ApiBody({ type: VKNewUserDto })
+  @ApiCreatedResponse({
+    description: 'Пользователь успешно создан.',
+    type: AnswerOkDto,
+  })
+  @ApiInternalServerErrorResponse({ description: 'Произошла ошибка' })
+  @ApiBadRequestResponse({ description: 'Произошла ошибка' })
   async register(@Body() dto: VKNewUserDto) {
     const user = await this.commandBus.execute<CreateUserCommand, POJOType<User>>(
       new CreateUserCommand(dto)
@@ -67,6 +92,13 @@ export class AuthApiController {
   @Public()
   @UseGuards(AdminLoginAuthGuard)
   @Post('administrative')
+  @ApiOperation({ summary: 'Авторизация администратора' })
+  @ApiBody({ type: MockLoginDto })
+  @ApiCreatedResponse({
+    description: 'Авторизация прошла успешно.',
+    type: AnswerAdminOkDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Неверное имя пользователя или пароль' })
   @HttpCode(HTTP_STATUS_OK)
   async administrative(@Req() req: Express.Request) {
     if (req.user) {
@@ -81,8 +113,16 @@ export class AuthApiController {
 
   @Public()
   @Post('mock')
+  @ApiOperation({ summary: 'Моковая авторизация, используется только для разработки' })
+  @ApiBody({ type: MockLoginDto })
+  @ApiCreatedResponse({
+    description: 'Авторизация прошла успешно.',
+    type: AnswerOkDto,
+  })
+  @ApiBadRequestResponse({ description: 'Произошла ошибка' })
+  @ApiUnauthorizedResponse({ description: 'Неверный VKID' })
   @HttpCode(HTTP_STATUS_OK)
-  public async mockLogin(@Body() dto: mockLoginDto) {
+  public async mockLogin(@Body() dto: MockLoginDto) {
     const { vkId: mockId } = dto;
     const user = await this.usersService.checkVKCredential(mockId);
     if (user) {
@@ -95,6 +135,13 @@ export class AuthApiController {
 
   @Public()
   @Get('token')
+  @ApiOperation({ summary: 'Проверяет токен' })
+  @ApiCreatedResponse({
+    description: 'Токен правильный.',
+    type: UserDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Токен не подходит' })
+  @ApiInternalServerErrorResponse({ description: 'Произошла ошибка' })
   @HttpCode(HTTP_STATUS_OK)
   public async checkToken(@Headers() headers: Record<string, string>) {
     const { authorization } = headers;
