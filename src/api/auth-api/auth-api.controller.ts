@@ -4,7 +4,6 @@ import {
   Get,
   InternalServerErrorException,
   Post,
-  Req,
   UnauthorizedException,
   UseGuards,
   Headers,
@@ -35,6 +34,7 @@ import { User } from '../../datalake/users/schemas/user.schema';
 import { AuthenticateCommand } from '../../common/commands/authenticate.command';
 import { CheckJwtCommand } from '../../common/commands/check-jwt.command';
 import { AnyUserInterface } from '../../common/types/user.types';
+import { AdminLoginDto } from './dto/admin.dto';
 
 const { HTTP_STATUS_OK, HTTP_STATUS_CREATED } = constants;
 
@@ -93,20 +93,22 @@ export class AuthApiController {
   @UseGuards(AdminLoginAuthGuard)
   @Post('administrative')
   @ApiOperation({ summary: 'Авторизация администратора' })
-  @ApiBody({ type: MockLoginDto })
+  @ApiBody({ type: AdminLoginDto })
   @ApiCreatedResponse({
     description: 'Авторизация прошла успешно.',
     type: AnswerAdminOkDto,
   })
   @ApiUnauthorizedResponse({ description: 'Неверное имя пользователя или пароль' })
   @HttpCode(HTTP_STATUS_OK)
-  async administrative(@Req() req: Express.Request) {
-    if (req.user) {
+  async administrative(@Body() dto: AdminLoginDto) {
+    const { login, password } = dto;
+    const admin = await this.usersService.checkAdminCredentials(login, password);
+    if (admin) {
       // TODO: Вынести в сервис в core после решения проблемы с типизацией Users
       const token = await this.commandBus.execute<AuthenticateCommand, string>(
-        new AuthenticateCommand(req.user as AnyUserInterface)
+        new AuthenticateCommand(admin as AnyUserInterface)
       ); // this.authService.authenticate(req.user as Record<string, unknown>);
-      return { token, user: req.user };
+      return { token, user: admin };
     }
     throw new UnauthorizedException('Неверное имя пользователя или пароль');
   }
