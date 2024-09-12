@@ -50,22 +50,90 @@ export class RecipientApiController {
     description: 'Задача создана успешно.',
     type: CreatedTaskDto,
   })
-  @ApiBadRequestResponse({ description: 'Произошла ошибка' })
-  @ApiUnauthorizedResponse({ description: 'Требуется авторизация' })
-  @ApiForbiddenResponse({ description: 'Требуется другой статус' })
+  @ApiBadRequestResponse({
+    schema: {
+      type: 'object',
+      example: {
+        message: ['string'],
+        error: 'Bad Request',
+        statusCode: 400,
+      },
+    },
+    description: 'Произошла ошибка',
+  })
+  @ApiUnauthorizedResponse({
+    schema: {
+      type: 'object',
+      example: {
+        message: 'Unauthorized',
+        statusCode: 401,
+      },
+    },
+    description: 'Требуется авторизация',
+  })
+  @ApiForbiddenResponse({
+    schema: {
+      type: 'object',
+      example: {
+        message: 'Forbidden resource',
+        error: 'Forbidden',
+        statusCode: 403,
+      },
+    },
+    description: 'Требуется другой статус',
+  })
+  @ApiInternalServerErrorResponse({
+    schema: {
+      type: 'object',
+      example: {
+        statusCode: 500,
+        message: 'Internal server error',
+      },
+    },
+    description: 'Внутрення ошибка на сервере',
+  })
   public async create(@Body() dto: ApiCreateTaskDto, @Req() { user: { _id: recipientId } }) {
     return this.tasksService.create({ ...dto, recipientId });
   }
 
   @Get('/tasks/virgin')
-  @ApiOperation({ summary: 'Найти все virgin задачи реципиента' })
+  @ApiOperation({ summary: 'Найти все неразобранные задачи реципиента' })
   @ApiQuery({ type: GetTasksSearchDto })
   @ApiCreatedResponse({
-    type: Array<CreatedTaskDto>,
+    type: CreatedTaskDto,
+    isArray: true,
   })
-  @ApiUnauthorizedResponse({ description: 'Требуется авторизация' })
-  @ApiForbiddenResponse({ description: 'Требуется другой статус или роль' })
-  @ApiInternalServerErrorResponse({ description: 'Произошла ошибка' })
+  @ApiUnauthorizedResponse({
+    schema: {
+      type: 'object',
+      example: {
+        message: 'Unauthorized',
+        statusCode: 401,
+      },
+    },
+    description: 'Требуется авторизация',
+  })
+  @ApiForbiddenResponse({
+    schema: {
+      type: 'object',
+      example: {
+        message: 'Forbidden resource',
+        error: 'Forbidden',
+        statusCode: 403,
+      },
+    },
+    description: 'Требуется другой статус',
+  })
+  @ApiInternalServerErrorResponse({
+    schema: {
+      type: 'object',
+      example: {
+        statusCode: 500,
+        message: 'Internal server error',
+      },
+    },
+    description: 'Внутрення ошибка на сервере',
+  })
   @AccessControlList({ role: UserRole.RECIPIENT, level: UserStatus.CONFIRMED })
   public async getVirginTasks(@Query() query: GetTasksSearchDto, @Req() req: Express.Request) {
     const { user } = req;
@@ -79,10 +147,58 @@ export class RecipientApiController {
     description: 'Задача отмечена как выполненная',
     type: CreatedTaskDto,
   })
-  @ApiUnauthorizedResponse({ description: 'Требуется авторизация' })
-  @ApiForbiddenResponse({ description: 'Нельзя отчитаться по не открытой задаче!' })
-  @ApiInternalServerErrorResponse({ description: 'Произошла ошибка' })
-  @ApiConflictResponse({ description: 'Нельзя повторно отчитаться по задаче!' })
+  @ApiBadRequestResponse({
+    schema: {
+      type: 'object',
+      example: {
+        message: ['string'],
+        error: 'Bad Request',
+        statusCode: 400,
+      },
+    },
+    description: 'Произошла ошибка',
+  })
+  @ApiUnauthorizedResponse({
+    schema: {
+      type: 'object',
+      example: {
+        message: 'Unauthorized',
+        statusCode: 401,
+      },
+    },
+    description: 'Требуется авторизация',
+  })
+  @ApiForbiddenResponse({
+    schema: {
+      type: 'object',
+      example: {
+        message: 'Forbidden resource',
+        error: 'Forbidden',
+        statusCode: 403,
+      },
+    },
+    description: 'Требуется другой статус',
+  })
+  @ApiConflictResponse({
+    schema: {
+      type: 'object',
+      example: {
+        message: 'Нельзя повторно отчитаться по задаче!',
+        statusCode: 409,
+      },
+    },
+    description: 'Запрос конфликтует с текущим состоянием сервера',
+  })
+  @ApiInternalServerErrorResponse({
+    schema: {
+      type: 'object',
+      example: {
+        statusCode: 500,
+        message: 'Internal server error',
+      },
+    },
+    description: 'Внутрення ошибка на сервере',
+  })
   @AccessControlList({ role: UserRole.RECIPIENT, level: UserStatus.CONFIRMED })
   public async fulfillTask(@Param('id') id: string, @Req() { user: { _id: userId } }) {
     return this.tasksService.reportTask(id, userId, UserRole.RECIPIENT, TaskReport.FULFILLED);
@@ -95,10 +211,58 @@ export class RecipientApiController {
     description: 'Задача отмечена как отклоненная реципиентом',
     type: CreatedTaskDto,
   })
-  @ApiUnauthorizedResponse({ description: 'Требуется авторизация' })
-  @ApiForbiddenResponse({ description: 'Нельзя отчитаться по не открытой задаче!' })
-  @ApiInternalServerErrorResponse({ description: 'Произошла ошибка' })
-  @ApiConflictResponse({ description: 'Нельзя повторно отчитаться по задаче!' })
+  @ApiBadRequestResponse({
+    schema: {
+      type: 'object',
+      example: {
+        message: ['string'],
+        error: 'Bad Request',
+        statusCode: 400,
+      },
+    },
+    description: 'Произошла ошибка',
+  })
+  @ApiUnauthorizedResponse({
+    schema: {
+      type: 'object',
+      example: {
+        message: 'Unauthorized',
+        statusCode: 401,
+      },
+    },
+    description: 'Требуется авторизация',
+  })
+  @ApiForbiddenResponse({
+    schema: {
+      type: 'object',
+      example: {
+        message: 'Forbidden resource',
+        error: 'Forbidden',
+        statusCode: 403,
+      },
+    },
+    description: 'Требуется другой статус',
+  })
+  @ApiConflictResponse({
+    schema: {
+      type: 'object',
+      example: {
+        message: 'Нельзя повторно отчитаться по задаче!',
+        statusCode: 409,
+      },
+    },
+    description: 'Запрос конфликтует с текущим состоянием сервера',
+  })
+  @ApiInternalServerErrorResponse({
+    schema: {
+      type: 'object',
+      example: {
+        statusCode: 500,
+        message: 'Internal server error',
+      },
+    },
+    description: 'Внутрення ошибка на сервере',
+  })
   @AccessControlList({ role: UserRole.RECIPIENT, level: UserStatus.CONFIRMED })
   public async rejectTask(@Param('id') id: string, @Req() { user: { _id: userId } }) {
     return this.tasksService.reportTask(id, userId, UserRole.RECIPIENT, TaskReport.REJECTED);
@@ -108,10 +272,30 @@ export class RecipientApiController {
   @ApiOperation({ summary: 'Найти все принятые задачи реципиента' })
   @ApiQuery({ type: GetTasksSearchDto })
   @ApiCreatedResponse({
-    type: Array<CreatedTaskDto>,
+    type: CreatedTaskDto,
+    isArray: true,
   })
-  @ApiUnauthorizedResponse({ description: 'Требуется авторизация' })
-  @ApiForbiddenResponse({ description: 'Требуется другой статус или роль' })
+  @ApiUnauthorizedResponse({
+    schema: {
+      type: 'object',
+      example: {
+        message: 'Unauthorized',
+        statusCode: 401,
+      },
+    },
+    description: 'Требуется авторизация',
+  })
+  @ApiForbiddenResponse({
+    schema: {
+      type: 'object',
+      example: {
+        message: 'Forbidden resource',
+        error: 'Forbidden',
+        statusCode: 403,
+      },
+    },
+    description: 'Требуется другой статус',
+  })
   @AccessControlList({ role: UserRole.RECIPIENT, level: UserStatus.CONFIRMED })
   public async getAcceptedTasks(@Query() query: GetTasksSearchDto, @Req() req: Express.Request) {
     const { latitude, longitude, ...data } = query;
@@ -125,10 +309,30 @@ export class RecipientApiController {
   @ApiOperation({ summary: 'Найти все активные задачи реципиента' })
   @ApiQuery({ type: GetTasksSearchDto })
   @ApiCreatedResponse({
-    type: Array<CreatedTaskDto>,
+    type: CreatedTaskDto,
+    isArray: true,
   })
-  @ApiUnauthorizedResponse({ description: 'Требуется авторизация' })
-  @ApiForbiddenResponse({ description: 'Требуется другой статус или роль' })
+  @ApiUnauthorizedResponse({
+    schema: {
+      type: 'object',
+      example: {
+        message: 'Unauthorized',
+        statusCode: 401,
+      },
+    },
+    description: 'Требуется авторизация',
+  })
+  @ApiForbiddenResponse({
+    schema: {
+      type: 'object',
+      example: {
+        message: 'Forbidden resource',
+        error: 'Forbidden',
+        statusCode: 403,
+      },
+    },
+    description: 'Требуется другой статус',
+  })
   @AccessControlList({ role: UserRole.RECIPIENT, level: UserStatus.CONFIRMED })
   public async getActiveTasks(@Query() query: GetTasksSearchDto, @Req() req: Express.Request) {
     const { latitude, longitude, ...data } = query;
@@ -156,10 +360,30 @@ export class RecipientApiController {
   @ApiOperation({ summary: 'Найти все завершенные задачи реципиента' })
   @ApiQuery({ type: GetTasksSearchDto })
   @ApiCreatedResponse({
-    type: Array<CreatedTaskDto>,
+    type: CreatedTaskDto,
+    isArray: true,
   })
-  @ApiUnauthorizedResponse({ description: 'Требуется авторизация' })
-  @ApiForbiddenResponse({ description: 'Требуется другой статус или роль' })
+  @ApiUnauthorizedResponse({
+    schema: {
+      type: 'object',
+      example: {
+        message: 'Unauthorized',
+        statusCode: 401,
+      },
+    },
+    description: 'Требуется авторизация',
+  })
+  @ApiForbiddenResponse({
+    schema: {
+      type: 'object',
+      example: {
+        message: 'Forbidden resource',
+        error: 'Forbidden',
+        statusCode: 403,
+      },
+    },
+    description: 'Требуется другой статус',
+  })
   public async getCompletedTasks(@Query() query: GetTasksSearchDto, @Req() req: Express.Request) {
     const { latitude, longitude, ...data } = query;
     const completed = await this.tasksService.getOwnTasks(
@@ -188,9 +412,37 @@ export class RecipientApiController {
   @ApiCreatedResponse({
     type: CreatedTaskDto,
   })
-  @ApiUnauthorizedResponse({ description: 'Требуется авторизация' })
-  @ApiForbiddenResponse({ description: 'Требуется другой статус или роль' })
-  @ApiInternalServerErrorResponse({ description: 'Произошла ошибка' })
+  @ApiUnauthorizedResponse({
+    schema: {
+      type: 'object',
+      example: {
+        message: 'Unauthorized',
+        statusCode: 401,
+      },
+    },
+    description: 'Требуется авторизация',
+  })
+  @ApiForbiddenResponse({
+    schema: {
+      type: 'object',
+      example: {
+        message: 'Forbidden resource',
+        error: 'Forbidden',
+        statusCode: 403,
+      },
+    },
+    description: 'Требуется другой статус',
+  })
+  @ApiInternalServerErrorResponse({
+    schema: {
+      type: 'object',
+      example: {
+        statusCode: 500,
+        message: 'Internal server error',
+      },
+    },
+    description: 'Внутрення ошибка на сервере',
+  })
   public async getTaskById(@Param('id') id: string) {
     return this.tasksService.getTask(id);
   }
@@ -204,10 +456,48 @@ export class RecipientApiController {
     description: 'Задача отредактирована успешно.',
     type: CreatedTaskDto,
   })
-  @ApiBadRequestResponse({ description: 'Произошла ошибка' })
-  @ApiUnauthorizedResponse({ description: 'Требуется авторизация' })
-  @ApiForbiddenResponse({ description: 'Требуется другой статус' })
-  @ApiInternalServerErrorResponse({ description: 'Произошла ошибка' })
+  @ApiBadRequestResponse({
+    schema: {
+      type: 'object',
+      example: {
+        message: ['string'],
+        error: 'Bad Request',
+        statusCode: 400,
+      },
+    },
+    description: 'Произошла ошибка',
+  })
+  @ApiUnauthorizedResponse({
+    schema: {
+      type: 'object',
+      example: {
+        message: 'Unauthorized',
+        statusCode: 401,
+      },
+    },
+    description: 'Требуется авторизация',
+  })
+  @ApiForbiddenResponse({
+    schema: {
+      type: 'object',
+      example: {
+        message: 'Forbidden resource',
+        error: 'Forbidden',
+        statusCode: 403,
+      },
+    },
+    description: 'Требуется другой статус',
+  })
+  @ApiInternalServerErrorResponse({
+    schema: {
+      type: 'object',
+      example: {
+        statusCode: 500,
+        message: 'Internal server error',
+      },
+    },
+    description: 'Внутрення ошибка на сервере',
+  })
   public async updateTask(
     @Param('id') id: string,
     @Req() { user },
@@ -224,9 +514,37 @@ export class RecipientApiController {
     description: 'Задача удалена успешно.',
     type: DeletedTaskDto,
   })
-  @ApiUnauthorizedResponse({ description: 'Требуется авторизация' })
-  @ApiForbiddenResponse({ description: 'Требуется другой статус' })
-  @ApiInternalServerErrorResponse({ description: 'Произошла ошибка' })
+  @ApiUnauthorizedResponse({
+    schema: {
+      type: 'object',
+      example: {
+        message: 'Unauthorized',
+        statusCode: 401,
+      },
+    },
+    description: 'Требуется авторизация',
+  })
+  @ApiForbiddenResponse({
+    schema: {
+      type: 'object',
+      example: {
+        message: 'Forbidden resource',
+        error: 'Forbidden',
+        statusCode: 403,
+      },
+    },
+    description: 'Требуется другой статус',
+  })
+  @ApiInternalServerErrorResponse({
+    schema: {
+      type: 'object',
+      example: {
+        statusCode: 500,
+        message: 'Internal server error',
+      },
+    },
+    description: 'Внутрення ошибка на сервере',
+  })
   public async cancelTask(@Param('id') id: string, @Req() req: Express.Request) {
     const { user } = req;
     return this.tasksService.cancelTask(id, user as AnyUserInterface);
