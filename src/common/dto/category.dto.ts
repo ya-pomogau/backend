@@ -1,3 +1,5 @@
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNumber, IsString } from 'class-validator';
 import { UserStatus } from '../types/user.types';
 
 export type CreateCategoryDto = {
@@ -11,3 +13,25 @@ export type UpdateCategoryDto = Partial<CreateCategoryDto> & {
   createdAt?: string | Date;
   updatedAt?: string | Date;
 };
+
+export class CategoryDto {
+  @IsString()
+  @ApiProperty()
+  _id: string;
+
+  @ApiProperty()
+  @IsString()
+  title: string;
+
+  @ApiProperty({
+    type: Number,
+  })
+  @IsNumber()
+  points: number;
+
+  @ApiProperty({
+    type: Number,
+  })
+  @IsNumber()
+  accessLevel: number;
+}

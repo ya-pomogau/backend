@@ -11,28 +11,61 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
+import {
+  ApiOperation,
+  ApiBody,
+  ApiCreatedResponse,
+  ApiBadRequestResponse,
+  ApiUnauthorizedResponse,
+  ApiForbiddenResponse,
+  ApiQuery,
+  ApiParam,
+  ApiInternalServerErrorResponse,
+  ApiConflictResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { TasksService } from '../../core/tasks/tasks.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { AccessControlGuard } from '../../common/guards/access-control.guard';
 import { ApiCreateTaskDto } from './dto/create-task.dto';
+import { CreatedTaskDto } from './dto/created-task.dto';
 import { AccessControlList } from '../../common/decorators/access-control-list.decorator';
 import { AnyUserInterface, UserRole, UserStatus } from '../../common/types/user.types';
 import { GetTasksSearchDto } from './dto/get-tasks-query.dto';
 import { TaskReport, TaskStatus } from '../../common/types/task.types';
+import { DeletedTaskDto } from './dto/deleted-task.dto';
 
 @UseGuards(JwtAuthGuard)
 @UseGuards(AccessControlGuard)
+@ApiTags('Recipient API')
 @Controller('recipient')
 export class RecipientApiController {
   constructor(private readonly tasksService: TasksService) {}
 
   @Post('/tasks')
   @AccessControlList({ role: UserRole.RECIPIENT, level: UserStatus.CONFIRMED })
+  @ApiOperation({ summary: 'Создание задачи' })
+  @ApiBody({ type: ApiCreateTaskDto })
+  @ApiCreatedResponse({
+    description: 'Задача создана успешно.',
+    type: CreatedTaskDto,
+  })
+  @ApiBadRequestResponse({ description: 'Произошла ошибка' })
+  @ApiUnauthorizedResponse({ description: 'Требуется авторизация' })
+  @ApiForbiddenResponse({ description: 'Требуется другой статус' })
   public async create(@Body() dto: ApiCreateTaskDto, @Req() { user: { _id: recipientId } }) {
     return this.tasksService.create({ ...dto, recipientId });
   }
 
   @Get('/tasks/virgin')
+  @ApiOperation({ summary: 'Найти все virgin задачи реципиента' })
+  @ApiQuery({ type: GetTasksSearchDto })
+  @ApiCreatedResponse({
+    type: Array<CreatedTaskDto>,
+  })
+  @ApiUnauthorizedResponse({ description: 'Требуется авторизация' })
+  @ApiForbiddenResponse({ description: 'Требуется другой статус или роль' })
+  @ApiInternalServerErrorResponse({ description: 'Произошла ошибка' })
   @AccessControlList({ role: UserRole.RECIPIENT, level: UserStatus.CONFIRMED })
   public async getVirginTasks(@Query() query: GetTasksSearchDto, @Req() req: Express.Request) {
     const { user } = req;
@@ -40,18 +73,45 @@ export class RecipientApiController {
   }
 
   @Put('/tasks/:id/fulfill')
+  @ApiOperation({ summary: 'Отметить задачу как выполненную' })
+  @ApiParam({ name: 'id', type: 'string', description: 'ID задачи' })
+  @ApiCreatedResponse({
+    description: 'Задача отмечена как выполненная',
+    type: CreatedTaskDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Требуется авторизация' })
+  @ApiForbiddenResponse({ description: 'Нельзя отчитаться по не открытой задаче!' })
+  @ApiInternalServerErrorResponse({ description: 'Произошла ошибка' })
+  @ApiConflictResponse({ description: 'Нельзя повторно отчитаться по задаче!' })
   @AccessControlList({ role: UserRole.RECIPIENT, level: UserStatus.CONFIRMED })
   public async fulfillTask(@Param('id') id: string, @Req() { user: { _id: userId } }) {
     return this.tasksService.reportTask(id, userId, UserRole.RECIPIENT, TaskReport.FULFILLED);
   }
 
   @Put('/tasks/:id/reject')
+  @ApiOperation({ summary: 'Отклонение задачи реципиентом' })
+  @ApiParam({ name: 'id', type: 'string', description: 'ID задачи' })
+  @ApiCreatedResponse({
+    description: 'Задача отмечена как отклоненная реципиентом',
+    type: CreatedTaskDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Требуется авторизация' })
+  @ApiForbiddenResponse({ description: 'Нельзя отчитаться по не открытой задаче!' })
+  @ApiInternalServerErrorResponse({ description: 'Произошла ошибка' })
+  @ApiConflictResponse({ description: 'Нельзя повторно отчитаться по задаче!' })
   @AccessControlList({ role: UserRole.RECIPIENT, level: UserStatus.CONFIRMED })
   public async rejectTask(@Param('id') id: string, @Req() { user: { _id: userId } }) {
     return this.tasksService.reportTask(id, userId, UserRole.RECIPIENT, TaskReport.REJECTED);
   }
 
   @Get('/tasks/accepted')
+  @ApiOperation({ summary: 'Найти все принятые задачи реципиента' })
+  @ApiQuery({ type: GetTasksSearchDto })
+  @ApiCreatedResponse({
+    type: Array<CreatedTaskDto>,
+  })
+  @ApiUnauthorizedResponse({ description: 'Требуется авторизация' })
+  @ApiForbiddenResponse({ description: 'Требуется другой статус или роль' })
   @AccessControlList({ role: UserRole.RECIPIENT, level: UserStatus.CONFIRMED })
   public async getAcceptedTasks(@Query() query: GetTasksSearchDto, @Req() req: Express.Request) {
     const { latitude, longitude, ...data } = query;
@@ -62,6 +122,13 @@ export class RecipientApiController {
   }
 
   @Get('/tasks/active')
+  @ApiOperation({ summary: 'Найти все активные задачи реципиента' })
+  @ApiQuery({ type: GetTasksSearchDto })
+  @ApiCreatedResponse({
+    type: Array<CreatedTaskDto>,
+  })
+  @ApiUnauthorizedResponse({ description: 'Требуется авторизация' })
+  @ApiForbiddenResponse({ description: 'Требуется другой статус или роль' })
   @AccessControlList({ role: UserRole.RECIPIENT, level: UserStatus.CONFIRMED })
   public async getActiveTasks(@Query() query: GetTasksSearchDto, @Req() req: Express.Request) {
     const { latitude, longitude, ...data } = query;
@@ -86,6 +153,13 @@ export class RecipientApiController {
 
   @Get('/tasks/completed')
   @AccessControlList({ role: UserRole.RECIPIENT, level: UserStatus.CONFIRMED })
+  @ApiOperation({ summary: 'Найти все завершенные задачи реципиента' })
+  @ApiQuery({ type: GetTasksSearchDto })
+  @ApiCreatedResponse({
+    type: Array<CreatedTaskDto>,
+  })
+  @ApiUnauthorizedResponse({ description: 'Требуется авторизация' })
+  @ApiForbiddenResponse({ description: 'Требуется другой статус или роль' })
   public async getCompletedTasks(@Query() query: GetTasksSearchDto, @Req() req: Express.Request) {
     const { latitude, longitude, ...data } = query;
     const completed = await this.tasksService.getOwnTasks(
@@ -108,13 +182,32 @@ export class RecipientApiController {
   }
 
   @Get('/tasks/:id')
+  @ApiOperation({ summary: 'Найти задачу по ID' })
   @AccessControlList({ role: UserRole.RECIPIENT, level: UserStatus.CONFIRMED })
+  @ApiParam({ name: 'id', type: 'string', description: 'ID задачи' })
+  @ApiCreatedResponse({
+    type: CreatedTaskDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Требуется авторизация' })
+  @ApiForbiddenResponse({ description: 'Требуется другой статус или роль' })
+  @ApiInternalServerErrorResponse({ description: 'Произошла ошибка' })
   public async getTaskById(@Param('id') id: string) {
     return this.tasksService.getTask(id);
   }
 
   @Patch('/tasks/:id')
   @AccessControlList({ role: UserRole.RECIPIENT, level: UserStatus.CONFIRMED })
+  @ApiOperation({ summary: 'Редактирование задачи' })
+  @ApiBody({ type: ApiCreateTaskDto })
+  @ApiParam({ name: 'id', type: 'string', description: 'ID задачи' })
+  @ApiCreatedResponse({
+    description: 'Задача отредактирована успешно.',
+    type: CreatedTaskDto,
+  })
+  @ApiBadRequestResponse({ description: 'Произошла ошибка' })
+  @ApiUnauthorizedResponse({ description: 'Требуется авторизация' })
+  @ApiForbiddenResponse({ description: 'Требуется другой статус' })
+  @ApiInternalServerErrorResponse({ description: 'Произошла ошибка' })
   public async updateTask(
     @Param('id') id: string,
     @Req() { user },
@@ -125,6 +218,15 @@ export class RecipientApiController {
 
   @Delete('/tasks/:id')
   @AccessControlList({ role: UserRole.RECIPIENT, level: UserStatus.CONFIRMED })
+  @ApiOperation({ summary: 'Удаление задачи' })
+  @ApiParam({ name: 'id', type: 'string', description: 'ID задачи' })
+  @ApiCreatedResponse({
+    description: 'Задача удалена успешно.',
+    type: DeletedTaskDto,
+  })
+  @ApiUnauthorizedResponse({ description: 'Требуется авторизация' })
+  @ApiForbiddenResponse({ description: 'Требуется другой статус' })
+  @ApiInternalServerErrorResponse({ description: 'Произошла ошибка' })
   public async cancelTask(@Param('id') id: string, @Req() req: Express.Request) {
     const { user } = req;
     return this.tasksService.cancelTask(id, user as AnyUserInterface);
