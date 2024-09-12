@@ -8,7 +8,7 @@ import { MessagesRepository } from '../../datalake/messages/messages.repository'
 // import { ChatEntityInterface, MetadataType, ChatEntity } from '../../entities/chats/chat.entity.ts';
 
 @Injectable()
-export class ChatsEntityFactory {
+export class ChatEntitiesFactory {
   constructor(
     private readonly _chatsRepository: ChatsRepository,
     private readonly _messagesRepository: MessagesRepository
