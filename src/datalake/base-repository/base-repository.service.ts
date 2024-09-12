@@ -171,10 +171,7 @@ export abstract class BaseRepositoryService<T extends Document, M = {}, V = {}> 
     return this.entityModel.deleteMany(entityFilterQuery);
   }
 
-  async aggregate(
-    pipeline: PipelineStage[],
-    options?: Record<string, unknown>
-  ): Promise<Array<Record<string, unknown>>> {
+  async aggregate(pipeline: PipelineStage[], options?: Record<string, unknown>): Promise<Array<T>> {
     return this.entityModel.aggregate(pipeline, options);
   }
 }
