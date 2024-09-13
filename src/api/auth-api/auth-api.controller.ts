@@ -18,6 +18,7 @@ import {
   ApiCreatedResponse,
   ApiInternalServerErrorResponse,
   ApiOperation,
+  ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { AnswerAdminOkDto, AnswerOkDto, UserDto } from '../../common/dto/api.dto';
@@ -39,10 +40,7 @@ import { AdminLoginDto } from './dto/admin.dto';
 
 const { HTTP_STATUS_OK, HTTP_STATUS_CREATED } = constants;
 
-/* type mockLoginDto = {
-  vkId: string;
-}; */
-
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthApiController {
   constructor(
@@ -59,7 +57,27 @@ export class AuthApiController {
     description: 'Авторизация прошла успешно.',
     type: AnswerOkDto,
   })
-  @ApiUnauthorizedResponse({ description: 'Неверное имя пользователя или пароль' })
+  @ApiBadRequestResponse({
+    schema: {
+      type: 'object',
+      example: {
+        message: ['string'],
+        error: 'Bad Request',
+        statusCode: 400,
+      },
+    },
+    description: 'Произошла ошибка',
+  })
+  @ApiUnauthorizedResponse({
+    schema: {
+      type: 'object',
+      example: {
+        message: 'Unauthorized',
+        statusCode: 401,
+      },
+    },
+    description: 'Неверное имя пользователя или пароль',
+  })
   @HttpCode(HTTP_STATUS_OK)
   async vkLogin(@Body() dto: VkLoginDto) {
     // return this.authService.loginVK(dto);
@@ -75,8 +93,27 @@ export class AuthApiController {
     description: 'Пользователь успешно создан.',
     type: AnswerOkDto,
   })
-  @ApiInternalServerErrorResponse({ description: 'Произошла ошибка' })
-  @ApiBadRequestResponse({ description: 'Произошла ошибка' })
+  @ApiInternalServerErrorResponse({
+    schema: {
+      type: 'object',
+      example: {
+        statusCode: 500,
+        message: 'Internal server error',
+      },
+    },
+    description: 'Внутрення ошибка на сервере',
+  })
+  @ApiBadRequestResponse({
+    schema: {
+      type: 'object',
+      example: {
+        message: ['string'],
+        error: 'Bad Request',
+        statusCode: 400,
+      },
+    },
+    description: 'Произошла ошибка',
+  })
   async register(@Body() dto: VKNewUserDto) {
     const user = await this.commandBus.execute<CreateUserCommand, POJOType<User>>(
       new CreateUserCommand(dto)
@@ -99,7 +136,16 @@ export class AuthApiController {
     description: 'Авторизация прошла успешно.',
     type: AnswerAdminOkDto,
   })
-  @ApiUnauthorizedResponse({ description: 'Неверное имя пользователя или пароль' })
+  @ApiUnauthorizedResponse({
+    schema: {
+      type: 'object',
+      example: {
+        message: 'Unauthorized',
+        statusCode: 401,
+      },
+    },
+    description: 'Неверное имя пользователя или пароль',
+  })
   @HttpCode(HTTP_STATUS_OK)
   async administrative(@Req() req: Express.Request) {
     if (req.user) {
@@ -120,8 +166,27 @@ export class AuthApiController {
     description: 'Авторизация прошла успешно.',
     type: AnswerOkDto,
   })
-  @ApiBadRequestResponse({ description: 'Произошла ошибка' })
-  @ApiUnauthorizedResponse({ description: 'Неверный VKID' })
+  @ApiBadRequestResponse({
+    schema: {
+      type: 'object',
+      example: {
+        message: ['string'],
+        error: 'Bad Request',
+        statusCode: 400,
+      },
+    },
+    description: 'Произошла ошибка',
+  })
+  @ApiUnauthorizedResponse({
+    schema: {
+      type: 'object',
+      example: {
+        message: 'Unauthorized',
+        statusCode: 401,
+      },
+    },
+    description: 'Неверный VKID',
+  })
   @HttpCode(HTTP_STATUS_OK)
   public async mockLogin(@Body() dto: MockLoginDto) {
     const { vkId: mockId } = dto;
@@ -141,8 +206,26 @@ export class AuthApiController {
     description: 'Токен правильный.',
     type: UserDto,
   })
-  @ApiUnauthorizedResponse({ description: 'Токен не подходит' })
-  @ApiInternalServerErrorResponse({ description: 'Произошла ошибка' })
+  @ApiUnauthorizedResponse({
+    schema: {
+      type: 'object',
+      example: {
+        message: 'Unauthorized',
+        statusCode: 401,
+      },
+    },
+    description: 'Токен не подходит',
+  })
+  @ApiInternalServerErrorResponse({
+    schema: {
+      type: 'object',
+      example: {
+        statusCode: 500,
+        message: 'Internal server error',
+      },
+    },
+    description: 'Внутрення ошибка на сервере',
+  })
   @HttpCode(HTTP_STATUS_OK)
   public async checkToken(@Headers() headers: Record<string, string>) {
     const { authorization } = headers;

@@ -19,10 +19,12 @@ import { IsCoords } from '../decorators/is-coords';
 import { AdminPermission, UserRole, UserStatus } from '../types/user.types';
 
 export class PointGeoJSONDto implements PointGeoJSONInterface {
+  @ApiProperty()
   @IsCoords()
   @IsNotEmpty()
   coordinates: GeoCoordinates;
 
+  @ApiProperty()
   @IsIn(['Point'])
   type: 'Point';
 }
@@ -71,17 +73,18 @@ export class UserDto {
   @IsString()
   vkId: string;
 
-  @ApiProperty()
+  @ApiProperty({ enum: UserRole })
   @IsEnum(UserRole)
   role: UserRole;
 
-  @ApiProperty()
+  @ApiProperty({ enum: UserStatus })
   @IsEnum(UserStatus)
   status?: UserStatus;
 
   @ApiProperty()
   @ValidateNested({ each: true })
   @Type(() => PointGeoJSONDto)
+  @IsNotEmpty()
   location: PointGeoJSONDto;
 
   @ApiProperty()
@@ -144,7 +147,7 @@ export class AdminDto {
   @IsString()
   vkId: string;
 
-  @ApiProperty()
+  @ApiProperty({ enum: UserRole })
   @IsEnum(UserRole)
   role: UserRole;
 }
