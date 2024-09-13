@@ -7,8 +7,8 @@ import {
   IsDateString,
   IsBoolean,
 } from 'class-validator';
+import { PointGeoJSONDto } from '../../../common/dto/api.dto';
 import { ResolveStatus, TaskReport, TaskStatus } from '../../../common/types/task.types';
-import { PointGeoJSON } from '../../../common/schemas/PointGeoJSON.schema';
 import { CategoryDto } from '../../../common/dto/category.dto';
 import { InTaskUserDto } from './in-task-user.dto';
 
@@ -43,7 +43,7 @@ export class CreatedTaskDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  location: PointGeoJSON;
+  location: PointGeoJSONDto;
 
   @ApiProperty()
   @IsNotEmpty()
