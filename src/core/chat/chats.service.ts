@@ -164,6 +164,8 @@ const mockConflictChats: ConflictChatsTupleMetaInterface = {
   adminRecipientUnreads: 11,
   meta: [mockVolunteerChat, mockRecipientChat]
 }
+
+const mockMetaArray = [mockTaskChatMeta, mockSystemChatMeta, mockVolunteerChat];
 //#endregion
 
 @Injectable()
@@ -272,5 +274,15 @@ export class ChatService {
 
   async closeSystemChat(chatId: ObjectId) {
     console.log('Closing system chat');
+  }
+
+  async getUserChatsMeta(userId: string | ObjectId) {
+    console.log('Getting user meta');
+    return mockMetaArray;
+  }
+
+  async getMessages(chatId: string | ObjectId, skip: number, limit?: number): Promise<wsMessageData> {
+    console.log('Getting messages');
+    return mockResponseMessage;
   }
 }
