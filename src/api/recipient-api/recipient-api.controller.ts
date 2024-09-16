@@ -34,6 +34,7 @@ import { AnyUserInterface, UserRole, UserStatus } from '../../common/types/user.
 import { GetTasksSearchDto } from './dto/get-tasks-query.dto';
 import { TaskReport, TaskStatus } from '../../common/types/task.types';
 import { DeletedTaskDto } from './dto/deleted-task.dto';
+import { schema } from '../../common/utils/apiSchemaObj';
 
 @UseGuards(JwtAuthGuard)
 @UseGuards(AccessControlGuard)
@@ -51,45 +52,19 @@ export class RecipientApiController {
     type: CreatedTaskDto,
   })
   @ApiBadRequestResponse({
-    schema: {
-      type: 'object',
-      example: {
-        message: ['string'],
-        error: 'Bad Request',
-        statusCode: 400,
-      },
-    },
+    schema: schema(['string'], 'Bad Request', 400),
     description: 'Произошла ошибка',
   })
   @ApiUnauthorizedResponse({
-    schema: {
-      type: 'object',
-      example: {
-        message: 'Unauthorized',
-        statusCode: 401,
-      },
-    },
+    schema: schema('Unauthorized', null, 401),
     description: 'Требуется авторизация',
   })
   @ApiForbiddenResponse({
-    schema: {
-      type: 'object',
-      example: {
-        message: 'Forbidden resource',
-        error: 'Forbidden',
-        statusCode: 403,
-      },
-    },
+    schema: schema('Forbidden resource', 'Forbidden', 403),
     description: 'Требуется другой статус',
   })
   @ApiInternalServerErrorResponse({
-    schema: {
-      type: 'object',
-      example: {
-        statusCode: 500,
-        message: 'Internal server error',
-      },
-    },
+    schema: schema('Internal server error', null, 500),
     description: 'Внутрення ошибка на сервере',
   })
   public async create(@Body() dto: ApiCreateTaskDto, @Req() { user: { _id: recipientId } }) {
@@ -104,34 +79,15 @@ export class RecipientApiController {
     isArray: true,
   })
   @ApiUnauthorizedResponse({
-    schema: {
-      type: 'object',
-      example: {
-        message: 'Unauthorized',
-        statusCode: 401,
-      },
-    },
+    schema: schema('Unauthorized', null, 401),
     description: 'Требуется авторизация',
   })
   @ApiForbiddenResponse({
-    schema: {
-      type: 'object',
-      example: {
-        message: 'Forbidden resource',
-        error: 'Forbidden',
-        statusCode: 403,
-      },
-    },
+    schema: schema('Forbidden resource', 'Forbidden', 403),
     description: 'Требуется другой статус',
   })
   @ApiInternalServerErrorResponse({
-    schema: {
-      type: 'object',
-      example: {
-        statusCode: 500,
-        message: 'Internal server error',
-      },
-    },
+    schema: schema('Internal server error', null, 500),
     description: 'Внутрення ошибка на сервере',
   })
   @AccessControlList({ role: UserRole.RECIPIENT, level: UserStatus.CONFIRMED })
@@ -148,55 +104,23 @@ export class RecipientApiController {
     type: CreatedTaskDto,
   })
   @ApiBadRequestResponse({
-    schema: {
-      type: 'object',
-      example: {
-        message: ['string'],
-        error: 'Bad Request',
-        statusCode: 400,
-      },
-    },
+    schema: schema(['string'], 'Bad Request', 400),
     description: 'Произошла ошибка',
   })
   @ApiUnauthorizedResponse({
-    schema: {
-      type: 'object',
-      example: {
-        message: 'Unauthorized',
-        statusCode: 401,
-      },
-    },
+    schema: schema('Unauthorized', null, 401),
     description: 'Требуется авторизация',
   })
   @ApiForbiddenResponse({
-    schema: {
-      type: 'object',
-      example: {
-        message: 'Forbidden resource',
-        error: 'Forbidden',
-        statusCode: 403,
-      },
-    },
+    schema: schema('Forbidden resource', 'Forbidden', 403),
     description: 'Требуется другой статус',
   })
   @ApiConflictResponse({
-    schema: {
-      type: 'object',
-      example: {
-        message: 'Нельзя повторно отчитаться по задаче!',
-        statusCode: 409,
-      },
-    },
+    schema: schema('Нельзя повторно отчитаться по задаче!', null, 409),
     description: 'Запрос конфликтует с текущим состоянием сервера',
   })
   @ApiInternalServerErrorResponse({
-    schema: {
-      type: 'object',
-      example: {
-        statusCode: 500,
-        message: 'Internal server error',
-      },
-    },
+    schema: schema('Internal server error', null, 500),
     description: 'Внутрення ошибка на сервере',
   })
   @AccessControlList({ role: UserRole.RECIPIENT, level: UserStatus.CONFIRMED })
@@ -212,55 +136,23 @@ export class RecipientApiController {
     type: CreatedTaskDto,
   })
   @ApiBadRequestResponse({
-    schema: {
-      type: 'object',
-      example: {
-        message: ['string'],
-        error: 'Bad Request',
-        statusCode: 400,
-      },
-    },
+    schema: schema(['string'], 'Bad Request', 400),
     description: 'Произошла ошибка',
   })
   @ApiUnauthorizedResponse({
-    schema: {
-      type: 'object',
-      example: {
-        message: 'Unauthorized',
-        statusCode: 401,
-      },
-    },
+    schema: schema('Unauthorized', null, 401),
     description: 'Требуется авторизация',
   })
   @ApiForbiddenResponse({
-    schema: {
-      type: 'object',
-      example: {
-        message: 'Forbidden resource',
-        error: 'Forbidden',
-        statusCode: 403,
-      },
-    },
+    schema: schema('Forbidden resource', 'Forbidden', 403),
     description: 'Требуется другой статус',
   })
   @ApiConflictResponse({
-    schema: {
-      type: 'object',
-      example: {
-        message: 'Нельзя повторно отчитаться по задаче!',
-        statusCode: 409,
-      },
-    },
+    schema: schema('Нельзя повторно отчитаться по задаче!', null, 409),
     description: 'Запрос конфликтует с текущим состоянием сервера',
   })
   @ApiInternalServerErrorResponse({
-    schema: {
-      type: 'object',
-      example: {
-        statusCode: 500,
-        message: 'Internal server error',
-      },
-    },
+    schema: schema('Internal server error', null, 500),
     description: 'Внутрення ошибка на сервере',
   })
   @AccessControlList({ role: UserRole.RECIPIENT, level: UserStatus.CONFIRMED })
@@ -276,24 +168,11 @@ export class RecipientApiController {
     isArray: true,
   })
   @ApiUnauthorizedResponse({
-    schema: {
-      type: 'object',
-      example: {
-        message: 'Unauthorized',
-        statusCode: 401,
-      },
-    },
+    schema: schema('Unauthorized', null, 401),
     description: 'Требуется авторизация',
   })
   @ApiForbiddenResponse({
-    schema: {
-      type: 'object',
-      example: {
-        message: 'Forbidden resource',
-        error: 'Forbidden',
-        statusCode: 403,
-      },
-    },
+    schema: schema('Forbidden resource', 'Forbidden', 403),
     description: 'Требуется другой статус',
   })
   @AccessControlList({ role: UserRole.RECIPIENT, level: UserStatus.CONFIRMED })
@@ -313,24 +192,11 @@ export class RecipientApiController {
     isArray: true,
   })
   @ApiUnauthorizedResponse({
-    schema: {
-      type: 'object',
-      example: {
-        message: 'Unauthorized',
-        statusCode: 401,
-      },
-    },
+    schema: schema('Unauthorized', null, 401),
     description: 'Требуется авторизация',
   })
   @ApiForbiddenResponse({
-    schema: {
-      type: 'object',
-      example: {
-        message: 'Forbidden resource',
-        error: 'Forbidden',
-        statusCode: 403,
-      },
-    },
+    schema: schema('Forbidden resource', 'Forbidden', 403),
     description: 'Требуется другой статус',
   })
   @AccessControlList({ role: UserRole.RECIPIENT, level: UserStatus.CONFIRMED })
@@ -364,24 +230,11 @@ export class RecipientApiController {
     isArray: true,
   })
   @ApiUnauthorizedResponse({
-    schema: {
-      type: 'object',
-      example: {
-        message: 'Unauthorized',
-        statusCode: 401,
-      },
-    },
+    schema: schema('Unauthorized', null, 401),
     description: 'Требуется авторизация',
   })
   @ApiForbiddenResponse({
-    schema: {
-      type: 'object',
-      example: {
-        message: 'Forbidden resource',
-        error: 'Forbidden',
-        statusCode: 403,
-      },
-    },
+    schema: schema('Forbidden resource', 'Forbidden', 403),
     description: 'Требуется другой статус',
   })
   public async getCompletedTasks(@Query() query: GetTasksSearchDto, @Req() req: Express.Request) {
@@ -413,34 +266,15 @@ export class RecipientApiController {
     type: CreatedTaskDto,
   })
   @ApiUnauthorizedResponse({
-    schema: {
-      type: 'object',
-      example: {
-        message: 'Unauthorized',
-        statusCode: 401,
-      },
-    },
+    schema: schema('Unauthorized', null, 401),
     description: 'Требуется авторизация',
   })
   @ApiForbiddenResponse({
-    schema: {
-      type: 'object',
-      example: {
-        message: 'Forbidden resource',
-        error: 'Forbidden',
-        statusCode: 403,
-      },
-    },
+    schema: schema('Forbidden resource', 'Forbidden', 403),
     description: 'Требуется другой статус',
   })
   @ApiInternalServerErrorResponse({
-    schema: {
-      type: 'object',
-      example: {
-        statusCode: 500,
-        message: 'Internal server error',
-      },
-    },
+    schema: schema('Internal server error', null, 500),
     description: 'Внутрення ошибка на сервере',
   })
   public async getTaskById(@Param('id') id: string) {
@@ -457,45 +291,19 @@ export class RecipientApiController {
     type: CreatedTaskDto,
   })
   @ApiBadRequestResponse({
-    schema: {
-      type: 'object',
-      example: {
-        message: ['string'],
-        error: 'Bad Request',
-        statusCode: 400,
-      },
-    },
+    schema: schema(['string'], 'Bad Request', 400),
     description: 'Произошла ошибка',
   })
   @ApiUnauthorizedResponse({
-    schema: {
-      type: 'object',
-      example: {
-        message: 'Unauthorized',
-        statusCode: 401,
-      },
-    },
+    schema: schema('Unauthorized', null, 401),
     description: 'Требуется авторизация',
   })
   @ApiForbiddenResponse({
-    schema: {
-      type: 'object',
-      example: {
-        message: 'Forbidden resource',
-        error: 'Forbidden',
-        statusCode: 403,
-      },
-    },
+    schema: schema('Forbidden resource', 'Forbidden', 403),
     description: 'Требуется другой статус',
   })
   @ApiInternalServerErrorResponse({
-    schema: {
-      type: 'object',
-      example: {
-        statusCode: 500,
-        message: 'Internal server error',
-      },
-    },
+    schema: schema('Internal server error', null, 500),
     description: 'Внутрення ошибка на сервере',
   })
   public async updateTask(
@@ -515,34 +323,15 @@ export class RecipientApiController {
     type: DeletedTaskDto,
   })
   @ApiUnauthorizedResponse({
-    schema: {
-      type: 'object',
-      example: {
-        message: 'Unauthorized',
-        statusCode: 401,
-      },
-    },
+    schema: schema('Unauthorized', null, 401),
     description: 'Требуется авторизация',
   })
   @ApiForbiddenResponse({
-    schema: {
-      type: 'object',
-      example: {
-        message: 'Forbidden resource',
-        error: 'Forbidden',
-        statusCode: 403,
-      },
-    },
+    schema: schema('Forbidden resource', 'Forbidden', 403),
     description: 'Требуется другой статус',
   })
   @ApiInternalServerErrorResponse({
-    schema: {
-      type: 'object',
-      example: {
-        statusCode: 500,
-        message: 'Internal server error',
-      },
-    },
+    schema: schema('Internal server error', null, 500),
     description: 'Внутрення ошибка на сервере',
   })
   public async cancelTask(@Param('id') id: string, @Req() req: Express.Request) {
