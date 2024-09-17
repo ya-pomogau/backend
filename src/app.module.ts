@@ -25,6 +25,7 @@ import { ContactsModule } from './core/contacts/contacts.module';
 import { TasksModule } from './core/tasks/tasks.module';
 import { PolicyModule } from './core/policy/policy.module';
 import { SystemApiModule } from './api/system-api/system-api.module';
+import { WebsocketApiModule } from './api/websocket-api/websocket-api.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { SystemApiModule } from './api/system-api/system-api.module';
     TasksModule,
     PolicyModule,
     SystemApiModule,
+    WebsocketApiModule,
   ],
   providers: [
     {
