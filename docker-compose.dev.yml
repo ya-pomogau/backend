@@ -1,32 +1,22 @@
+version: '3'
 services:
   backend:
-    container_name: i-help-backend-dev
-    hostname: backend
-    image: i-help-backend:dev
     build:
       context: .
-      dockerfile: Dockerfile.dev
-    volumes:
-      - ./src:/app/src
-      - /app/node_modules
+      dockerfile: Dockerfile
+    restart: always
     ports:
-      - ${CONTAINER_PORT}:${SERVER_PORT}
-    env_file:
-      - .env.dev
-    restart: on-failure
+      - 3001:3001
+    environment:
+      - DATABASE_HOST=mongodb
     depends_on:
       - mongodb
-    environment:
-      # wait for mongodb service ready
-      # https://github.com/ufoscout/docker-compose-wait
-      WAIT_HOSTS: mongodb:${DATABASE_PORT}
-      WAIT_LOGGER_LEVEL: info
 
   mongodb:
-    container_name: i-help-db-dev
-    hostname: mongodb
-    image: mongo:7.0.5
-    restart: on-failure
+    image: mongo:latest
+    restart: always
+    ports:
+      - 27017:27017
     volumes:
       - ihelp:/data/db
 
