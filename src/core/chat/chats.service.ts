@@ -82,7 +82,7 @@ const mockMessages: MessageInterface[] = [
     _id: new mongoose.Types.ObjectId,
     title: 'TestTitle1',
     body: 'TestBody1',
-    attaches: ['Hi there!', 'Hi there!'],
+    attaches: [new ObjectId().toHexString(), new ObjectId().toHexString()],
     createdAt: new Date(),
     author: mockVolunteer,
     chatId: new mongoose.Types.ObjectId,
@@ -91,7 +91,7 @@ const mockMessages: MessageInterface[] = [
     _id: new mongoose.Types.ObjectId,
     title: 'TestTitle2',
     body: 'TestBody2',
-    attaches: ['Hi there!', 'Hi there!'],
+    attaches: [new ObjectId().toHexString(), new ObjectId().toHexString()],
     createdAt: new Date(),
     author: mockRecipient,
     chatId: new mongoose.Types.ObjectId,
@@ -114,7 +114,7 @@ const mockTaskChatMeta: TaskChatMetaInterface = {
   id: 'test',
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
-  watermark: '',
+  watermark: new ObjectId().toHexString(),
   unreads: 1,
 }
 
@@ -127,7 +127,7 @@ const mockSystemChatMeta: SystemChatMetaInterface = {
   id: 'test2',
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
-  watermark: '',
+  watermark: new ObjectId().toHexString(),
   unreads: 1,
 }
 
@@ -139,7 +139,7 @@ const mockVolunteerChat: VolunteerConflictChatMetaInterface = {
   id: '10',
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
-  watermark: 'volunteerWatermark',
+  watermark: new ObjectId().toHexString(),
   unreads: 10,
 }
 
@@ -151,7 +151,7 @@ const mockRecipientChat: RecipientConflictChatMetaInterface = {
   id: '20',
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
-  watermark: 'recipientWatermark',
+  watermark: new ObjectId().toHexString(),
   unreads: 10,
 }
 
