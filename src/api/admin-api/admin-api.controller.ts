@@ -50,8 +50,8 @@ import { ConflictedTasksDto } from './dto/conflicted-task.dto';
 import { TaskDto } from './dto/created-task.dto';
 import { ContactInfoDto } from './dto/contact.dto';
 
-//@UseGuards(JwtAuthGuard)
-//@UseGuards(AccessControlGuard)
+@UseGuards(JwtAuthGuard)
+@UseGuards(AccessControlGuard)
 @Controller('admin')
 @ApiTags('Administrative API. Guarded.')
 export class AdminApiController {
