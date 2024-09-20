@@ -1,6 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { NewUserInterface } from 'src/common/types/api.types';
+import { UserRole } from 'src/common/types/user.types';
 
-export class UserDto {
+export class UserDto implements NewUserInterface {
   @ApiProperty({ example: '66e286b3b279ac443e0029e5', description: 'Уникальный идентификатор пользователя' })
   _id: string;
 
@@ -14,7 +16,7 @@ export class UserDto {
   address: string;
 
   @ApiProperty({ example: 'Volunteer', description: 'Роль пользователя' })
-  role: string;
+  role: UserRole;
 
   @ApiProperty({ example: 'https://sun1-55.userapi.com/s/v1/ig2/KUqSBr1y28rrFnR3P5GpUQILqgA3Kzk2G6hwYECeUhg4hHZsysvUNe-nKNtR3gzY4NrIoi5zmnMHbMm6vTA5EHcw.jpg', description: 'Аватар пользователя' })
   avatar: string;

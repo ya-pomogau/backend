@@ -36,7 +36,7 @@ import { AccessRights } from '../../common/types/access-rights.types';
 import { ResolveResult, TaskInterface, TaskStatus } from '../../common/types/task.types';
 import { UpdateContactsRequestDto } from '../../common/dto/contacts.dto';
 import { NewAdminDto } from './dto/new-admin.dto';
-import { AdministratorDto } from './dto/administrator.dto';
+import { CreatedAdministratorDto } from './dto/created-administrator.dto';
 import { PostDTO } from './dto/new-post.dto';
 import { ApiPrivilegesDto } from './dto/privileges.dto';
 import { ApiCreateCategoryDto } from './dto/new-category.dto';
@@ -46,8 +46,7 @@ import { CreateUserDto } from 'src/common/dto/users.dto';
 import { UserDto } from './dto/user.dto';
 import { CreatedPostDto } from './dto/created-post.dto';
 import { CreatedCategoryDto } from './dto/created-category.dto';
-import { ConflictedTasksDto } from './dto/conflicted-task.dto';
-import { TaskDto } from './dto/created-task.dto';
+import { ProcessedTaskDto } from './dto/processed-task.dto';
 import { ContactInfoDto } from './dto/contact.dto';
 
 @UseGuards(JwtAuthGuard)
@@ -80,7 +79,7 @@ export class AdminApiController {
   @ApiResponse({
     status: 200,
     description: 'Ok',
-    type: [AdministratorDto],
+    type: [CreatedAdministratorDto],
   })
   @AccessControlList({ role: UserRole.ADMIN, rights: [AccessRights.confirmUser] })
   public async getAdministrators() {
@@ -92,12 +91,12 @@ export class AdminApiController {
   @ApiOperation({
     summary: 'Создает нового администратора',
     description:
-      'Создает нового пользователя с полномочиями администратора (не главный администратор)',
+      'Создает нового пользователя с полномочиями администратора (не главный администратор). Только для главного администратора.',
   })
   @ApiBody({ type: NewAdminDto })
   @ApiCreatedResponse({
     description: 'Ok',
-    type: AdministratorDto,
+    type: CreatedAdministratorDto,
   })
   @ApiBearerAuth()
   @ApiUnauthorizedResponse({
@@ -118,7 +117,7 @@ export class AdminApiController {
   // @ApiTags('Activate an administrator. Root only.')
   @ApiOperation({
     summary: 'Активирует администратора',
-    description: 'Активирует администратора',
+    description: 'Активирует администратора. Только для главного администратора.',
   })
   @ApiParam({
     name: 'id',
@@ -129,7 +128,7 @@ export class AdminApiController {
   })
   @ApiResponse({
     status: 200,
-    type: AdministratorDto,
+    type: CreatedAdministratorDto,
     description: 'Возвращает объект администратора с обновленным значением isActive = true',
   })
   @ApiUnauthorizedResponse({
@@ -145,7 +144,7 @@ export class AdminApiController {
   // @ApiTags('Block (deactivate) an administrator. Root only.')
   @ApiOperation({
     summary: 'Блокирует администратора',
-    description: 'Блокирует администратора',
+    description: 'Блокирует администратора. Только для главного администратора.',
   })
   @ApiParam({
     name: 'id',
@@ -156,7 +155,7 @@ export class AdminApiController {
   })
   @ApiResponse({
     status: 200,
-    type: AdministratorDto,
+    type: CreatedAdministratorDto,
     description: 'Возвращает объект администратора с обновленным значением isActive = false',
   })
   @ApiUnauthorizedResponse({
@@ -174,7 +173,7 @@ export class AdminApiController {
   @ApiOperation({
     summary: 'Добавляет привилегий администратору',
     description:
-      'Добавляет привилегий администратору. У каждого администратора есть шесть видов прав доступа: “Подтверждать аккаунты”, “Создавать заявки”, “Выдавать ключи”, “Решать споры”, “Контент блог”, “Повышение баллов”. Они не зависят друг от друга и могут использоваться в разных комбинациях. Только для главного администратора!',
+      'Добавляет привилегий администратору. У каждого администратора есть шесть видов прав доступа: “Подтверждать аккаунты”, “Создавать заявки”, “Выдавать ключи”, “Решать споры”, “Контент блог”, “Повышение баллов”. Они не зависят друг от друга и могут использоваться в разных комбинациях. Только для главного администратора.',
   })
   @ApiParam({
     name: 'id',
@@ -186,7 +185,7 @@ export class AdminApiController {
   @ApiBody({ type: ApiPrivilegesDto })
   @ApiResponse({
     status: 200,
-    type: AdministratorDto,
+    type: CreatedAdministratorDto,
     description: 'Возвращает объект администратора с обновленным значением permissions (массив с перечислением полномочий)',
   })
   @ApiUnauthorizedResponse({
@@ -208,7 +207,7 @@ export class AdminApiController {
   // @ApiTags('Revoke administrator privileges. Root only.')
   @ApiOperation({
     summary: 'Удаляет привилегии у администратора',
-    description: 'Удаляет привилегии у администратора. Только для главного администратора!',
+    description: 'Удаляет привилегии у администратора. Только для главного администратора.',
   })
   @ApiParam({
     name: 'id',
@@ -220,7 +219,7 @@ export class AdminApiController {
   @ApiBody({ type: ApiPrivilegesDto })
   @ApiResponse({
     status: 200,
-    type: AdministratorDto,
+    type: CreatedAdministratorDto,
     description: 'Возвращает объект администратора с обновленным значением permissions (массив с перечислением полномочий)',
   })
   @ApiUnauthorizedResponse({
@@ -242,7 +241,7 @@ export class AdminApiController {
   // @ApiTags('Update administrator privileges. Root only.')
   @ApiOperation({
     summary: 'Обновляет привилегии администратора',
-    description: 'Обновляет привилегии администратора. Только для главного администратора!',
+    description: 'Обновляет привилегии администратора. Только для главного администратора.',
   })
   @ApiParam({
     name: 'id',
@@ -254,7 +253,7 @@ export class AdminApiController {
   @ApiBody({ type: ApiPrivilegesDto })
   @ApiResponse({
     status: 200,
-    type: AdministratorDto,
+    type: CreatedAdministratorDto,
     description: 'Возвращает объект администратора с обновленным значением permissions (массив с перечислением полномочий)',
   })
   @ApiUnauthorizedResponse({
@@ -285,7 +284,7 @@ export class AdminApiController {
   @ApiResponse({
     status: 200,
     type: UserDto,
-    description: 'Возвращает объект пользователя со значением Status = 1 (CONFIRMED) ',
+    description: 'Возвращает объект пользователя со значением Status = 1 (CONFIRMED)',
   })
   @ApiUnauthorizedResponse({
     description: 'Отсутствуют необходимые полномочия для выполнения данной операции',
@@ -534,7 +533,7 @@ export class AdminApiController {
   @Post('category')
   // @ApiTags('Create a category. Root only.')
   @ApiOperation({ summary: 'Создает категорию' })
-  @ApiOperation({ description: 'Создает категорию' })
+  @ApiOperation({ description: 'Создает категорию. Только для главного администратора.' })
   @ApiBody({ type: ApiCreateCategoryDto })
   @ApiCreatedResponse({
     description: 'Ok',
@@ -556,7 +555,7 @@ export class AdminApiController {
   @Patch('categories')
   // @ApiTags('Bulk update categories by ids. Admins only.')
   @ApiOperation({ summary: 'Массово обновляет категории по идентификаторам' })
-  @ApiOperation({ description: 'Массово обновляет категории по идентификаторам' })
+  @ApiOperation({ description: 'Массово обновляет категории по идентификаторам. Только для администраторов.' })
   @ApiBody({ type: ApiBulkUpdateCategoriesDto })
   @ApiResponse({
     status: 200,
@@ -580,7 +579,7 @@ export class AdminApiController {
   @Patch('categories/:id')
   // @ApiTags('Update category by id. Admins only.')
   @ApiOperation({ summary: 'Обновляет категорию по идентификатору' })
-  @ApiOperation({ description: 'Обновляет категорию по идентификатору' })
+  @ApiOperation({ description: 'Обновляет категорию по идентификатору. Только для администраторов.' })
   @ApiParam({
     name: 'id',
     description: 'Идентификатор категории',
@@ -613,7 +612,7 @@ export class AdminApiController {
   @Delete('categories/:id')
   // @ApiTags('Delete category by id. Root only.')
   @ApiOperation({ summary: 'Удаляет категорию по идентификатору' })
-  @ApiOperation({ description: 'Удаляет категорию по идентификатору' })
+  @ApiOperation({ description: 'Удаляет категорию по идентификатору. Только для главного администратора.' })
   @ApiParam({
     name: 'id',
     description: 'Идентификатор категории',
@@ -645,7 +644,7 @@ export class AdminApiController {
   @ApiOperation({ description: 'Получает список конфликтных задач' })
   @ApiResponse({
     status: 200,
-    type: ConflictedTasksDto,
+    type: [ProcessedTaskDto],
     description: 'Ok',
   })
   @ApiUnauthorizedResponse({
@@ -751,7 +750,7 @@ export class AdminApiController {
   })
   @ApiResponse({
     status: 200,
-    type: TaskDto,
+    type: ProcessedTaskDto,
     description: 'Ok',
   })
   @ApiUnauthorizedResponse({
@@ -776,7 +775,7 @@ export class AdminApiController {
   })
   @ApiResponse({
     status: 200,
-    type: TaskDto,
+    type: ProcessedTaskDto,
     description: 'Ok',
   })
   @ApiUnauthorizedResponse({
@@ -801,7 +800,7 @@ export class AdminApiController {
   })
   @ApiResponse({
     status: 200,
-    type: TaskDto,
+    type: ProcessedTaskDto,
     description: 'Ok',
   })
   @ApiUnauthorizedResponse({
@@ -819,7 +818,7 @@ export class AdminApiController {
   @ApiOperation({ description: 'Получает список задач на модерации' })
   @ApiResponse({
     status: 200,
-    type: [TaskDto],
+    type: [ProcessedTaskDto],
     description: 'Ok',
   })
   @ApiUnauthorizedResponse({
@@ -834,7 +833,7 @@ export class AdminApiController {
   @Patch('contacts')
   // @ApiTags('Update a contacts data. Root only.')
   @ApiOperation({ summary: 'Обновляет контактные данные' })
-  @ApiOperation({ description: 'Обновляет контактные данные' })
+  @ApiOperation({ description: 'Обновляет контактные данные. Только для главного администратора.' })
   @ApiResponse({
     status: 200,
     type: ContactInfoDto,

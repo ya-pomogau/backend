@@ -1,10 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { CreatedCategoryDto } from './created-category.dto';
 import { UserDto } from './user.dto';
+import { ResolveStatus, TaskInterface, TaskReport, TaskStatus } from 'src/common/types/task.types';
+import { PointGeoJSONInterface } from 'src/common/types/point-geojson.types';
+import { UserProfile } from 'src/common/types/user.types';
 
-class LocationDto {
+class LocationDto implements PointGeoJSONInterface {
   @ApiProperty({ example: 'Point', description: 'Тип местоположения' })
-  type: string;
+  type: 'Point';
 
   @ApiProperty({
     example: [47.249366, 39.710494],
@@ -31,7 +34,7 @@ class LocationDto {
   updatedAt: string;
 }
 
-export class TaskDto {
+export class ProcessedTaskDto implements TaskInterface {
   @ApiProperty({
     example: '66bcbaf831bd2d046260a91a',
     description: 'Идентификатор задачи',
@@ -48,19 +51,19 @@ export class TaskDto {
     example: 'conflicted',
     description: 'Статус задачи',
   })
-  status: string;
+  status: TaskStatus;
 
   @ApiProperty({
     example: 'virgin',
     description: 'Состояние разрешения администратором',
   })
-  adminResolve: string;
+  adminResolve: ResolveStatus | null;
 
   @ApiProperty({
     example: null,
     description: 'Модератор, назначенный на задачу',
   })
-  moderator: string | null;
+  moderator: UserProfile | null;
 
   @ApiProperty({
     type: CreatedCategoryDto,
@@ -72,7 +75,7 @@ export class TaskDto {
     example: '2024-08-14T14:20:00.000Z',
     description: 'Дата задачи',
   })
-  date: string | null;
+  date: Date | null;
 
   @ApiProperty({
     type: LocationDto,
@@ -90,7 +93,7 @@ export class TaskDto {
     example: 'rejected',
     description: 'Отчёт получателя',
   })
-  recipientReport: string;
+  recipientReport: TaskReport | null;
 
   @ApiProperty({
     type: UserDto,
@@ -102,7 +105,7 @@ export class TaskDto {
     example: 'fulfilled',
     description: 'Отчёт волонтёра',
   })
-  volunteerReport: string;
+  volunteerReport: TaskReport | null;
 
   @ApiProperty({
     example: true,

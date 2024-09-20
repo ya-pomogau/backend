@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { ContactsInterface } from 'src/common/types/contacts.types';
 
-export class ContactInfoDto {
+export class ContactInfoDto implements ContactsInterface {
   @ApiProperty({
     example: '66d45e77b279ac443e001e35',
     description: 'Идентификатор записи',

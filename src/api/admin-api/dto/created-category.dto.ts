@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { ApiCreateCategoryDto } from './new-category.dto';
 
-export class CreatedCategoryDto {
+export class CreatedCategoryDto implements ApiCreateCategoryDto {
   @ApiProperty({ example: '66ea95fbeb4ba9b5f01271ad', description: 'Уникальный идентификатор категории' })
   _id: string;
 

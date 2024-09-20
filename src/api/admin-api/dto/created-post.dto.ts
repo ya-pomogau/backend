@@ -1,6 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { NewProfileInterface } from 'src/common/types/api.types';
+import { BlogPostInterface } from 'src/common/types/blog-post.types';
 
-class AuthorDto {
+class AuthorDto implements NewProfileInterface {
+  @ApiProperty({ example: '66e286b3b279ac443e0029e5', description: 'Уникальный идентификатор пользователя' })
+  _id: string;
+  
   @ApiProperty({ example: 'name4', description: 'Имя автора', required: true })
   name: string;
 
@@ -14,7 +19,7 @@ class AuthorDto {
   avatar?: string;
 }
 
-export class CreatedPostDto {
+export class CreatedPostDto implements BlogPostInterface {
   @ApiProperty({ example: 'Благотворительность в рекламе', description: 'Заголовок блога', required: true })
   title: string;
 

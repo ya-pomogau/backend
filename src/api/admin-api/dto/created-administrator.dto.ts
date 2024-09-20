@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { NewAdminInterface } from 'src/common/types/api.types';
 
-export class AdministratorDto {
+export class CreatedAdministratorDto implements NewAdminInterface {
   @ApiProperty({
     example: '66e00b10886d5b0bae564600',
     description: 'Уникальный идентификатор',
@@ -8,10 +9,16 @@ export class AdministratorDto {
   _id: string;
 
   @ApiProperty({
-    example: 'admin5',
+    example: 'Admin',
     description: 'Логин',
   })
   login: string;
+
+  @ApiProperty({
+    example: 'AdminAdmin999@',
+    description: 'Пароль',
+  })
+  password: string;
 
   @ApiProperty({
     example: null,
@@ -81,10 +88,4 @@ export class AdministratorDto {
     format: 'date-time',
   })
   updatedAt: string;
-
-  @ApiProperty({
-    example: 0,
-    description: 'Версия документа',
-  })
-  __v: number;
 }
