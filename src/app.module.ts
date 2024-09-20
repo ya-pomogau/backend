@@ -25,6 +25,7 @@ import { TasksModule } from './core/tasks/tasks.module';
 import { PolicyModule } from './core/policy/policy.module';
 import { SystemApiModule } from './api/system-api/system-api.module';
 import { LoggerMiddleware } from './common/middleware';
+import { WebsocketApiModule } from './api/websocket-api/websocket-api.module';
 
 @Module({
   imports: [
