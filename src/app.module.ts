@@ -24,8 +24,7 @@ import { ContactsModule } from './core/contacts/contacts.module';
 import { TasksModule } from './core/tasks/tasks.module';
 import { PolicyModule } from './core/policy/policy.module';
 import { SystemApiModule } from './api/system-api/system-api.module';
-import { WebsocketApiModule } from './api/websocket-api/websocket-api.module';
-import { LoggerMiddleware } from './common/middleware/loggerMiddleware';
+import { LoggerMiddleware } from './common/middleware';
 
 @Module({
   imports: [
