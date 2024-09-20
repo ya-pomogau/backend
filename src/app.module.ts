@@ -1,6 +1,5 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-// import { ScheduleModule } from '@nestjs/schedule';
 import { MongooseModule } from '@nestjs/mongoose';
 import { APP_GUARD } from '@nestjs/core';
 
@@ -25,6 +24,7 @@ import { ContactsModule } from './core/contacts/contacts.module';
 import { TasksModule } from './core/tasks/tasks.module';
 import { PolicyModule } from './core/policy/policy.module';
 import { SystemApiModule } from './api/system-api/system-api.module';
+import { LoggerMiddleware } from './common/middleware';
 
 @Module({
   imports: [
@@ -61,4 +61,8 @@ import { SystemApiModule } from './api/system-api/system-api.module';
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
+}
