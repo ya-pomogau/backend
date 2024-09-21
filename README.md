@@ -1,6 +1,6 @@
-Бриф [https://narrow-mountain-bc1.notion.site/3-13-1880e7396a9c4bbda3d1f33103fd01af](https://narrow-mountain-bc1.notion.site/3-13-1880e7396a9c4bbda3d1f33103fd01af)
+~~Бриф [https://narrow-mountain-bc1.notion.site/3-13-1880e7396a9c4bbda3d1f33103fd01af](https://narrow-mountain-bc1.notion.site/3-13-1880e7396a9c4bbda3d1f33103fd01af)~~
 
-Backend [https://yapomogayu.workshop-projects.ru](https://yapomogayu.workshop-projects.ru)
+Frontend [https://yapomogayu.workshop-projects.ru](https://yapomogayu.workshop-projects.ru)
 
 IP адрес: 51.250.110.188
 
