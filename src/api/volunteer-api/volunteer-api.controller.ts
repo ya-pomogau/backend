@@ -9,7 +9,7 @@ import { User } from '../../datalake/users/schemas/user.schema';
 import { Volunteer } from '../../datalake/users/schemas/volunteer.schema';
 import { GetTasksSearchDto } from '../recipient-api/dto/get-tasks-query.dto';
 import { TaskReport, TaskStatus } from '../../common/types/task.types';
-import { ApiBadRequestResponse, ApiConflictResponse, ApiCreatedResponse, ApiForbiddenResponse, ApiOperation, ApiParam, ApiQuery, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiConflictResponse, ApiForbiddenResponse, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { Task } from 'src/datalake/task/schemas/task.schema';
 
 @UseGuards(JwtAuthGuard)
@@ -24,7 +24,7 @@ export class VolunteerApiController {
 
   @ApiOperation({ summary: 'Получение новых задач по статусу' })
   @ApiQuery({ type: GetTasksSearchDto })
-  @ApiCreatedResponse({ type: Promise<Task[]> })
+  @ApiOkResponse({ type: Promise<Task[]> })
   @ApiUnauthorizedResponse({ description: 'Требуется авторизация' })
   @ApiForbiddenResponse({ description: 'Требуется другой статус или роль' })
   @ApiBadRequestResponse({ description: 'Ошибка запроса. В нём есть пользователь?' })
@@ -45,7 +45,7 @@ export class VolunteerApiController {
 
   @ApiOperation({ summary: 'Принятие задачи' })
   @ApiParam({ name: 'id', type: 'String' })
-  @ApiCreatedResponse({ type: Promise<Task> })
+  @ApiOkResponse({ type: Promise<Task> })
   @ApiUnauthorizedResponse({ description: 'Требуется авторизация' })
   @ApiForbiddenResponse({ description: 'Требуется другой статус или роль' })
   @ApiBadRequestResponse({ description: 'Ошибка запроса. В нём есть пользователь?' })
@@ -58,7 +58,7 @@ export class VolunteerApiController {
 
   @ApiOperation({ summary: 'Успешное завершение задачи' })
   @ApiParam({ name: 'id', type: 'String' })
-  @ApiCreatedResponse({ type: Promise<Task> })
+  @ApiOkResponse({ type: Promise<Task> })
   @ApiUnauthorizedResponse({ description: 'Требуется авторизация' })
   @ApiForbiddenResponse({ description: 'Требуется другой статус или роль' })
   @ApiBadRequestResponse({ description: 'Ошибка запроса. В нём есть пользователь?' })
@@ -72,7 +72,7 @@ export class VolunteerApiController {
 
   @ApiOperation({ summary: 'Отказ от задачи' })
   @ApiParam({ name: 'id', type: 'String' })
-  @ApiCreatedResponse({ type: Promise<Task> })
+  @ApiOkResponse({ type: Promise<Task> })
   @ApiUnauthorizedResponse({ description: 'Требуется авторизация' })
   @ApiForbiddenResponse({ description: 'Требуется другой статус или роль' })
   @ApiBadRequestResponse({ description: 'Ошибка запроса. В нём есть пользователь?' })
@@ -86,7 +86,7 @@ export class VolunteerApiController {
 
   @ApiOperation({ summary: 'Получение подтвержденных задач' })
   @ApiQuery({ type: GetTasksSearchDto })
-  @ApiCreatedResponse({ type: Promise<Task[]> })
+  @ApiOkResponse({ type: Promise<Task[]> })
   @ApiUnauthorizedResponse({ description: 'Требуется авторизация' })
   @ApiForbiddenResponse({ description: 'Требуется другой статус или роль' })
   @ApiBadRequestResponse({ description: 'Ошибка запроса. В нём есть пользователь?' })
@@ -102,7 +102,7 @@ export class VolunteerApiController {
 
   @ApiOperation({ summary: 'Получение завершенных задач' })
   @ApiQuery({ type: GetTasksSearchDto })
-  @ApiCreatedResponse({ type: Promise<Task[]> })
+  @ApiOkResponse({ type: Promise<Task[]> })
   @ApiUnauthorizedResponse({ description: 'Требуется авторизация' })
   @ApiForbiddenResponse({ description: 'Требуется другой статус или роль' })
   @ApiBadRequestResponse({ description: 'Ошибка запроса. В нём есть пользователь?' })
