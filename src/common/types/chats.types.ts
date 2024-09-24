@@ -1,4 +1,4 @@
-import { type ObjectId } from 'mongodb';
+import { type ObjectId } from 'mongoose';
 import {
   AdminInterface,
   AnyUserInterface,
