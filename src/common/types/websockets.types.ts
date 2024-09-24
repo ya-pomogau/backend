@@ -58,3 +58,7 @@ export type wsConnectedUserData = {
   user: AnyUserInterface;
   sockets: Array<string>;
 };
+
+export type wsOpenedChatsData<T extends string> = {
+  [key in T]: Array<string>;
+};
