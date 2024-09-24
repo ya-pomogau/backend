@@ -9,7 +9,7 @@ import { ContactsModule } from '../../core/contacts/contacts.module';
 import { PolicyModule } from '../../core/policy/policy.module';
 import { AuthModule } from '../../core/auth/auth.module';
 import { AuthService } from '../../core/auth/auth.service';
-import { SystemApiController } from './system-api.controller';
+import { WebsocketApiGateway } from './websocket-api.gateway';
 
 @Module({
   imports: [
@@ -23,7 +23,6 @@ import { SystemApiController } from './system-api.controller';
     JwtModule,
     AuthModule,
   ],
-  controllers: [SystemApiController],
-  providers: [AuthService, JwtService],
+  providers: [WebsocketApiGateway, AuthService, JwtService],
 })
-export class SystemApiModule {}
+export class WebsocketApiModule {}

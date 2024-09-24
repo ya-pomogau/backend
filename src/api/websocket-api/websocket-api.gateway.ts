@@ -15,8 +15,6 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { IsArray, IsNotEmpty, IsObject, IsString } from 'class-validator';
-
-import configuration from '../../config/configuration';
 import { SocketAuthGuard } from '../../common/guards/socket-auth.guard';
 import { SocketValidationPipe } from '../../common/pipes/socket-validation.pipe';
 import { AnyUserInterface } from '../../common/types/user.types';
@@ -51,12 +49,14 @@ class TestEventMessageDto implements TestEventMessageInterface {
 
 @UseGuards(SocketAuthGuard)
 @UsePipes(SocketValidationPipe)
-@WebSocketGateway(configuration().server.ws_port, {
+@WebSocketGateway({
   cors: {
     allowedHeaders: '*',
   },
 })
-export class SystemApiGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+export class WebsocketApiGateway
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
   constructor(
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService
