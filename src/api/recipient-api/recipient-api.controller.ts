@@ -53,7 +53,7 @@ export class RecipientApiController {
   })
   @ApiBadRequestResponse({
     schema: schema(['string'], 'Bad Request', 400),
-    description: 'Произошла ошибка',
+    description: 'Переданы не верные данные',
   })
   @ApiUnauthorizedResponse({
     schema: schema('Unauthorized', null, 401),
@@ -61,7 +61,7 @@ export class RecipientApiController {
   })
   @ApiForbiddenResponse({
     schema: schema('Forbidden resource', 'Forbidden', 403),
-    description: 'Требуется другой статус',
+    description: 'Для совершения этой операции нужен статус CONFIRMED, VERIFIED, ACTIVATED',
   })
   @ApiInternalServerErrorResponse({
     schema: schema('Internal server error', null, 500),
@@ -84,7 +84,7 @@ export class RecipientApiController {
   })
   @ApiForbiddenResponse({
     schema: schema('Forbidden resource', 'Forbidden', 403),
-    description: 'Требуется другой статус',
+    description: 'Для совершения этой операции нужен статус CONFIRMED, VERIFIED, ACTIVATED',
   })
   @ApiInternalServerErrorResponse({
     schema: schema('Internal server error', null, 500),
@@ -105,7 +105,7 @@ export class RecipientApiController {
   })
   @ApiBadRequestResponse({
     schema: schema(['string'], 'Bad Request', 400),
-    description: 'Произошла ошибка',
+    description: 'Переданы не верные данные',
   })
   @ApiUnauthorizedResponse({
     schema: schema('Unauthorized', null, 401),
@@ -113,7 +113,7 @@ export class RecipientApiController {
   })
   @ApiForbiddenResponse({
     schema: schema('Forbidden resource', 'Forbidden', 403),
-    description: 'Требуется другой статус',
+    description: 'Для совершения этой операции нужен статус CONFIRMED, VERIFIED, ACTIVATED',
   })
   @ApiConflictResponse({
     schema: schema('Нельзя повторно отчитаться по задаче!', null, 409),
@@ -137,7 +137,7 @@ export class RecipientApiController {
   })
   @ApiBadRequestResponse({
     schema: schema(['string'], 'Bad Request', 400),
-    description: 'Произошла ошибка',
+    description: 'Переданы не верные данные',
   })
   @ApiUnauthorizedResponse({
     schema: schema('Unauthorized', null, 401),
@@ -145,7 +145,7 @@ export class RecipientApiController {
   })
   @ApiForbiddenResponse({
     schema: schema('Forbidden resource', 'Forbidden', 403),
-    description: 'Требуется другой статус',
+    description: 'Для совершения этой операции нужен статус CONFIRMED, VERIFIED, ACTIVATED',
   })
   @ApiConflictResponse({
     schema: schema('Нельзя повторно отчитаться по задаче!', null, 409),
@@ -173,7 +173,7 @@ export class RecipientApiController {
   })
   @ApiForbiddenResponse({
     schema: schema('Forbidden resource', 'Forbidden', 403),
-    description: 'Требуется другой статус',
+    description: 'Для совершения этой операции нужен статус CONFIRMED, VERIFIED, ACTIVATED',
   })
   @AccessControlList({ role: UserRole.RECIPIENT, level: UserStatus.CONFIRMED })
   public async getAcceptedTasks(@Query() query: GetTasksSearchDto, @Req() req: Express.Request) {
@@ -197,7 +197,7 @@ export class RecipientApiController {
   })
   @ApiForbiddenResponse({
     schema: schema('Forbidden resource', 'Forbidden', 403),
-    description: 'Требуется другой статус',
+    description: 'Для совершения этой операции нужен статус CONFIRMED, VERIFIED, ACTIVATED',
   })
   @AccessControlList({ role: UserRole.RECIPIENT, level: UserStatus.CONFIRMED })
   public async getActiveTasks(@Query() query: GetTasksSearchDto, @Req() req: Express.Request) {
@@ -235,7 +235,7 @@ export class RecipientApiController {
   })
   @ApiForbiddenResponse({
     schema: schema('Forbidden resource', 'Forbidden', 403),
-    description: 'Требуется другой статус',
+    description: 'Для совершения этой операции нужен статус CONFIRMED, VERIFIED, ACTIVATED',
   })
   public async getCompletedTasks(@Query() query: GetTasksSearchDto, @Req() req: Express.Request) {
     const { latitude, longitude, ...data } = query;
@@ -271,7 +271,7 @@ export class RecipientApiController {
   })
   @ApiForbiddenResponse({
     schema: schema('Forbidden resource', 'Forbidden', 403),
-    description: 'Требуется другой статус',
+    description: 'Для совершения этой операции нужен статус CONFIRMED, VERIFIED, ACTIVATED',
   })
   @ApiInternalServerErrorResponse({
     schema: schema('Internal server error', null, 500),
@@ -292,7 +292,7 @@ export class RecipientApiController {
   })
   @ApiBadRequestResponse({
     schema: schema(['string'], 'Bad Request', 400),
-    description: 'Произошла ошибка',
+    description: 'Переданы не верные данные',
   })
   @ApiUnauthorizedResponse({
     schema: schema('Unauthorized', null, 401),
@@ -300,7 +300,7 @@ export class RecipientApiController {
   })
   @ApiForbiddenResponse({
     schema: schema('Forbidden resource', 'Forbidden', 403),
-    description: 'Требуется другой статус',
+    description: 'Для совершения этой операции нужен статус CONFIRMED, VERIFIED, ACTIVATED',
   })
   @ApiInternalServerErrorResponse({
     schema: schema('Internal server error', null, 500),
@@ -328,7 +328,7 @@ export class RecipientApiController {
   })
   @ApiForbiddenResponse({
     schema: schema('Forbidden resource', 'Forbidden', 403),
-    description: 'Требуется другой статус',
+    description: 'Для совершения этой операции нужен статус CONFIRMED, VERIFIED, ACTIVATED',
   })
   @ApiInternalServerErrorResponse({
     schema: schema('Internal server error', null, 500),
