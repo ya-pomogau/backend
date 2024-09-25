@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
-import { ObjectId } from 'mongodb';
-import mongoose from 'mongoose';
+import mongoose, { ObjectId } from 'mongoose';
 
 import { ConflictChatsTupleMetaInterface,
   MessageInterface,
@@ -77,34 +76,36 @@ const mockAdmin: AdminInterface = {
   isActive: false,
 }
 
-const mockMessages: MessageInterface[] = [
+
+
+const mockMessages = [
   {
-    _id: new mongoose.Types.ObjectId,
+    _id: new mongoose.Types.ObjectId().toHexString(),
     title: 'TestTitle1',
     body: 'TestBody1',
-    attaches: [new ObjectId().toHexString(), new ObjectId().toHexString()],
+    attaches: [new mongoose.Types.ObjectId().toHexString(), new mongoose.Types.ObjectId().toHexString()],
     createdAt: new Date(),
     author: mockVolunteer,
-    chatId: new mongoose.Types.ObjectId,
+    chatId: new mongoose.Types.ObjectId().toHexString(),
   },
   {
     _id: new mongoose.Types.ObjectId,
     title: 'TestTitle2',
     body: 'TestBody2',
-    attaches: [new ObjectId().toHexString(), new ObjectId().toHexString()],
+    attaches: [new mongoose.Types.ObjectId().toHexString(), new mongoose.Types.ObjectId().toHexString()],
     createdAt: new Date(),
     author: mockRecipient,
-    chatId: new mongoose.Types.ObjectId,
+    chatId: new mongoose.Types.ObjectId().toHexString(),
   },
 ]
 
-const mockResponseMessage: wsMessageData = {
+const mockResponseMessage = {
   data: {
     messages: mockMessages
   }
 }
 
-const mockTaskChatMeta: TaskChatMetaInterface = {
+const mockTaskChatMeta = {
   _id: new mongoose.Types.ObjectId().toHexString(),
   type: 'TASK_CHAT',
   isActive: true,
@@ -114,7 +115,7 @@ const mockTaskChatMeta: TaskChatMetaInterface = {
   id: 'test',
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
-  watermark: new ObjectId().toHexString(),
+  watermark: new mongoose.Types.ObjectId().toHexString(),
   unreads: 1,
 }
 
@@ -127,7 +128,7 @@ const mockSystemChatMeta: SystemChatMetaInterface = {
   id: 'test2',
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
-  watermark: new ObjectId().toHexString(),
+  watermark: new mongoose.Types.ObjectId().toHexString(),
   unreads: 1,
 }
 
@@ -139,7 +140,7 @@ const mockVolunteerChat: VolunteerConflictChatMetaInterface = {
   id: '10',
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
-  watermark: new ObjectId().toHexString(),
+  watermark: new mongoose.Types.ObjectId().toHexString(),
   unreads: 10,
 }
 
@@ -151,7 +152,7 @@ const mockRecipientChat: RecipientConflictChatMetaInterface = {
   id: '20',
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
-  watermark: new ObjectId().toHexString(),
+  watermark: new mongoose.Types.ObjectId().toHexString(),
   unreads: 10,
 }
 
@@ -175,7 +176,7 @@ export class ChatService {
     private readonly queryBus: QueryBus
   ) {}
 
-  async createTaskChat(metadata: TaskChatMetaInterface): Promise<TaskChatMetaInterface> {
+  async createTaskChat(metadata: TaskChatMetaInterface) {
     // const chatEntity = new ChatEntity();
 
     // const newChat = await chatEntity.createChat('TASK_CHAT', metadata);
@@ -204,7 +205,7 @@ export class ChatService {
     return mockConflictChats;
   }
 
-  async addMessage(chatId: ObjectId, message: MessageInterface): Promise<wsMessageData> {
+  async addMessage(chatId: ObjectId, message: MessageInterface) {
     // const chatEntity = new ChatEntity();
 
     // const chat = await chatEntity.findChatByParams({ chatId: chatId });
@@ -224,37 +225,37 @@ export class ChatService {
     return mockResponseMessage;
   }
 
-  async getConflictChatsByAdmin(userId: ObjectId, chatQuery: wsChatPageQueryPayload): Promise<wsMessageData> {
+  async getConflictChatsByAdmin(userId: ObjectId, chatQuery: wsChatPageQueryPayload) {
     console.log('Getting conflict chats by admin');
     return mockResponseMessage;
   }
 
-  async getConflictClosedChats(chatQuery: wsChatPageQueryPayload): Promise<wsMessageData> {
+  async getConflictClosedChats(chatQuery: wsChatPageQueryPayload) {
     console.log('Getting conflict closed chats');
     return mockResponseMessage;
   }
 
-  async getOpenSystemChats(chatQuery: wsChatPageQueryPayload): Promise<wsMessageData> {
+  async getOpenSystemChats(chatQuery: wsChatPageQueryPayload) {
     console.log('Getting open system chats');
     return mockResponseMessage;
   }
 
-  async getClosedSystemChats(chatQuery: wsChatPageQueryPayload): Promise<wsMessageData> {
+  async getClosedSystemChats(chatQuery: wsChatPageQueryPayload) {
     console.log('Getting closed system chats');
     return mockResponseMessage;
   }
 
-  async getSystemChatsByUser(userId: ObjectId, chatQuery: wsChatPageQueryPayload): Promise<wsMessageData> {
+  async getSystemChatsByUser(userId: ObjectId, chatQuery: wsChatPageQueryPayload) {
     console.log('Getting system chats by user');
     return mockResponseMessage;
   }
 
-  async getOpenSystemChatsByAdmin(userId: ObjectId, chatQuery: wsChatPageQueryPayload): Promise<wsMessageData> {
+  async getOpenSystemChatsByAdmin(userId: ObjectId, chatQuery: wsChatPageQueryPayload) {
     console.log('Getting open system chats by admin');
     return mockResponseMessage;
   }
 
-  async getClosedSystemChatsByAdmin(userId: ObjectId, chatQuery: wsChatPageQueryPayload): Promise<wsMessageData> {
+  async getClosedSystemChatsByAdmin(userId: ObjectId, chatQuery: wsChatPageQueryPayload) {
     console.log('Getting closed system chats by admin');
     return mockResponseMessage;
   }
@@ -281,7 +282,7 @@ export class ChatService {
     return mockMetaArray;
   }
 
-  async getMessages(chatId: string | ObjectId, skip: number, limit?: number): Promise<wsMessageData> {
+  async getMessages(chatId: string | ObjectId, skip: number, limit?: number) {
     console.log('Getting messages');
     return mockResponseMessage;
   }
