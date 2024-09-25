@@ -205,7 +205,7 @@ export class ChatService {
     return mockConflictChats;
   }
 
-  async addMessage(chatId: ObjectId, message: MessageInterface) {
+  async addMessage(chatId: string, message: MessageInterface) {
     // const chatEntity = new ChatEntity();
 
     // const chat = await chatEntity.findChatByParams({ chatId: chatId });
@@ -269,11 +269,11 @@ export class ChatService {
     console.log('Closing chat by task');
   }
 
-  async closeConflictChats(chatId: ObjectId) {
+  async closeConflictChats(chatId: string) {
     console.log('Closing conflict chats');
   }
 
-  async closeSystemChat(chatId: ObjectId) {
+  async closeSystemChat(chatId: string) {
     console.log('Closing system chat');
   }
 
