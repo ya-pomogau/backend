@@ -109,7 +109,7 @@ const mockTaskChatMeta = {
   _id: new mongoose.Types.ObjectId().toHexString(),
   type: 'TASK_CHAT',
   isActive: true,
-  taskId: new mongoose.Types.ObjectId,
+  taskId: new mongoose.Types.ObjectId().toHexString(),
   volunteer: mockVolunteer,
   recipient: mockRecipient,
   id: 'test',
