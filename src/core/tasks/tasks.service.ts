@@ -6,6 +6,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { FilterQuery } from 'mongoose';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { TasksRepository } from '../../datalake/task/task.repository';
 import { UsersRepository } from '../../datalake/users/users.repository';
 import { CreateTaskDto, GetTasksDto } from '../../common/dto/tasks.dto';
@@ -32,7 +34,9 @@ export class TasksService {
     private readonly tasksRepo: TasksRepository,
     private readonly usersRepo: UsersRepository,
     private readonly categoryRepo: CategoryRepository,
-    private readonly usersService: UsersService
+    private readonly usersService: UsersService,
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus
   ) {}
 
   public async create(dto: CreateTaskDto) {
