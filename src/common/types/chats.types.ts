@@ -22,6 +22,7 @@ export const ChatTypes = {
   SYSTEM_CHAT: 'SystemChat',
   CONFLICT_CHAT_WITH_VOLUNTEER: 'ConflictChatWithVolunteer',
   CONFLICT_CHAT_WITH_RECIPIENT: 'ConflictChatWithRecipient',
+  CONFLICT_CHAT: 'ConflictChat',
 } as const;
 
 export type ChatType = keyof typeof ChatTypes;
