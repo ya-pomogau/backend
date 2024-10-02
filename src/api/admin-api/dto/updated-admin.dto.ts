@@ -1,24 +1,25 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { NewAdminInterface } from 'src/common/types/api.types';
+import { ApiPrivilegesDto } from './privileges.dto';
 
-export class CreatedAdministratorDto implements NewAdminInterface {
+export class UpdatedAdminDto {
   @ApiProperty({
-    example: '66e00b10886d5b0bae564600',
+    example: '66fd7b747d8163d4a3c0b515',
     description: 'Уникальный идентификатор',
   })
   _id: string;
 
   @ApiProperty({
-    example: 'Admin',
-    description: 'Логин',
+    example: ['CONFIRM_USER'],
+    description: 'Список разрешений пользователя',
+    isArray: true,
   })
-  login: string;
+  permissions: ApiPrivilegesDto[];
 
   @ApiProperty({
-    example: 'AdminAdmin999@',
-    description: 'Пароль',
+    example: 'admin123',
+    description: 'Логин пользователя',
   })
-  password: string;
+  login: string;
 
   @ApiProperty({
     example: null,
@@ -41,31 +42,31 @@ export class CreatedAdministratorDto implements NewAdminInterface {
 
   @ApiProperty({
     example: '...не дом и не улица...',
-    description: 'Адрес администратора',
+    description: 'Адрес пользователя',
   })
   address: string;
 
   @ApiProperty({
     example: 'https://kspshnik.com/pub/img/brienzersee_pre.jpg',
-    description: 'Ссылка на аватар',
+    description: 'Ссылка на аватар пользователя',
   })
   avatar: string;
 
   @ApiProperty({
     example: 'name5',
-    description: 'Имя',
+    description: 'Имя пользователя',
   })
   name: string;
 
   @ApiProperty({
     example: '+78776637383',
-    description: 'Телефонный номер',
+    description: 'Телефонный номер пользователя',
   })
   phone: string;
 
   @ApiProperty({
-    example: '1948387874309540000',
-    description: 'VK ID в виде строки',
+    example: '1948387874309540012',
+    description: 'VK ID пользователя в виде строки',
   })
   vkId: string;
 
@@ -76,14 +77,14 @@ export class CreatedAdministratorDto implements NewAdminInterface {
   role: string;
 
   @ApiProperty({
-    example: '2024-09-10T09:02:08.696Z',
+    example: '2024-10-02T16:57:24.250Z',
     description: 'Дата создания учетной записи',
     format: 'date-time',
   })
   createdAt: string;
 
   @ApiProperty({
-    example: '2024-09-10T09:02:08.696Z',
+    example: '2024-10-02T17:15:41.608Z',
     description: 'Дата последнего обновления учетной записи',
     format: 'date-time',
   })

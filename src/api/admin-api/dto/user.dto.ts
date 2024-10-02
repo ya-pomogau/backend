@@ -1,9 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { NewUserInterface } from 'src/common/types/api.types';
-import { UserRole } from 'src/common/types/user.types';
+import { NewUserInterface } from '../../../common/types/api.types';
+import { UserRole } from '../../../common/types/user.types';
 
 export class UserDto implements NewUserInterface {
-  @ApiProperty({ example: '66e286b3b279ac443e0029e5', description: 'Уникальный идентификатор пользователя' })
+  @ApiProperty({
+    example: '66e286b3b279ac443e0029e5',
+    description: 'Уникальный идентификатор пользователя',
+  })
   _id: string;
 
   @ApiProperty({ example: 'Анастасия Волкова', description: 'Имя пользователя' })
@@ -18,7 +21,11 @@ export class UserDto implements NewUserInterface {
   @ApiProperty({ example: 'Volunteer', description: 'Роль пользователя' })
   role: UserRole;
 
-  @ApiProperty({ example: 'https://sun1-55.userapi.com/s/v1/ig2/KUqSBr1y28rrFnR3P5GpUQILqgA3Kzk2G6hwYECeUhg4hHZsysvUNe-nKNtR3gzY4NrIoi5zmnMHbMm6vTA5EHcw.jpg', description: 'Аватар пользователя' })
+  @ApiProperty({
+    example:
+      'https://sun1-55.userapi.com/s/v1/ig2/KUqSBr1y28rrFnR3P5GpUQILqgA3Kzk2G6hwYECeUhg4hHZsysvUNe-nKNtR3gzY4NrIoi5zmnMHbMm6vTA5EHcw.jpg',
+    description: 'Аватар пользователя',
+  })
   avatar: string;
 
   @ApiProperty({ example: 0, description: 'Количество выполненных заданий' })
@@ -48,6 +55,9 @@ export class UserDto implements NewUserInterface {
   @ApiProperty({ example: '2024-09-12T06:14:11.355Z', description: 'Дата создания пользователя' })
   createdAt: string;
 
-  @ApiProperty({ example: '2024-09-17T13:04:28.759Z', description: 'Дата обновления данных пользователя' })
+  @ApiProperty({
+    example: '2024-09-17T13:04:28.759Z',
+    description: 'Дата обновления данных пользователя',
+  })
   updatedAt: string;
 }
