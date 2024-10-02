@@ -455,7 +455,21 @@ export class UsersService {
   }
 
   public async getProfile(userId: string) {
-    return this.usersRepo.findById(userId);
+    try {
+      const user = await this.usersRepo.findOne({ _id: userId });
+
+      if (!user) {
+        throw new NotFoundException('Пользователь не найден!', {
+          cause: `Пользователь с _id '${userId}' не найден`,
+        });
+      }
+
+      return user;
+    } catch (error) {
+      throw new InternalServerErrorException('Ошибка при выполнении запроса!', {
+        cause: error.message,
+      });
+    }
   }
 
   public async updateProfile(

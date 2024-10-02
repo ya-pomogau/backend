@@ -15,6 +15,8 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { IsArray, IsNotEmpty, IsObject, IsString } from 'class-validator';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 
 import configuration from '../../config/configuration';
 import { SocketAuthGuard } from '../../common/guards/socket-auth.guard';
@@ -26,6 +28,7 @@ import {
   wsConnectedUserData,
   wsDisconnectionPayload,
   wsTokenPayload,
+  wsOpenedChatsData,
 } from '../../common/types/websockets.types';
 
 // Интерфейс и dto созданы для тестирования SocketValidationPipe
@@ -56,7 +59,9 @@ class TestEventMessageDto implements TestEventMessageInterface {
     allowedHeaders: '*',
   },
 })
-export class SystemApiGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+export class WebsocketApiGateway
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
   constructor(
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService
@@ -66,6 +71,8 @@ export class SystemApiGateway implements OnGatewayInit, OnGatewayConnection, OnG
   public server: Server;
 
   private connectedUsers: Map<string, wsConnectedUserData> = new Map();
+
+  private openedChats: Map<string, wsOpenedChatsData<string>> = new Map();
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   afterInit(server: Server) {
@@ -81,30 +88,24 @@ export class SystemApiGateway implements OnGatewayInit, OnGatewayConnection, OnG
    */
   // eslint-disable-next-line consistent-return
   async handleConnection(@ConnectedSocket() client: Socket): Promise<void> {
-    let user: AnyUserInterface;
-    try {
-      user = await this.jwtService.verifyAsync(client.handshake.headers.authorization, {
-        secret: this.configService.get<string>('jwt.key'),
-      });
-    } catch (error) {
-      return this.disconnect(client, { type: UnauthorizedException.name, message: error.message });
-    }
+    const user = await this.checkUserAuth(client);
     // eslint-disable-next-line no-console
     console.log('user:', user);
 
-    if (this.connectedUsers.has(user._id)) {
-      const currentSockets = this.connectedUsers.get(user._id).sockets;
-      this.connectedUsers.set(user._id, { user, sockets: [...currentSockets, client.id] });
+    const connectedUser = this.getConnectedUser(user._id);
+    if (connectedUser) {
+      this.connectedUsers.set(user._id, { user, sockets: [...connectedUser.sockets, client.id] });
+    } else {
+      this.connectedUsers.set(user._id, { user, sockets: [client.id] });
     }
-    this.connectedUsers.set(user._id, { user, sockets: [client.id] });
   }
 
   sendTokenAndUpdatedUser(user: AnyUserInterface, token: string) {
-    const connectedUserData: wsConnectedUserData = this.connectedUsers.get(user._id);
+    const connectedUser = this.getConnectedUser(user._id);
 
     // если пользователь подключен, то отправляем токен на все устройства, с которых залогинен
-    if (connectedUserData) {
-      connectedUserData.sockets.forEach((clientId) => {
+    if (connectedUser) {
+      connectedUser.sockets.forEach((clientId) => {
         this.server.sockets.sockets.get(clientId).emit(wsMessageKind.REFRESH_TOKEN_COMMAND, {
           data: {
             user,
@@ -114,32 +115,46 @@ export class SystemApiGateway implements OnGatewayInit, OnGatewayConnection, OnG
       });
 
       // обновление объекта подключенного пользователя
-      this.connectedUsers.set(user._id, { user, ...connectedUserData });
+      this.connectedUsers.set(user._id, { user, sockets: [...connectedUser.sockets] });
     }
   }
 
   async handleDisconnect(@ConnectedSocket() client: Socket) {
-    const user: AnyUserInterface = await this.jwtService.verifyAsync(
-      client.handshake.headers.authorization,
-      {
-        secret: this.configService.get<string>('jwt.key'),
+    const user = await this.checkUserAuth(client);
+
+    const connectedUser = this.getConnectedUser(user._id);
+    if (connectedUser) {
+      const sockets = connectedUser.sockets.filter((socket) => socket !== client.id);
+      if (sockets.length > 0) {
+        this.connectedUsers.set(user._id, { user, sockets });
+      } else {
+        this.connectedUsers.delete(user._id);
+
+        client.broadcast.emit(wsMessageKind.DISCONNECTION_EVENT, {
+          data: {
+            userId: user._id,
+          } as wsDisconnectionPayload,
+        } as wsMessageData);
       }
-    );
-
-    client.broadcast.emit(wsMessageKind.DISCONNECTION_EVENT, {
-      data: {
-        userId: user._id,
-      } as wsDisconnectionPayload,
-    } as wsMessageData);
-
-    const sockets = this.connectedUsers
-      .get(user._id)
-      .sockets.filter((socket) => socket !== client.id);
-
-    if (sockets.length > 0) {
-      this.connectedUsers.set(user._id, { user, sockets });
     }
-    this.connectedUsers.delete(user._id);
+  }
+
+  private async checkUserAuth(client: Socket): Promise<AnyUserInterface | null> {
+    let user: AnyUserInterface;
+    try {
+      user = await this.jwtService.verifyAsync(client.handshake.headers.authorization, {
+        secret: this.configService.get<string>('jwt.key'),
+      });
+    } catch (error) {
+      this.disconnect(client, { type: UnauthorizedException.name, message: error.message });
+    }
+
+    return user || null;
+  }
+
+  private getConnectedUser(userId: string): wsConnectedUserData | null {
+    const connectedUser = this.connectedUsers.get(userId);
+    return connectedUser || null;
   }
 
   private disconnect(socket: Socket, error: Record<string, unknown>) {
