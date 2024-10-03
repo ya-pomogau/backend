@@ -30,6 +30,7 @@ import {
   wsTokenPayload,
   wsOpenedChatsData,
 } from '../../common/types/websockets.types';
+import { wsOpenedChatsPayloadDto } from './dto/websocket-opened-chats.dto';
 
 // Интерфейс и dto созданы для тестирования SocketValidationPipe
 // Удалить на этапе, когда будут реализованы необходимые dto
@@ -167,4 +168,75 @@ export class WebsocketApiGateway
     // eslint-disable-next-line no-console
     console.log('This is test event data:', data);
   }
+
+  // @SubscribeMessage(wsMessageKind.OPEN_CHAT_EVENT)
+  @SubscribeMessage(wsMessageKind.OPEN_CHAT_EVENT)
+  handleOpenChat(
+    @MessageBody('data') data: wsOpenedChatsPayloadDto,
+    @ConnectedSocket() client: Socket
+  ) {
+    console.log(`Start processing...client = ${client}`);
+
+    const user = this.getConnectedUser(client.id);
+    // if (!user) return;
+    if (!user) {
+      console.log(`No user...with this client.id = ${client.id}`);
+      return;
+    }
+
+    const { chatId } = data;
+    let openedChat = this.openedChats.get(chatId);
+
+    if (!openedChat) {
+      // Если chatId еще нет в мапе, добавляем его
+      openedChat = { [user.user._id]: [client.id] };
+    } else if (!openedChat[user.user._id]) {
+      // Если чат есть, но у пользователя нет открытых подключений
+      openedChat[user.user._id] = [client.id];
+    } else {
+      // Если у пользователя уже открыт чат на другом устройстве
+      openedChat[user.user._id].push(client.id);
+    }
+
+    // Обновляем мапу
+    this.openedChats.set(chatId, openedChat);
+
+    // Отправляем ответ клиенту
+    console.log('Sending chat_opened event to client:', client.id, chatId);
+    client.emit('chat_opened', {
+      message: `Chat ${chatId} opened for user ${user.user._id}`,
+    });
+  }
+
+  // @SubscribeMessage(wsMessageKind.CLOSE_CHAT_EVENT)
+  // handleCloseChat(
+  //   @MessageBody('data') data: wsOpenedChatsInfoPayload,
+  //   @ConnectedSocket() client: Socket
+  // ) {
+  //   const user = this.getConnectedUser(client.id);
+  //   if (!user) return;
+
+  //   const { chatId } = data;
+  //   const openedChat = this.openedChats.get(chatId);
+
+  //   if (!openedChat || !openedChat[user.user._id]) return;
+
+  //   const userSockets = openedChat[user.user._id];
+
+  //   if (userSockets.length > 1) {
+  //     // Если у пользователя несколько подключений, удаляем одно
+  //     openedChat[user.user._id] = userSockets.filter(socketId => socketId !== client.id);
+  //   } else {
+  //     // Если одно подключение, удаляем пользователя из openedChat
+  //     delete openedChat[user.user._id];
+
+  //     if (Object.keys(openedChat).length === 0) {
+  //       // Если больше никого нет в чате, удаляем chatId из мапы
+  //       this.openedChats.delete(chatId);
+  //     }
+  //   }
+
+  //   // Обновляем мапу
+  //   this.openedChats.set(chatId, openedChat);
+  // }
 }

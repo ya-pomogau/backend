@@ -151,7 +151,7 @@ export class UsersService {
     return this.create({
       ...dto,
       password: await HashService.generateHash(dto.password),
-      isRoot: false,
+      isRoot: true,
       isActive: true,
       role: UserRole.ADMIN,
     });
