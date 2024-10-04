@@ -31,7 +31,7 @@ export interface ChatModelInterface {
 }
 
 export interface TaskChatModelInterface {
-  taskId: ObjectId;
+  taskId: ObjectId | string;
   volunteer: VolunteerInterface;
   recipient: RecipientInterface;
   volunteerLastReadAt: Date | null;
