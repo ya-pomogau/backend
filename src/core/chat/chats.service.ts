@@ -178,7 +178,9 @@ export class ChatService {
   constructor(private readonly commandBus: CommandBus, private readonly queryBus: QueryBus) {}
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async createTaskChat(metadata: TaskChatMetaInterface) {
+  async createTaskChat(
+    metadata: Pick<TaskChatMetaInterface, 'type' | 'volunteer' | 'recipient' | 'taskId'>
+  ) {
     // const chatEntity = new ChatEntity();
 
     // const newChat = await chatEntity.createChat('TASK_CHAT', metadata);
@@ -194,7 +196,8 @@ export class ChatService {
     // return response;
 
     // eslint-disable-next-line no-console
-    console.log('Creating task chat');
+    console.log('Creating task chat.\nMeta:');
+    console.dir(metadata);
     return mockTaskChatMeta;
   }
 
@@ -215,7 +218,7 @@ export class ChatService {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async addMessage(chatId: string, message: MessageInterface) {
+  async addMessage(chatId: string, message: Omit<MessageInterface, '_id' | 'createdAt' | 'title'>) {
     // const chatEntity = new ChatEntity();
 
     // const chat = await chatEntity.findChatByParams({ chatId: chatId });
@@ -233,7 +236,12 @@ export class ChatService {
 
     // eslint-disable-next-line no-console
     console.log('Adding message into chat');
-    return mockResponseMessage;
+    console.dir(message);
+    return {
+      ...message,
+      _id: new mongoose.Types.ObjectId().toHexString(),
+      createdAt: new Date().toISOString(),
+    } as MessageInterface;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
