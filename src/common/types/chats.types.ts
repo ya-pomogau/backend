@@ -8,11 +8,10 @@ import {
 import { MongooseIdAndTimestampsInterface } from './system.types';
 
 export interface MessageInterface {
-  _id: ObjectId;
-  title: string;
+  _id: ObjectId | string;
   body: string;
   attaches: string[];
-  createdAt: Date;
+  createdAt: Date | string;
   author: AnyUserInterface;
   chatId: ObjectId;
 }
