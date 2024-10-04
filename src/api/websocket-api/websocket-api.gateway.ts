@@ -18,6 +18,8 @@ import { IsArray, IsNotEmpty, IsObject, IsString } from 'class-validator';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 
+import { AddChatMessageCommand } from '../../common/commands/add-chat-message.command';
+import { MessageInterface } from '../../common/types/chats.types';
 import configuration from '../../config/configuration';
 import { SocketAuthGuard } from '../../common/guards/socket-auth.guard';
 import { SocketValidationPipe } from '../../common/pipes/socket-validation.pipe';
@@ -30,6 +32,7 @@ import {
   wsTokenPayload,
   wsOpenedChatsData,
 } from '../../common/types/websockets.types';
+import { WSNewMsgCommandPayload } from './dto/ws-new-msg-payload.dto';
 
 // Интерфейс и dto созданы для тестирования SocketValidationPipe
 // Удалить на этапе, когда будут реализованы необходимые dto
@@ -64,7 +67,8 @@ export class WebsocketApiGateway
 {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    private readonly commandBus: CommandBus
   ) {}
 
   @WebSocketServer()
@@ -166,5 +170,16 @@ export class WebsocketApiGateway
   handleTestEvent(@MessageBody('data') data: TestEventMessageDto) {
     // eslint-disable-next-line no-console
     console.log('This is test event data:', data);
+  }
+
+  @SubscribeMessage('NewMessage')
+  async handleNewMessage(@MessageBody('NewMessage') NewMessage: WSNewMsgCommandPayload) {
+    const { title, body, attaches, author } = NewMessage;
+    const message = { title, body, attaches, author };
+    const { chatId } = NewMessage;
+    await this.commandBus.execute<AddChatMessageCommand, MessageInterface>(
+      new AddChatMessageCommand(chatId, message)
+    );
+    //  sendNewMessage(message: MessageInterface, addresseeId: string, senderId: string)
   }
 }

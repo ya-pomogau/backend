@@ -155,3 +155,8 @@ export interface GetAdminChatsResponseDtoInterface {
   moderated: Array<ConflictChatInfo>;
   conflict: Array<ConflictChatInfo>;
 }
+
+export interface NewMessageInterface
+  extends Omit<MessageInterface, '_id' | 'chatId' | 'createdAt'> {
+  chatId: string;
+}
