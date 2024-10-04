@@ -185,13 +185,13 @@ export class WebsocketApiGateway
     let openedChat = this.openedChats.get(chatId);
 
     if (!openedChat) {
-      // добавить в мапу новую пару ключ-значение);
+      // добавить в мапу новую пару ключ-значение)
       openedChat = { [user._id]: [client.id] };
     } else if (!openedChat[user._id]) {
-      // добавить в объект openedChat новое свойство);
+      // добавить в объект openedChat новое свойство)
       openedChat[user._id] = [client.id];
     } else {
-      // добавить в значение openedChat[userId] новый элемент).
+      // добавить в значение openedChat[userId] новый элемент)
       openedChat[user._id].push(client.id);
     }
 
@@ -208,19 +208,20 @@ export class WebsocketApiGateway
     const { chatId } = data;
 
     const openedChat = this.openedChats.get(chatId);
+
+    // получаем все соединения пользователя
     const userSockets = openedChat[user._id];
     if (userSockets.length > 1) {
-      // удалить из массива одно подключение);
+      // удалить из массива одно подключение)
       openedChat[user._id] = userSockets.filter((socketId) => socketId !== client.id);
     } else {
-      // удалить свойство openedChat[userId]);
+      // удалить свойство openedChat[userId])
       delete openedChat[user._id];
       if (Object.keys(openedChat).length === 0) {
-        //  удалить из мапы запись по ключу chatId.
+        //  удалить из мапы запись по ключу chatId
         this.openedChats.delete(chatId);
       }
     }
-    // обновляем мапу
     this.openedChats.set(chatId, openedChat);
   }
 }
