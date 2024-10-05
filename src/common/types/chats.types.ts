@@ -31,7 +31,7 @@ export interface ChatModelInterface {
 }
 
 export interface TaskChatModelInterface {
-  taskId: ObjectId;
+  taskId: ObjectId | string;
   volunteer: VolunteerInterface;
   recipient: RecipientInterface;
   volunteerLastReadAt: Date | null;
@@ -154,3 +154,8 @@ export interface GetAdminChatsResponseDtoInterface {
   moderated: Array<ConflictChatInfo>;
   conflict: Array<ConflictChatInfo>;
 }
+
+export type CreateTaskChatDtoType = Pick<
+  TaskChatInterface,
+  'taskId' | 'type' | 'volunteer' | 'recipient'
+>;

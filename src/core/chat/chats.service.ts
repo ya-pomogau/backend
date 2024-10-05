@@ -7,7 +7,7 @@ import {
   MessageInterface,
   RecipientConflictChatMetaInterface,
   SystemChatMetaInterface,
-  TaskChatMetaInterface,
+  CreateTaskChatDtoType,
   VolunteerConflictChatMetaInterface,
 } from '../../common/types/chats.types';
 import { AdminInterface, UserRole, UserStatus } from '../../common/types/user.types';
@@ -178,9 +178,7 @@ export class ChatService {
   constructor(private readonly commandBus: CommandBus, private readonly queryBus: QueryBus) {}
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async createTaskChat(
-    metadata: Pick<TaskChatMetaInterface, 'type' | 'volunteer' | 'recipient' | 'taskId'>
-  ) {
+  async createTaskChat(metadata: CreateTaskChatDtoType) {
     // const chatEntity = new ChatEntity();
 
     // const newChat = await chatEntity.createChat('TASK_CHAT', metadata);
