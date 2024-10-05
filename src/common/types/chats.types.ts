@@ -154,3 +154,8 @@ export interface GetAdminChatsResponseDtoInterface {
   moderated: Array<ConflictChatInfo>;
   conflict: Array<ConflictChatInfo>;
 }
+
+export type CreateTaskChatDtoType = Pick<
+  TaskChatInterface,
+  'taskId' | 'type' | 'volunteer' | 'recipient'
+>;
