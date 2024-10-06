@@ -29,7 +29,9 @@ import {
   wsDisconnectionPayload,
   wsTokenPayload,
   wsOpenedChatsData,
+  wsChatPageQueryPayload,
 } from '../../common/types/websockets.types';
+import { GetChatMessagesQuery } from '../../common/queries/get-chat-messages.query';
 
 // Интерфейс и dto созданы для тестирования SocketValidationPipe
 // Удалить на этапе, когда будут реализованы необходимые dto
@@ -64,7 +66,9 @@ export class WebsocketApiGateway
 {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus
   ) {}
 
   @WebSocketServer()
@@ -166,5 +170,13 @@ export class WebsocketApiGateway
   handleTestEvent(@MessageBody('data') data: TestEventMessageDto) {
     // eslint-disable-next-line no-console
     console.log('This is test event data:', data);
+  }
+
+  @SubscribeMessage('PageQuery')
+  async handlePageQuery(@MessageBody('chatInfo') chatInfo: wsChatPageQueryPayload) {
+    const request = await this.queryBus.execute(
+      new GetChatMessagesQuery(chatInfo.chatId, chatInfo.skip, chatInfo.limit)
+    );
+    return request.data;
   }
 }
