@@ -19,7 +19,7 @@ import { IsArray, IsNotEmpty, IsObject, IsString } from 'class-validator';
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 
 import { AddChatMessageCommand } from '../../common/commands/add-chat-message.command';
-import { MessageInterface } from '../../common/types/chats.types';
+// import { MessageInterface } from '../../common/types/chats.types';
 import configuration from '../../config/configuration';
 import { SocketAuthGuard } from '../../common/guards/socket-auth.guard';
 import { SocketValidationPipe } from '../../common/pipes/socket-validation.pipe';
@@ -30,7 +30,7 @@ import {
   wsConnectedUserData,
   wsDisconnectionPayload,
   wsTokenPayload,
-  wsOpenedChatsData,
+  // wsOpenedChatsData,
 } from '../../common/types/websockets.types';
 import { WSNewMsgCommandPayload } from './dto/ws-new-msg-payload.dto';
 
@@ -76,7 +76,7 @@ export class WebsocketApiGateway
 
   private connectedUsers: Map<string, wsConnectedUserData> = new Map();
 
-  private openedChats: Map<string, wsOpenedChatsData<string>> = new Map();
+  private openedChats: Map<string, string[]> = new Map();
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   afterInit(server: Server) {
@@ -167,19 +167,35 @@ export class WebsocketApiGateway
   }
 
   @SubscribeMessage('test_event')
-  handleTestEvent(@MessageBody('data') data: TestEventMessageDto) {
+  async handleTestEvent(@MessageBody('data') data: TestEventMessageDto) {
     // eslint-disable-next-line no-console
     console.log('This is test event data:', data);
   }
 
   @SubscribeMessage('NewMessage')
-  async handleNewMessage(@MessageBody('NewMessage') NewMessage: WSNewMsgCommandPayload) {
+  async handleNewMessage(
+    @ConnectedSocket() client: Socket,
+    @MessageBody('NewMessage') NewMessage: WSNewMsgCommandPayload
+  ) {
+    const userId = (await this.checkUserAuth(client))._id;
+    const userIds: string[] = [userId];
+    const { chatId } = NewMessage;
+    let newarr: string[];
+    if (this.openedChats.get(chatId)) {
+      newarr = userIds.concat(this.openedChats.get(chatId));
+    } else {
+      newarr = userIds;
+    }
+    if (chatId) {
+      this.openedChats.set(chatId, [...newarr]);
+    }
     const { title, body, attaches, author } = NewMessage;
     const message = { title, body, attaches, author };
-    const { chatId } = NewMessage;
-    await this.commandBus.execute<AddChatMessageCommand, MessageInterface>(
-      new AddChatMessageCommand(chatId, message)
-    );
-    //  sendNewMessage(message: MessageInterface, addresseeId: string, senderId: string)
+    this.server.in(client.id).socketsJoin(chatId);
+    return this.commandBus.execute(new AddChatMessageCommand(chatId, message));
+  }
+
+  sendNewMessage(message, chatId: string) {
+    this.server.in(chatId).emit('NewMessage', message);
   }
 }

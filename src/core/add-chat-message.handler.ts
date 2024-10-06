@@ -12,6 +12,6 @@ export class AddChatMessageHandler implements ICommandHandler<AddChatMessageComm
 
   async execute({ chatId, message }: AddChatMessageCommand) {
     const savedMessage = await this.chatService.addMessage(chatId, message);
-    return savedMessage; // this.websocketApiGateway.sendNewMessage(savedMessage, addresseeId, senderId);
+    return this.websocketApiGateway.sendNewMessage(savedMessage, chatId);
   }
 }
