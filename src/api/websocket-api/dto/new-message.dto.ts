@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { AnyUserInterface } from '../../../common/types/user.types';
 import { NewMessageInterface } from '../../../common/types/chats.types';
 
-export class WSNewMsgCommandPayload implements NewMessageInterface {
+export class newMessageDto implements NewMessageInterface {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()

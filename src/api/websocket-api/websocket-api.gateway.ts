@@ -32,7 +32,7 @@ import {
   wsTokenPayload,
   // wsOpenedChatsData,
 } from '../../common/types/websockets.types';
-import { WSNewMsgCommandPayload } from './dto/ws-new-msg-payload.dto';
+import { newMessageDto } from './dto/new-message.dto';
 
 // Интерфейс и dto созданы для тестирования SocketValidationPipe
 // Удалить на этапе, когда будут реализованы необходимые dto
@@ -175,11 +175,12 @@ export class WebsocketApiGateway
   @SubscribeMessage('NewMessage')
   async handleNewMessage(
     @ConnectedSocket() client: Socket,
-    @MessageBody('NewMessage') NewMessage: WSNewMsgCommandPayload
+    @MessageBody('NewMessage') NewMessage: newMessageDto
   ) {
+    //  const { chatId } = NewMessage;
+    const chatId = '1';
     const userId = (await this.checkUserAuth(client))._id;
     const userIds: string[] = [userId];
-    const { chatId } = NewMessage;
     let newarr: string[];
     if (this.openedChats.get(chatId)) {
       newarr = userIds.concat(this.openedChats.get(chatId));
@@ -189,13 +190,20 @@ export class WebsocketApiGateway
     if (chatId) {
       this.openedChats.set(chatId, [...newarr]);
     }
-    const { title, body, attaches, author } = NewMessage;
-    const message = { title, body, attaches, author };
-    this.server.in(client.id).socketsJoin(chatId);
-    return this.commandBus.execute(new AddChatMessageCommand(chatId, message));
+    return this.commandBus.execute(new AddChatMessageCommand(NewMessage));
   }
 
-  sendNewMessage(message, chatId: string) {
-    this.server.in(chatId).emit('NewMessage', message);
+  sendNewMessage(message) {
+    const usersInChat = this.openedChats.get('1');
+    console.log(message.chatId);
+    const connectedUsers: wsConnectedUserData[] = [];
+    usersInChat.forEach((userInChat) => {
+      connectedUsers.push(this.getConnectedUser(userInChat));
+    });
+    connectedUsers.forEach((connectedUser) => {
+      connectedUser.sockets.forEach((clientId) => {
+        this.server.sockets.sockets.get(clientId).emit('NewMessage', message);
+      });
+    });
   }
 }

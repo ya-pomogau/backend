@@ -10,8 +10,8 @@ export class AddChatMessageHandler implements ICommandHandler<AddChatMessageComm
     private readonly chatService: ChatService
   ) {}
 
-  async execute({ chatId, message }: AddChatMessageCommand) {
-    const savedMessage = await this.chatService.addMessage(chatId, message);
-    return this.websocketApiGateway.sendNewMessage(savedMessage, chatId);
+  async execute({ message }: AddChatMessageCommand) {
+    const savedMessage = await this.chatService.addMessage(message);
+    return this.websocketApiGateway.sendNewMessage(savedMessage);
   }
 }

@@ -215,7 +215,7 @@ export class ChatService {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async addMessage(chatId: string, message: Omit<NewMessageInterface, 'chatId'>) {
+  async addMessage(message: NewMessageInterface) {
     // const chatEntity = new ChatEntity();
 
     // const chat = await chatEntity.findChatByParams({ chatId: chatId });
