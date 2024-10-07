@@ -30,6 +30,7 @@ import {
   wsTokenPayload,
   wsOpenedChatsData,
   wsChatPageQueryPayload,
+  wsMessagesPayload,
 } from '../../common/types/websockets.types';
 import { GetChatMessagesQuery } from '../../common/queries/get-chat-messages.query';
 
@@ -166,17 +167,24 @@ export class WebsocketApiGateway
     socket.disconnect();
   }
 
+  private sendChatMessages(messages: wsMessagesPayload, clientId: string) {
+    this.server.sockets.sockets.get(clientId).emit(wsMessageKind.CHAT_PAGE_CONTENT, messages);
+  }
+
   @SubscribeMessage('test_event')
   handleTestEvent(@MessageBody('data') data: TestEventMessageDto) {
     // eslint-disable-next-line no-console
     console.log('This is test event data:', data);
   }
 
-  @SubscribeMessage('PageQuery')
-  async handlePageQuery(@MessageBody('chatInfo') chatInfo: wsChatPageQueryPayload) {
+  @SubscribeMessage(wsMessageKind.CHAT_PAGE_QUERY)
+  async handlePageQuery(
+    @ConnectedSocket() client: Socket,
+    @MessageBody('chatInfo') chatInfo: wsChatPageQueryPayload
+  ) {
     const request = await this.queryBus.execute(
       new GetChatMessagesQuery(chatInfo.chatId, chatInfo.skip, chatInfo.limit)
     );
-    return request.data;
+    this.sendChatMessages(request.data, client.id);
   }
 }

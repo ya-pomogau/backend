@@ -6,7 +6,7 @@ import { ChatService } from './chat/chats.service';
 export class GetChatMessagesQueryHandler implements IQueryHandler<GetChatMessagesQuery> {
   constructor(private readonly chatService: ChatService) {}
 
-  async execute({ chatId, skip, limit }: GetChatMessagesQuery) {
+  async execute({ chatId, skip = 0, limit = 0 }: GetChatMessagesQuery) {
     return this.chatService.getMessages(chatId, skip, limit);
   }
 }
