@@ -8,13 +8,12 @@ import {
 import { MongooseIdAndTimestampsInterface } from './system.types';
 
 export interface MessageInterface {
-  _id: ObjectId;
-  title: string;
+  _id: ObjectId | string;
   body: string;
   attaches: string[];
-  createdAt: Date;
+  createdAt: Date | string;
   author: AnyUserInterface;
-  chatId: ObjectId;
+  chatId: ObjectId | string;
 }
 
 export const ChatTypes = {
@@ -32,7 +31,7 @@ export interface ChatModelInterface {
 }
 
 export interface TaskChatModelInterface {
-  taskId: ObjectId;
+  taskId: ObjectId | string;
   volunteer: VolunteerInterface;
   recipient: RecipientInterface;
   volunteerLastReadAt: Date | null;
@@ -160,3 +159,8 @@ export interface NewMessageInterface
   extends Omit<MessageInterface, '_id' | 'chatId' | 'createdAt'> {
   chatId: string;
 }
+
+export type CreateTaskChatDtoType = Pick<
+  TaskChatInterface,
+  'taskId' | 'type' | 'volunteer' | 'recipient'
+>;

@@ -27,6 +27,7 @@ import { AnyUserInterface, UserRole } from '../../common/types/user.types';
 import { Volunteer } from '../../datalake/users/schemas/volunteer.schema';
 import { User } from '../../datalake/users/schemas/user.schema';
 import { UsersService } from '../users/users.service';
+import { CreateTaskChatCommand } from '../../common/commands/create-chat.command';
 
 @Injectable()
 export class TasksService {
@@ -281,11 +282,13 @@ export class TasksService {
       throw new ForbiddenException('Вам нельзя брать задачи из этой категории!');
     }
     const { name, phone, avatar, address, _id, vkId, role } = volunteer;
-    return this.tasksRepo.findByIdAndUpdate(
+    const updatedTask = await this.tasksRepo.findByIdAndUpdate(
       taskId,
       { status: TaskStatus.ACCEPTED, volunteer: { name, phone, avatar, address, _id, vkId, role } },
       { new: true }
     );
+    await this.commandBus.execute(new CreateTaskChatCommand({ taskId, updatedTask }));
+    return updatedTask;
   }
 
   public async reportTask(taskId: string, userId: string, userRole: UserRole, result: TaskReport) {

@@ -7,7 +7,7 @@ import {
   NewMessageInterface,
   RecipientConflictChatMetaInterface,
   SystemChatMetaInterface,
-  TaskChatMetaInterface,
+  CreateTaskChatDtoType,
   VolunteerConflictChatMetaInterface,
 } from '../../common/types/chats.types';
 import { AdminInterface, UserRole, UserStatus } from '../../common/types/user.types';
@@ -178,7 +178,7 @@ export class ChatService {
   constructor(private readonly commandBus: CommandBus, private readonly queryBus: QueryBus) {}
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async createTaskChat(metadata: TaskChatMetaInterface) {
+  async createTaskChat(metadata: CreateTaskChatDtoType) {
     // const chatEntity = new ChatEntity();
 
     // const newChat = await chatEntity.createChat('TASK_CHAT', metadata);
@@ -194,7 +194,8 @@ export class ChatService {
     // return response;
 
     // eslint-disable-next-line no-console
-    console.log('Creating task chat');
+    console.log('Creating task chat.\nMeta:');
+    console.dir(metadata);
     return mockTaskChatMeta;
   }
 
@@ -233,7 +234,12 @@ export class ChatService {
 
     // eslint-disable-next-line no-console
     console.log('Adding message into chat');
-    return mockResponseMessage;
+    console.dir(message);
+    return {
+      ...message,
+      _id: new mongoose.Types.ObjectId().toHexString(),
+      createdAt: new Date().toISOString(),
+    } as MessageInterface;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
