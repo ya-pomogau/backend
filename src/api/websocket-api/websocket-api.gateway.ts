@@ -176,23 +176,26 @@ export class WebsocketApiGateway
   ) {
     const user = await this.checkUserAuth(client);
     const { chatId } = data;
-
-    client.emit('Opened chat', {
-      message: `Chat ${chatId} was opened for user ${user._id}`,
-    });
-
     // пробуем найти уже такой открытый чат в мапе openedChats и далее проверяем по случаям
     let openedChat = this.openedChats.get(chatId);
 
+    // ключ chatId отсутствует в OpenedChats
     if (!openedChat) {
-      // добавить в мапу новую пару ключ-значение)
+      // добавить в мапу новую пару ключ-значение
       openedChat = { [user._id]: [client.id] };
     } else if (!openedChat[user._id]) {
-      // добавить в объект openedChat новое свойство)
+      // ключ chatId есть в OpenedChats, но openedChat[userId] не существует
+      // добавить в объект openedChat новое свойство
       openedChat[user._id] = [client.id];
     } else {
-      // добавить в значение openedChat[userId] новый элемент)
-      openedChat[user._id].push(client.id);
+      // добавить в значение openedChat[userId] новый элемент
+      // ключ chatId есть в OpenedChats и openedChat[userId] существует
+      const userSockets = openedChat[user._id];
+      if (userSockets.includes(client.id)) {
+        return;
+      }
+      userSockets.push(client.id);
+      openedChat[user._id] = userSockets;
     }
 
     // обновляем мапу
@@ -206,22 +209,25 @@ export class WebsocketApiGateway
   ) {
     const user = await this.checkUserAuth(client);
     const { chatId } = data;
-
     const openedChat = this.openedChats.get(chatId);
 
     // получаем все соединения пользователя
     const userSockets = openedChat[user._id];
+
     if (userSockets.length > 1) {
-      // удалить из массива одно подключение)
-      openedChat[user._id] = userSockets.filter((socketId) => socketId !== client.id);
+      const updatedSockets = userSockets.filter((socketId) => socketId !== client.id);
+      openedChat[user._id] = updatedSockets;
+      this.openedChats.set(chatId, openedChat);
     } else {
-      // удалить свойство openedChat[userId])
       delete openedChat[user._id];
+
+      // если других пользователей в чате нет, то удаляем чам
       if (Object.keys(openedChat).length === 0) {
-        //  удалить из мапы запись по ключу chatId
         this.openedChats.delete(chatId);
+      } else {
+        // в противном случае обновим данные для этого чата
+        this.openedChats.set(chatId, openedChat);
       }
     }
-    this.openedChats.set(chatId, openedChat);
   }
 }
