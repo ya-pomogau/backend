@@ -4,11 +4,11 @@ import mongoose, { ObjectId } from 'mongoose';
 
 import {
   ConflictChatsTupleMetaInterface,
-  NewMessageInterface,
   RecipientConflictChatMetaInterface,
   SystemChatMetaInterface,
   CreateTaskChatDtoType,
   VolunteerConflictChatMetaInterface,
+  MessageInterface,
 } from '../../common/types/chats.types';
 import { AdminInterface, UserRole, UserStatus } from '../../common/types/user.types';
 import { wsChatPageQueryPayload } from '../../common/types/websockets.types';
@@ -216,7 +216,7 @@ export class ChatService {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async addMessage(message: NewMessageInterface) {
+  async addMessage(message: Omit<MessageInterface, '_id' | 'createdAt'>) {
     // const chatEntity = new ChatEntity();
 
     // const chat = await chatEntity.findChatByParams({ chatId: chatId });

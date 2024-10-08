@@ -33,6 +33,7 @@ import {
   // wsOpenedChatsData,
 } from '../../common/types/websockets.types';
 import { newMessageDto } from './dto/new-message.dto';
+import { MessageInterface } from '../../common/types/chats.types';
 
 // Интерфейс и dto созданы для тестирования SocketValidationPipe
 // Удалить на этапе, когда будут реализованы необходимые dto
@@ -177,8 +178,7 @@ export class WebsocketApiGateway
     @ConnectedSocket() client: Socket,
     @MessageBody('NewMessage') NewMessage: newMessageDto
   ) {
-    //  const { chatId } = NewMessage;
-    const chatId = '1';
+    const { chatId } = NewMessage;
     const userId = (await this.checkUserAuth(client))._id;
     const userIds: string[] = [userId];
     let newarr: string[];
@@ -193,16 +193,17 @@ export class WebsocketApiGateway
     return this.commandBus.execute(new AddChatMessageCommand(NewMessage));
   }
 
-  sendNewMessage(message) {
-    const usersInChat = this.openedChats.get('1');
-    console.log(message.chatId);
+  sendNewMessage(savedMessage: MessageInterface) {
+    const { ...message } = savedMessage;
+    const chatId = message.chatId as unknown as string;
+    const usersInChat = this.openedChats.get(chatId);
     const connectedUsers: wsConnectedUserData[] = [];
     usersInChat.forEach((userInChat) => {
       connectedUsers.push(this.getConnectedUser(userInChat));
     });
     connectedUsers.forEach((connectedUser) => {
       connectedUser.sockets.forEach((clientId) => {
-        this.server.sockets.sockets.get(clientId).emit('NewMessage', message);
+        this.server.sockets.sockets.get(clientId).emit('NewMessage', savedMessage);
       });
     });
   }

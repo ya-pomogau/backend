@@ -155,11 +155,6 @@ export interface GetAdminChatsResponseDtoInterface {
   conflict: Array<ConflictChatInfo>;
 }
 
-export interface NewMessageInterface
-  extends Omit<MessageInterface, '_id' | 'chatId' | 'createdAt'> {
-  chatId: string;
-}
-
 export type CreateTaskChatDtoType = Pick<
   TaskChatInterface,
   'taskId' | 'type' | 'volunteer' | 'recipient'

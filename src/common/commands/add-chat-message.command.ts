@@ -1,5 +1,5 @@
-import { NewMessageInterface } from '../types/chats.types';
+import { MessageInterface } from '../types/chats.types';
 
 export class AddChatMessageCommand {
-  constructor(public readonly message: NewMessageInterface) {}
+  constructor(public readonly message: Omit<MessageInterface, '_id' | 'createdAt'>) {}
 }
