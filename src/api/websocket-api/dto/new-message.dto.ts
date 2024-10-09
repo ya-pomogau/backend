@@ -1,9 +1,9 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { AnyUserInterface } from '../../../common/types/user.types';
-import { MessageInterface } from '../../../common/types/chats.types';
+import { WsNewMessage } from '../../../common/types/websockets.types';
 
-export class newMessageDto implements Omit<MessageInterface, '_id' | 'createdAt'> {
+export class newMessageDto implements WsNewMessage {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
