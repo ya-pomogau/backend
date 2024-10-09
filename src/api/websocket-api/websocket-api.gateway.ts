@@ -178,6 +178,7 @@ export class WebsocketApiGateway
     @ConnectedSocket() client: Socket,
     @MessageBody('NewMessage') NewMessage: newMessageDto
   ) {
+    // *** ↓↓ временное решение до появления метода открытия чата ↓↓ ***
     const { chatId } = NewMessage;
     const userId = (await this.checkUserAuth(client))._id;
     const userIds: string[] = [userId];
@@ -190,6 +191,7 @@ export class WebsocketApiGateway
     if (chatId) {
       this.openedChats.set(chatId, [...newarr]);
     }
+    // *** ↑↑ временное решение до появления метода открытия чата ↑↑ ***
     return this.commandBus.execute(new AddChatMessageCommand(NewMessage));
   }
 
