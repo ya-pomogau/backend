@@ -41,7 +41,9 @@ export class CreatedTaskDto {
   @IsDateString()
   date: Date | null;
 
-  @ApiProperty()
+  @ApiProperty({
+    type: PointGeoJSONDto,
+  })
   @IsNotEmpty()
   location: PointGeoJSONDto;
 

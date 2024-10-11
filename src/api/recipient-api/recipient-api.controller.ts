@@ -23,6 +23,7 @@ import {
   ApiInternalServerErrorResponse,
   ApiConflictResponse,
   ApiTags,
+  ApiOkResponse,
 } from '@nestjs/swagger';
 import { TasksService } from '../../core/tasks/tasks.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
@@ -35,6 +36,7 @@ import { GetTasksSearchDto } from './dto/get-tasks-query.dto';
 import { TaskReport, TaskStatus } from '../../common/types/task.types';
 import { DeletedTaskDto } from './dto/deleted-task.dto';
 import { schema } from '../../common/utils/apiSchemaObj';
+import { ApiUpdateTaskDto } from './dto/update-task.dto';
 
 @UseGuards(JwtAuthGuard)
 @UseGuards(AccessControlGuard)
@@ -73,8 +75,7 @@ export class RecipientApiController {
 
   @Get('/tasks/virgin')
   @ApiOperation({ summary: 'Найти все неразобранные задачи реципиента' })
-  @ApiQuery({ type: GetTasksSearchDto })
-  @ApiCreatedResponse({
+  @ApiOkResponse({
     type: CreatedTaskDto,
     isArray: true,
   })
@@ -99,7 +100,7 @@ export class RecipientApiController {
   @Put('/tasks/:id/fulfill')
   @ApiOperation({ summary: 'Отметить задачу как выполненную' })
   @ApiParam({ name: 'id', type: 'string', description: 'ID задачи' })
-  @ApiCreatedResponse({
+  @ApiOkResponse({
     description: 'Задача отмечена как выполненная',
     type: CreatedTaskDto,
   })
@@ -131,7 +132,7 @@ export class RecipientApiController {
   @Put('/tasks/:id/reject')
   @ApiOperation({ summary: 'Отклонение задачи реципиентом' })
   @ApiParam({ name: 'id', type: 'string', description: 'ID задачи' })
-  @ApiCreatedResponse({
+  @ApiOkResponse({
     description: 'Задача отмечена как отклоненная реципиентом',
     type: CreatedTaskDto,
   })
@@ -163,7 +164,7 @@ export class RecipientApiController {
   @Get('/tasks/accepted')
   @ApiOperation({ summary: 'Найти все принятые задачи реципиента' })
   @ApiQuery({ type: GetTasksSearchDto })
-  @ApiCreatedResponse({
+  @ApiOkResponse({
     type: CreatedTaskDto,
     isArray: true,
   })
@@ -271,7 +272,7 @@ export class RecipientApiController {
   })
   @ApiForbiddenResponse({
     schema: schema('Forbidden resource', 'Forbidden', 403),
-    description: 'Для совершения этой операции нужен статус CONFIRMED, VERIFIED, ACTIVATED',
+    description: 'Для совершения этой операции нужен статус: 1, 2 или 3',
   })
   @ApiInternalServerErrorResponse({
     schema: schema('Internal server error', null, 500),
@@ -284,7 +285,7 @@ export class RecipientApiController {
   @Patch('/tasks/:id')
   @AccessControlList({ role: UserRole.RECIPIENT, level: UserStatus.CONFIRMED })
   @ApiOperation({ summary: 'Редактирование задачи' })
-  @ApiBody({ type: ApiCreateTaskDto })
+  @ApiBody({ type: ApiUpdateTaskDto })
   @ApiParam({ name: 'id', type: 'string', description: 'ID задачи' })
   @ApiCreatedResponse({
     description: 'Задача отредактирована успешно.',

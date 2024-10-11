@@ -236,9 +236,11 @@ export class TasksService {
         },
       };
     }
+    console.log(dto);
     if (categoryId) {
       query.category._id = categoryId;
     }
+    console.log(query.category);
     if (!!start && !!end) {
       query.date = {
         $gte: start,
