@@ -188,7 +188,7 @@ export class RecipientApiController {
   @Get('/tasks/active')
   @ApiOperation({ summary: 'Найти все активные задачи реципиента' })
   @ApiQuery({ type: GetTasksSearchDto })
-  @ApiCreatedResponse({
+  @ApiOkResponse({
     type: CreatedTaskDto,
     isArray: true,
   })
@@ -226,7 +226,7 @@ export class RecipientApiController {
   @AccessControlList({ role: UserRole.RECIPIENT, level: UserStatus.CONFIRMED })
   @ApiOperation({ summary: 'Найти все завершенные задачи реципиента' })
   @ApiQuery({ type: GetTasksSearchDto })
-  @ApiCreatedResponse({
+  @ApiOkResponse({
     type: CreatedTaskDto,
     isArray: true,
   })
@@ -263,7 +263,7 @@ export class RecipientApiController {
   @ApiOperation({ summary: 'Найти задачу по ID' })
   @AccessControlList({ role: UserRole.RECIPIENT, level: UserStatus.CONFIRMED })
   @ApiParam({ name: 'id', type: 'string', description: 'ID задачи' })
-  @ApiCreatedResponse({
+  @ApiOkResponse({
     type: CreatedTaskDto,
   })
   @ApiUnauthorizedResponse({
@@ -301,7 +301,7 @@ export class RecipientApiController {
   })
   @ApiForbiddenResponse({
     schema: schema('Forbidden resource', 'Forbidden', 403),
-    description: 'Для совершения этой операции нужен статус CONFIRMED, VERIFIED, ACTIVATED',
+    description: 'Для совершения этой операции нужен статус 1, 2, 3',
   })
   @ApiInternalServerErrorResponse({
     schema: schema('Internal server error', null, 500),
@@ -319,7 +319,7 @@ export class RecipientApiController {
   @AccessControlList({ role: UserRole.RECIPIENT, level: UserStatus.CONFIRMED })
   @ApiOperation({ summary: 'Удаление задачи' })
   @ApiParam({ name: 'id', type: 'string', description: 'ID задачи' })
-  @ApiCreatedResponse({
+  @ApiOkResponse({
     description: 'Задача удалена успешно.',
     type: DeletedTaskDto,
   })
