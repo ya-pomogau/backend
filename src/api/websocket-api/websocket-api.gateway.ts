@@ -176,30 +176,33 @@ export class WebsocketApiGateway
   ) {
     const user = await this.checkUserAuth(client);
     const { chatId } = data;
-    // пробуем найти уже такой открытый чат в мапе openedChats и далее проверяем по случаям
     let openedChat = this.openedChats.get(chatId);
 
-    // ключ chatId отсутствует в OpenedChats
+    // если чата нет, то добавляем новую запись
     if (!openedChat) {
-      // добавить в мапу новую пару ключ-значение
-      openedChat = { [user._id]: [client.id] };
-    } else if (!openedChat[user._id]) {
-      // ключ chatId есть в OpenedChats, но openedChat[userId] не существует
-      // добавить в объект openedChat новое свойство
-      openedChat[user._id] = [client.id];
-    } else {
-      // добавить в значение openedChat[userId] новый элемент
-      // ключ chatId есть в OpenedChats и openedChat[userId] существует
-      const userSockets = openedChat[user._id];
-      if (userSockets.includes(client.id)) {
-        return;
-      }
-      userSockets.push(client.id);
-      openedChat[user._id] = userSockets;
+      openedChat = { users: [user._id] };
+      this.openedChats.set(chatId, openedChat);
     }
 
-    // обновляем мапу
-    this.openedChats.set(chatId, openedChat);
+    // если чат есть, но такого пользователя там нет
+    if (!openedChat.users.includes(user._id)) {
+      openedChat.users.push(user._id);
+      this.openedChats.set(chatId, openedChat);
+    }
+
+    // обновим информацию о подключениях пользователя в connectedUsers
+    const connectedUser = this.connectedUsers.get(user._id);
+    if (connectedUser) {
+      // если пользователь уже подключён, добавляем новый сокет
+      if (!connectedUser.sockets.includes(client.id)) {
+        connectedUser.sockets.push(client.id);
+      }
+    } else {
+      // если пользователя нет в мапе, добавляем его с новым сокетом
+      this.connectedUsers.set(user._id, { user, sockets: [client.id] });
+    }
+    // client.emit('chat_opened', { message: `openedChat = ${JSON.stringify(openedChat)}` });
+    // TODO: Сделать запрос за последними сообщениями и отправить их клиенту
   }
 
   @SubscribeMessage(wsMessageKind.CLOSE_CHAT_EVENT)
@@ -211,23 +214,35 @@ export class WebsocketApiGateway
     const { chatId } = data;
     const openedChat = this.openedChats.get(chatId);
 
-    // получаем все соединения пользователя
-    const userSockets = openedChat[user._id];
+    // если такого чата нет
+    if (!openedChat) {
+      return;
+    }
 
-    if (userSockets.length > 1) {
-      const updatedSockets = userSockets.filter((socketId) => socketId !== client.id);
-      openedChat[user._id] = updatedSockets;
-      this.openedChats.set(chatId, openedChat);
-    } else {
-      delete openedChat[user._id];
+    // если пользователь есть в чате, то удалим его
+    if (openedChat.users.includes(user._id)) {
+      openedChat.users = openedChat.users.filter((userId) => userId !== user._id);
 
-      // если других пользователей в чате нет, то удаляем чам
-      if (Object.keys(openedChat).length === 0) {
+      // если после удаления пользователя в чате больше никого не осталось, то удалим чат
+      if (openedChat.users.length === 0) {
         this.openedChats.delete(chatId);
       } else {
-        // в противном случае обновим данные для этого чата
         this.openedChats.set(chatId, openedChat);
       }
     }
+
+    const connectedUser = this.connectedUsers.get(user._id);
+    if (connectedUser) {
+      // если у пользователя есть другие активные подключения, то удаляем только текущий сокет
+      connectedUser.sockets = connectedUser.sockets.filter((socketId) => socketId !== client.id);
+
+      // если у пользователя не осталось активных сокетов, удаляем пользователя из connectedUsers иначе обновим данные в мапе
+      if (connectedUser.sockets.length === 0) {
+        this.connectedUsers.delete(user._id);
+      } else {
+        this.connectedUsers.set(user._id, connectedUser);
+      }
+    }
+    // client.emit('chat_closed', { message: `openedChat = ${JSON.stringify(openedChat)}` });
   }
 }
