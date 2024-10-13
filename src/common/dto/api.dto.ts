@@ -3,14 +3,22 @@
 import { IsIn, IsNotEmpty, IsOptional, IsPhoneNumber, IsString, IsUrl } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { NewProfileInterface } from '../types/api.types';
-import { GeoCoordinates, PointGeoJSONInterface } from '../types/point-geojson.types';
+import { PointGeoJSONInterface } from '../types/point-geojson.types';
 import { IsCoords } from '../decorators/is-coords';
 
 export class PointGeoJSONDto implements PointGeoJSONInterface {
   @IsCoords()
   @IsNotEmpty()
-  @ApiProperty()
-  coordinates: GeoCoordinates;
+  @ApiProperty({
+    type: 'array',
+    items: {
+      type: 'number',
+    },
+    minItems: 2,
+    maxItems: 2,
+    example: [58, 58],
+  })
+  coordinates: [number, number];
 
   @ApiProperty()
   @IsIn(['Point'])
