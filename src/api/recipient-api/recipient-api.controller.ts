@@ -18,7 +18,6 @@ import {
   ApiBadRequestResponse,
   ApiUnauthorizedResponse,
   ApiForbiddenResponse,
-  ApiQuery,
   ApiParam,
   ApiInternalServerErrorResponse,
   ApiConflictResponse,
@@ -163,7 +162,6 @@ export class RecipientApiController {
 
   @Get('/tasks/accepted')
   @ApiOperation({ summary: 'Найти все принятые задачи реципиента' })
-  @ApiQuery({ type: GetTasksSearchDto })
   @ApiOkResponse({
     type: CreatedTaskDto,
     isArray: true,
@@ -187,7 +185,6 @@ export class RecipientApiController {
 
   @Get('/tasks/active')
   @ApiOperation({ summary: 'Найти все активные задачи реципиента' })
-  @ApiQuery({ type: GetTasksSearchDto })
   @ApiOkResponse({
     type: CreatedTaskDto,
     isArray: true,
@@ -225,7 +222,6 @@ export class RecipientApiController {
   @Get('/tasks/completed')
   @AccessControlList({ role: UserRole.RECIPIENT, level: UserStatus.CONFIRMED })
   @ApiOperation({ summary: 'Найти все завершенные задачи реципиента' })
-  @ApiQuery({ type: GetTasksSearchDto })
   @ApiOkResponse({
     type: CreatedTaskDto,
     isArray: true,
