@@ -32,7 +32,7 @@ import {
   wsTokenPayload,
   // wsOpenedChatsData,
 } from '../../common/types/websockets.types';
-import { newMessageDto } from './dto/new-message.dto';
+import { NewMessageDto } from './dto/new-message.dto';
 import { MessageInterface } from '../../common/types/chats.types';
 
 // Интерфейс и dto созданы для тестирования SocketValidationPipe
@@ -77,7 +77,9 @@ export class WebsocketApiGateway
 
   private connectedUsers: Map<string, wsConnectedUserData> = new Map();
 
-  private openedChats: Map<string, string[]> = new Map();
+  // private openedChats: Map<string, string[]> = new Map();
+
+  private openedChats: Map<string, Set<string>> = new Map();
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   afterInit(server: Server) {
@@ -176,22 +178,17 @@ export class WebsocketApiGateway
   @SubscribeMessage('NewMessage')
   async handleNewMessage(
     @ConnectedSocket() client: Socket,
-    @MessageBody('NewMessage') NewMessage: newMessageDto
+    @MessageBody('NewMessage') NewMessage: NewMessageDto
   ) {
     // *** ↓↓ временное решение до появления метода открытия чата ↓↓ ***
     const { chatId } = NewMessage;
     const userId = (await this.checkUserAuth(client))._id;
-    const userIds: string[] = [userId];
-    let newarr: string[];
-    if (this.openedChats.get(chatId)) {
-      newarr = userIds.concat(this.openedChats.get(chatId));
-    } else {
-      newarr = userIds;
-    }
+    const newarr = new Set<string>();
     if (chatId) {
-      this.openedChats.set(chatId, [...newarr]);
+      this.openedChats.set(chatId, newarr.add(userId));
     }
     // *** ↑↑ временное решение до появления метода открытия чата ↑↑ ***
+
     return this.commandBus.execute(new AddChatMessageCommand(NewMessage));
   }
 

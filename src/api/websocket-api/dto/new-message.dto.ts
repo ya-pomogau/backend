@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { AnyUserInterface } from '../../../common/types/user.types';
 import { WsNewMessage } from '../../../common/types/websockets.types';
 
-export class newMessageDto implements WsNewMessage {
+export class NewMessageDto implements WsNewMessage {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
