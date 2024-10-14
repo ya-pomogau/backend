@@ -22,7 +22,9 @@ import configuration from '../../config/configuration';
 import { SocketAuthGuard } from '../../common/guards/socket-auth.guard';
 import { SocketValidationPipe } from '../../common/pipes/socket-validation.pipe';
 import { AnyUserInterface } from '../../common/types/user.types';
+import { GetUserChatsMetaQuery } from '../../common/queries/get-user-chats-meta.query';
 import {
+  wsMetaPayload,
   wsMessageData,
   wsMessageKind,
   wsConnectedUserData,
@@ -63,6 +65,7 @@ export class WebsocketApiGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
   constructor(
+    private readonly queryBus: QueryBus,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService
   ) {}
@@ -98,6 +101,9 @@ export class WebsocketApiGateway
     } else {
       this.connectedUsers.set(user._id, { user, sockets: [client.id] });
     }
+
+    // Отправляем мета-данные чатов подключившемуся пользователю
+    await this.sendUserChatsMeta(user._id);
   }
 
   sendTokenAndUpdatedUser(user: AnyUserInterface, token: string) {
@@ -160,6 +166,19 @@ export class WebsocketApiGateway
   private disconnect(socket: Socket, error: Record<string, unknown>) {
     socket.emit('error', new WsException(error));
     socket.disconnect();
+  }
+
+  async sendUserChatsMeta(userId: string, clientIds: string[] = null): Promise<void> {
+    const socketsToSend = clientIds ?? this.getConnectedUser(userId)?.sockets;
+
+    const query = new GetUserChatsMetaQuery(userId);
+    const userChatsMeta = await this.queryBus.execute<GetUserChatsMetaQuery, wsMetaPayload>(query);
+
+    socketsToSend.forEach((clientId) => {
+      this.server.sockets.sockets.get(clientId).emit(wsMessageKind.REFRESH_CHATS_META_COMMAND, {
+        data: userChatsMeta as wsMetaPayload,
+      } as wsMessageData);
+    });
   }
 
   @SubscribeMessage('test_event')
