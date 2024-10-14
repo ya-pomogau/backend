@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
 import { JwtModule, JwtService } from '@nestjs/jwt';
-import { CqrsModule, QueryBus, CommandBus } from '@nestjs/cqrs';
+import { CqrsModule } from '@nestjs/cqrs';
 import { BlogModule } from '../../core/blog/blog.module';
 import { CategoriesModule } from '../../core/categories/categories.module';
 import { TasksModule } from '../../core/tasks/tasks.module';
@@ -27,14 +27,6 @@ import { QueryHandlers } from './commands-and-queries/queries';
     AuthModule,
     CqrsModule,
   ],
-  providers: [
-    ...QueryHandlers,
-    WebsocketApiGateway,
-    AuthService,
-    ChatService,
-    JwtService,
-    CommandBus,
-    QueryBus,
-  ],
+  providers: [...QueryHandlers, WebsocketApiGateway, AuthService, ChatService, JwtService],
 })
 export class WebsocketApiModule {}
