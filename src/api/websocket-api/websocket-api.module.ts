@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
 import { JwtModule, JwtService } from '@nestjs/jwt';
+import { CqrsModule, QueryBus, CommandBus } from '@nestjs/cqrs';
 import { BlogModule } from '../../core/blog/blog.module';
 import { CategoriesModule } from '../../core/categories/categories.module';
 import { TasksModule } from '../../core/tasks/tasks.module';
@@ -10,6 +11,8 @@ import { PolicyModule } from '../../core/policy/policy.module';
 import { AuthModule } from '../../core/auth/auth.module';
 import { AuthService } from '../../core/auth/auth.service';
 import { WebsocketApiGateway } from './websocket-api.gateway';
+import { ChatService } from '../../core/chat/chats.service';
+import { QueryHandlers } from './commands-and-queries/queries';
 
 @Module({
   imports: [
@@ -22,7 +25,16 @@ import { WebsocketApiGateway } from './websocket-api.gateway';
     HttpModule,
     JwtModule,
     AuthModule,
+    CqrsModule,
   ],
-  providers: [WebsocketApiGateway, AuthService, JwtService],
+  providers: [
+    ...QueryHandlers,
+    WebsocketApiGateway,
+    AuthService,
+    ChatService,
+    JwtService,
+    CommandBus,
+    QueryBus,
+  ],
 })
 export class WebsocketApiModule {}
