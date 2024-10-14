@@ -11,7 +11,7 @@ import { PolicyModule } from '../../core/policy/policy.module';
 import { AuthModule } from '../../core/auth/auth.module';
 import { AuthService } from '../../core/auth/auth.service';
 import { WebsocketApiGateway } from './websocket-api.gateway';
-import { QUERIES_HANDLERS } from '../../common/queries';
+import { QUERIES } from '../../common/queries';
 import { ChatService } from '../../core/chat/chats.service';
 
 @Module({
@@ -33,7 +33,7 @@ import { ChatService } from '../../core/chat/chats.service';
     ChatService,
     CommandBus,
     QueryBus,
-    ...QUERIES_HANDLERS,
+    ...QUERIES,
   ],
 })
 export class WebsocketApiModule implements OnModuleInit {
@@ -41,6 +41,6 @@ export class WebsocketApiModule implements OnModuleInit {
 
   onModuleInit() {
     // this.commandBus.register();
-    this.queryBus.register(QUERIES_HANDLERS);
+    this.queryBus.register(QUERIES);
   }
 }
