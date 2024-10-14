@@ -30,9 +30,9 @@ import {
   wsTokenPayload,
   wsOpenedChatsData,
   wsChatPageQueryPayload,
-  wsMessagesPayload,
 } from '../../common/types/websockets.types';
 import { GetChatMessagesQuery } from '../../common/queries/get-chat-messages.query';
+import { MessageInterface } from '../../common/types/chats.types';
 
 // Интерфейс и dto созданы для тестирования SocketValidationPipe
 // Удалить на этапе, когда будут реализованы необходимые dto
@@ -167,8 +167,14 @@ export class WebsocketApiGateway
     socket.disconnect();
   }
 
-  private sendChatMessages(messages: wsMessagesPayload, clientId: string) {
-    this.server.sockets.sockets.get(clientId).emit(wsMessageKind.CHAT_PAGE_CONTENT, messages);
+  private sendChatMessages(messages: Array<MessageInterface>, clientId: string) {
+    const wsMessageData: wsMessageData = {
+      data: {
+        messages,
+      },
+    };
+
+    this.server.sockets.sockets.get(clientId).emit(wsMessageKind.CHAT_PAGE_CONTENT, wsMessageData);
   }
 
   @SubscribeMessage('test_event')
@@ -182,9 +188,9 @@ export class WebsocketApiGateway
     @ConnectedSocket() client: Socket,
     @MessageBody('chatInfo') chatInfo: wsChatPageQueryPayload
   ) {
-    const request = await this.queryBus.execute(
+    const request: Array<MessageInterface> = await this.queryBus.execute(
       new GetChatMessagesQuery(chatInfo.chatId, chatInfo.skip, chatInfo.limit)
     );
-    this.sendChatMessages(request.data, client.id);
+    this.sendChatMessages(request, client.id);
   }
 }
