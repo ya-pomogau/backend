@@ -1,7 +1,7 @@
 import { Module, OnModuleInit } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
 import { JwtModule, JwtService } from '@nestjs/jwt';
-import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { CommandBus, CqrsModule, QueryBus } from '@nestjs/cqrs';
 import { BlogModule } from '../../core/blog/blog.module';
 import { CategoriesModule } from '../../core/categories/categories.module';
 import { TasksModule } from '../../core/tasks/tasks.module';
@@ -25,16 +25,9 @@ import { ChatService } from '../../core/chat/chats.service';
     HttpModule,
     JwtModule,
     AuthModule,
+    CqrsModule,
   ],
-  providers: [
-    WebsocketApiGateway,
-    AuthService,
-    JwtService,
-    ChatService,
-    CommandBus,
-    QueryBus,
-    ...QUERIES,
-  ],
+  providers: [WebsocketApiGateway, AuthService, JwtService, ChatService, ...QUERIES],
 })
 export class WebsocketApiModule implements OnModuleInit {
   constructor(private readonly commandBus: CommandBus, private readonly queryBus: QueryBus) {}
