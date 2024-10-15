@@ -62,3 +62,5 @@ export type wsConnectedUserData = {
 export type wsOpenedChatsData<T extends string> = {
   [key in T]: Array<string>;
 };
+
+export type WsNewMessage = Omit<MessageInterface, '_id' | 'createdAt'>;
