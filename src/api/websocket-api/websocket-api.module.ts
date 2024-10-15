@@ -1,4 +1,4 @@
-import { Module, OnModuleInit } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { CommandBus, CqrsModule, QueryBus } from '@nestjs/cqrs';
@@ -29,7 +29,7 @@ import { ChatService } from '../../core/chat/chats.service';
   ],
   providers: [WebsocketApiGateway, AuthService, JwtService, ChatService, ...QUERIES],
 })
-export class WebsocketApiModule implements OnModuleInit {
+export class WebsocketApiModule {
   constructor(private readonly commandBus: CommandBus, private readonly queryBus: QueryBus) {}
 
   onModuleInit() {
