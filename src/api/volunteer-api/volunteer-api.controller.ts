@@ -9,7 +9,7 @@ import { User } from '../../datalake/users/schemas/user.schema';
 import { Volunteer } from '../../datalake/users/schemas/volunteer.schema';
 import { GetTasksSearchDto } from '../recipient-api/dto/get-tasks-query.dto';
 import { TaskReport, TaskStatus } from '../../common/types/task.types';
-import { ApiBadRequestResponse, ApiConflictResponse, ApiForbiddenResponse, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiConflictResponse, ApiCreatedResponse, ApiForbiddenResponse, ApiOkResponse, ApiOperation, ApiParam, ApiQuery, ApiResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { Task } from 'src/datalake/task/schemas/task.schema';
 
 @UseGuards(JwtAuthGuard)
@@ -25,9 +25,37 @@ export class VolunteerApiController {
   @ApiOperation({ summary: 'Получение новых задач по статусу' })
   @ApiQuery({ type: GetTasksSearchDto })
   @ApiOkResponse({ type: Promise<Task[]> })
-  @ApiUnauthorizedResponse({ description: 'Требуется авторизация' })
-  @ApiForbiddenResponse({ description: 'Требуется другой статус или роль' })
-  @ApiBadRequestResponse({ description: 'Ошибка запроса. В нём есть пользователь?' })
+  @ApiCreatedResponse({
+    description: 'Успешное получение задач',
+    type: Promise<Task[]>
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Требуется авторизация',
+    schema: {
+      example: {
+        statusCode: 401,
+        error: 'Unathorized'
+      }
+    }
+  })
+  @ApiForbiddenResponse({
+    description: 'Требуется другой статус или роль',
+    schema: {
+      example: {
+        statusCode: 403,
+        error: 'Forbidden'
+      }
+    }
+  })
+  @ApiBadRequestResponse({
+    description: 'Ошибка запроса. В нём есть пользователь?',
+    schema: {
+      example: {
+        statusCode: 400,
+        error: 'Bad Request'
+      }
+    }
+  })
   @AccessControlList({ role: UserRole.VOLUNTEER, level: UserStatus.UNCONFIRMED })
   @Get('tasks/virgin')
   public async getNewTasks(@Req() req: Express.Request, @Query() query: GetTasksSearchDto) {
@@ -46,10 +74,46 @@ export class VolunteerApiController {
   @ApiOperation({ summary: 'Принятие задачи' })
   @ApiParam({ name: 'id', type: 'String' })
   @ApiOkResponse({ type: Promise<Task> })
-  @ApiUnauthorizedResponse({ description: 'Требуется авторизация' })
-  @ApiForbiddenResponse({ description: 'Требуется другой статус или роль' })
-  @ApiBadRequestResponse({ description: 'Ошибка запроса. В нём есть пользователь?' })
-  @ApiConflictResponse({ description: 'Нельзя повторно взять задание или оно взято другим волонтёром' })
+  @ApiCreatedResponse({
+    description: 'Успешное принятие задачи',
+    type: Promise<Task>
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Требуется авторизация',
+    schema: {
+      example: {
+        statusCode: 401,
+        error: 'Unathorized'
+      }
+    }
+  })
+  @ApiForbiddenResponse({
+    description: 'Требуется другой статус или роль',
+    schema: {
+      example: {
+        statusCode: 403,
+        error: 'Forbidden'
+      }
+    }
+  })
+  @ApiBadRequestResponse({
+    description: 'Ошибка запроса. В нём есть пользователь?',
+    schema: {
+      example: {
+        statusCode: 400,
+        error: 'Bad Request'
+      }
+    }
+  })
+  @ApiConflictResponse({
+    description: 'Нельзя повторно взять задание или оно взято другим волонтёром',
+    schema: {
+      example: {
+        statusCode: 409,
+        error: 'Conflict'
+      }
+    }
+  })
   @AccessControlList({ role: UserRole.VOLUNTEER, level: UserStatus.CONFIRMED })
   @Put('tasks/:id/accept')
   public async accept(@Req() req: Express.Request, @Param('id') taskId: string) {
@@ -59,10 +123,46 @@ export class VolunteerApiController {
   @ApiOperation({ summary: 'Успешное завершение задачи' })
   @ApiParam({ name: 'id', type: 'String' })
   @ApiOkResponse({ type: Promise<Task> })
-  @ApiUnauthorizedResponse({ description: 'Требуется авторизация' })
-  @ApiForbiddenResponse({ description: 'Требуется другой статус или роль' })
-  @ApiBadRequestResponse({ description: 'Ошибка запроса. В нём есть пользователь?' })
-  @ApiConflictResponse({ description: 'Нельзя повторно отчитаться о задаче' })
+  @ApiCreatedResponse({
+    description: 'Успешное завершение задачи',
+    type: Promise<Task>
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Требуется авторизация',
+    schema: {
+      example: {
+        statusCode: 401,
+        error: 'Unathorized'
+      }
+    }
+  })
+  @ApiForbiddenResponse({
+    description: 'Требуется другой статус или роль',
+    schema: {
+      example: {
+        statusCode: 403,
+        error: 'Forbidden'
+      }
+    }
+  })
+  @ApiBadRequestResponse({
+    description: 'Ошибка запроса. В нём есть пользователь?',
+    schema: {
+      example: {
+        statusCode: 400,
+        error: 'Bad Request'
+      }
+    }
+  })
+  @ApiConflictResponse({
+    description: 'Нельзя отчитаться о задаче',
+    schema: {
+      example: {
+        statusCode: 409,
+        error: 'Conflict'
+      }
+    }
+  })
   @Put('/tasks/:id/fulfill')
   @AccessControlList({ role: UserRole.VOLUNTEER, level: UserStatus.CONFIRMED })
   public async fulfillTask(@Param('id') id: string, @Req() req: Express.Request) {
@@ -73,10 +173,46 @@ export class VolunteerApiController {
   @ApiOperation({ summary: 'Отказ от задачи' })
   @ApiParam({ name: 'id', type: 'String' })
   @ApiOkResponse({ type: Promise<Task> })
-  @ApiUnauthorizedResponse({ description: 'Требуется авторизация' })
-  @ApiForbiddenResponse({ description: 'Требуется другой статус или роль' })
-  @ApiBadRequestResponse({ description: 'Ошибка запроса. В нём есть пользователь?' })
-  @ApiConflictResponse({ description: 'Нельзя повторно отчитаться о задаче' })
+  @ApiCreatedResponse({
+    description: 'Успешный отказ от задачи',
+    type: Promise<Task>
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Требуется авторизация',
+    schema: {
+      example: {
+        statusCode: 401,
+        error: 'Unathorized'
+      }
+    }
+  })
+  @ApiForbiddenResponse({
+    description: 'Требуется другой статус или роль',
+    schema: {
+      example: {
+        statusCode: 403,
+        error: 'Forbidden'
+      }
+    }
+  })
+  @ApiBadRequestResponse({
+    description: 'Ошибка запроса. В нём есть пользователь?',
+    schema: {
+      example: {
+        statusCode: 400,
+        error: 'Bad Request'
+      }
+    }
+  })
+  @ApiConflictResponse({
+    description: 'Нельзя повторно отчитаться о задаче',
+    schema: {
+      example: {
+        statusCode: 409,
+        error: 'Conflict'
+      }
+    }
+  })
   @Put('/tasks/:id/reject')
   @AccessControlList({ role: UserRole.VOLUNTEER, level: UserStatus.CONFIRMED })
   public async rejectTask(@Param('id') id: string, @Req() req: Express.Request) {
@@ -87,9 +223,37 @@ export class VolunteerApiController {
   @ApiOperation({ summary: 'Получение подтвержденных задач' })
   @ApiQuery({ type: GetTasksSearchDto })
   @ApiOkResponse({ type: Promise<Task[]> })
-  @ApiUnauthorizedResponse({ description: 'Требуется авторизация' })
-  @ApiForbiddenResponse({ description: 'Требуется другой статус или роль' })
-  @ApiBadRequestResponse({ description: 'Ошибка запроса. В нём есть пользователь?' })
+  @ApiCreatedResponse({
+    description: 'Успешное получение задач',
+    type: Promise<Task[]>
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Требуется авторизация',
+    schema: {
+      example: {
+        statusCode: 401,
+        error: 'Unathorized'
+      }
+    }
+  })
+  @ApiForbiddenResponse({
+    description: 'Требуется другой статус или роль',
+    schema: {
+      example: {
+        statusCode: 403,
+        error: 'Forbidden'
+      }
+    }
+  })
+  @ApiBadRequestResponse({
+    description: 'Ошибка запроса. В нём есть пользователь?',
+    schema: {
+      example: {
+        statusCode: 400,
+        error: 'Bad Request'
+      }
+    }
+  })
   @Get('/tasks/accepted')
   @AccessControlList({ role: UserRole.VOLUNTEER, level: UserStatus.CONFIRMED })
   public async getAcceptedTasks(@Query() query: GetTasksSearchDto, @Req() req: Express.Request) {
@@ -103,9 +267,37 @@ export class VolunteerApiController {
   @ApiOperation({ summary: 'Получение завершенных задач' })
   @ApiQuery({ type: GetTasksSearchDto })
   @ApiOkResponse({ type: Promise<Task[]> })
-  @ApiUnauthorizedResponse({ description: 'Требуется авторизация' })
-  @ApiForbiddenResponse({ description: 'Требуется другой статус или роль' })
-  @ApiBadRequestResponse({ description: 'Ошибка запроса. В нём есть пользователь?' })
+  @ApiCreatedResponse({
+    description: 'Успешное получение задач',
+    type: Promise<Task[]>
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Требуется авторизация',
+    schema: {
+      example: {
+        statusCode: 401,
+        error: 'Unathorized'
+      }
+    }
+  })
+  @ApiForbiddenResponse({
+    description: 'Требуется другой статус или роль',
+    schema: {
+      example: {
+        statusCode: 403,
+        error: 'Forbidden'
+      }
+    }
+  })
+  @ApiBadRequestResponse({
+    description: 'Ошибка запроса. В нём есть пользователь?',
+    schema: {
+      example: {
+        statusCode: 400,
+        error: 'Bad Request'
+      }
+    }
+  })
   @Get('/tasks/completed')
   @AccessControlList({ role: UserRole.VOLUNTEER, level: UserStatus.CONFIRMED })
   public async getCompletedTasks(@Query() query: GetTasksSearchDto, @Req() req: Express.Request) {
