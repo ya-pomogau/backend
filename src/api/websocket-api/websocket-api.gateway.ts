@@ -187,8 +187,11 @@ export class WebsocketApiGateway
     this.server.sockets.sockets.get(clientId).emit(wsMessageKind.CHAT_PAGE_CONTENT, wsMessageData);
   }
 
-  async sendUserChatsMeta(userId: string, clientIds: string[] = null): Promise<void> {
-    const socketsToSend = clientIds ?? this.getConnectedUser(userId)?.sockets;
+  async sendUserChatsMeta(userId: string): Promise<void> {
+    const connectedUser = this.getConnectedUser(userId);
+    if (!connectedUser) return;
+
+    const socketsToSend = connectedUser.sockets;
 
     const query = new GetUserChatsMetaQuery(userId);
     const userChatsMeta = await this.queryBus.execute<GetUserChatsMetaQuery, wsMetaPayload>(query);
