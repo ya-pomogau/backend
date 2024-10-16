@@ -24,7 +24,9 @@ import configuration from '../../config/configuration';
 import { SocketAuthGuard } from '../../common/guards/socket-auth.guard';
 import { SocketValidationPipe } from '../../common/pipes/socket-validation.pipe';
 import { AnyUserInterface } from '../../common/types/user.types';
+import { GetUserChatsMetaQuery } from '../../common/queries/get-user-chats-meta.query';
 import {
+  wsMetaPayload,
   wsMessageData,
   wsMessageKind,
   wsConnectedUserData,
@@ -108,6 +110,9 @@ export class WebsocketApiGateway
     } else {
       this.connectedUsers.set(user._id, { user, sockets: [client.id] });
     }
+
+    // Отправляем мета-данные чатов подключившемуся пользователю
+    await this.sendUserChatsMeta(user._id);
   }
 
   sendTokenAndUpdatedUser(user: AnyUserInterface, token: string) {
@@ -180,6 +185,22 @@ export class WebsocketApiGateway
     };
 
     this.server.sockets.sockets.get(clientId).emit(wsMessageKind.CHAT_PAGE_CONTENT, wsMessageData);
+  }
+
+  async sendUserChatsMeta(userId: string): Promise<void> {
+    const connectedUser = this.getConnectedUser(userId);
+    if (!connectedUser) return;
+
+    const socketsToSend = connectedUser.sockets;
+
+    const query = new GetUserChatsMetaQuery(userId);
+    const userChatsMeta = await this.queryBus.execute<GetUserChatsMetaQuery, wsMetaPayload>(query);
+
+    socketsToSend.forEach((clientId) => {
+      this.server.sockets.sockets.get(clientId).emit(wsMessageKind.REFRESH_CHATS_META_COMMAND, {
+        data: userChatsMeta as wsMetaPayload,
+      } as wsMessageData);
+    });
   }
 
   @SubscribeMessage('test_event')
