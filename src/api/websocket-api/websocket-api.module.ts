@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
 import { JwtModule, JwtService } from '@nestjs/jwt';
-import { CqrsModule, CommandBus, QueryBus } from '@nestjs/cqrs';
+import { CqrsModule } from '@nestjs/cqrs';
 import { BlogModule } from '../../core/blog/blog.module';
 import { CategoriesModule } from '../../core/categories/categories.module';
 import { TasksModule } from '../../core/tasks/tasks.module';
@@ -37,11 +37,4 @@ import { QUERIES } from '../../common/queries';
     ...QUERIES,
   ],
 })
-export class WebsocketApiModule {
-  constructor(private readonly commandBus: CommandBus, private readonly queryBus: QueryBus) {}
-
-  onModuleInit() {
-    // this.commandBus.register();
-    this.queryBus.register(QUERIES);
-  }
-}
+export class WebsocketApiModule {}
