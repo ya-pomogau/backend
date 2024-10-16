@@ -18,6 +18,8 @@ import { IsArray, IsNotEmpty, IsObject, IsString } from 'class-validator';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 
+import { AddChatMessageCommand } from '../../common/commands/add-chat-message.command';
+// import { MessageInterface } from '../../common/types/chats.types';
 import configuration from '../../config/configuration';
 import { SocketAuthGuard } from '../../common/guards/socket-auth.guard';
 import { SocketValidationPipe } from '../../common/pipes/socket-validation.pipe';
@@ -28,10 +30,12 @@ import {
   wsConnectedUserData,
   wsDisconnectionPayload,
   wsTokenPayload,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  wsOpenedChatsData,
+  // wsOpenedChatsData,
+  wsChatPageQueryPayload,
 } from '../../common/types/websockets.types';
-import { wsOpenedChatsPayloadDto } from './dto/websocket-opened-chats.dto';
+import { NewMessageDto } from './dto/new-message.dto';
+import { MessageInterface } from '../../common/types/chats.types';
+import { GetChatMessagesQuery } from '../../common/queries/get-chat-messages.query';
 
 // Интерфейс и dto созданы для тестирования SocketValidationPipe
 // Удалить на этапе, когда будут реализованы необходимые dto
@@ -66,7 +70,9 @@ export class WebsocketApiGateway
 {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus
   ) {}
 
   @WebSocketServer()
@@ -74,7 +80,9 @@ export class WebsocketApiGateway
 
   private connectedUsers: Map<string, wsConnectedUserData> = new Map();
 
-  private openedChats: Map<string, wsOpenedChatsData<string>> = new Map();
+  // private openedChats: Map<string, string[]> = new Map();
+
+  private openedChats: Map<string, Set<string>> = new Map();
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   afterInit(server: Server) {
@@ -164,86 +172,62 @@ export class WebsocketApiGateway
     socket.disconnect();
   }
 
+  private sendChatMessages(messages: Array<MessageInterface>, clientId: string) {
+    const wsMessageData: wsMessageData = {
+      data: {
+        messages,
+      },
+    };
+
+    this.server.sockets.sockets.get(clientId).emit(wsMessageKind.CHAT_PAGE_CONTENT, wsMessageData);
+  }
+
   @SubscribeMessage('test_event')
-  handleTestEvent(@MessageBody('data') data: TestEventMessageDto) {
+  async handleTestEvent(@MessageBody('data') data: TestEventMessageDto) {
     // eslint-disable-next-line no-console
     console.log('This is test event data:', data);
   }
 
-  @SubscribeMessage(wsMessageKind.OPEN_CHAT_EVENT)
-  async handleOpenChat(
-    @MessageBody('data') data: wsOpenedChatsPayloadDto,
-    @ConnectedSocket() client: Socket
+  @SubscribeMessage('NewMessage')
+  async handleNewMessage(
+    @ConnectedSocket() client: Socket,
+    @MessageBody('NewMessage') NewMessage: NewMessageDto
   ) {
-    const user = await this.checkUserAuth(client);
-    const { chatId } = data;
-    let openedChat = this.openedChats.get(chatId);
-
-    // если чата нет, то добавляем новую запись
-    if (!openedChat) {
-      openedChat = { users: [user._id] };
-      this.openedChats.set(chatId, openedChat);
+    // *** ↓↓ временное решение до появления метода открытия чата ↓↓ ***
+    const { chatId } = NewMessage;
+    const userId = (await this.checkUserAuth(client))._id;
+    const newarr = new Set<string>();
+    if (chatId) {
+      this.openedChats.set(chatId, newarr.add(userId));
     }
+    // *** ↑↑ временное решение до появления метода открытия чата ↑↑ ***
 
-    // если чат есть, но такого пользователя там нет
-    if (!openedChat.users.includes(user._id)) {
-      openedChat.users.push(user._id);
-      this.openedChats.set(chatId, openedChat);
-    }
-
-    // обновим информацию о подключениях пользователя в connectedUsers
-    const connectedUser = this.connectedUsers.get(user._id);
-    if (connectedUser) {
-      // если пользователь уже подключён, добавляем новый сокет
-      if (!connectedUser.sockets.includes(client.id)) {
-        connectedUser.sockets.push(client.id);
-      }
-    } else {
-      // если пользователя нет в мапе, добавляем его с новым сокетом
-      this.connectedUsers.set(user._id, { user, sockets: [client.id] });
-    }
-    // client.emit('chat_opened', { message: `openedChat = ${JSON.stringify(openedChat)}` });
-    // TODO: Сделать запрос за последними сообщениями и отправить их клиенту
+    return this.commandBus.execute(new AddChatMessageCommand(NewMessage));
   }
 
-  @SubscribeMessage(wsMessageKind.CLOSE_CHAT_EVENT)
-  async handleCloseChat(
-    @MessageBody('data') data: wsOpenedChatsPayloadDto,
-    @ConnectedSocket() client: Socket
+  sendNewMessage(savedMessage: MessageInterface) {
+    const { ...message } = savedMessage;
+    const chatId = message.chatId as unknown as string;
+    const usersInChat = this.openedChats.get(chatId);
+    const connectedUsers: wsConnectedUserData[] = [];
+    usersInChat.forEach((userInChat) => {
+      connectedUsers.push(this.getConnectedUser(userInChat));
+    });
+    connectedUsers.forEach((connectedUser) => {
+      connectedUser.sockets.forEach((clientId) => {
+        this.server.sockets.sockets.get(clientId).emit('NewMessage', savedMessage);
+      });
+    });
+  }
+
+  @SubscribeMessage(wsMessageKind.CHAT_PAGE_QUERY)
+  async handlePageQuery(
+    @ConnectedSocket() client: Socket,
+    @MessageBody('chatInfo') chatInfo: wsChatPageQueryPayload
   ) {
-    const user = await this.checkUserAuth(client);
-    const { chatId } = data;
-    const openedChat = this.openedChats.get(chatId);
-
-    // если такого чата нет
-    if (!openedChat) {
-      return;
-    }
-
-    // если пользователь есть в чате, то удалим его
-    if (openedChat.users.includes(user._id)) {
-      openedChat.users = openedChat.users.filter((userId) => userId !== user._id);
-
-      // если после удаления пользователя в чате больше никого не осталось, то удалим чат
-      if (openedChat.users.length === 0) {
-        this.openedChats.delete(chatId);
-      } else {
-        this.openedChats.set(chatId, openedChat);
-      }
-    }
-
-    const connectedUser = this.connectedUsers.get(user._id);
-    if (connectedUser) {
-      // если у пользователя есть другие активные подключения, то удаляем только текущий сокет
-      connectedUser.sockets = connectedUser.sockets.filter((socketId) => socketId !== client.id);
-
-      // если у пользователя не осталось активных сокетов, удаляем пользователя из connectedUsers иначе обновим данные в мапе
-      if (connectedUser.sockets.length === 0) {
-        this.connectedUsers.delete(user._id);
-      } else {
-        this.connectedUsers.set(user._id, connectedUser);
-      }
-    }
-    // client.emit('chat_closed', { message: `openedChat = ${JSON.stringify(openedChat)}` });
+    const request: Array<MessageInterface> = await this.queryBus.execute(
+      new GetChatMessagesQuery(chatInfo.chatId, chatInfo.skip, chatInfo.limit)
+    );
+    this.sendChatMessages(request, client.id);
   }
 }
