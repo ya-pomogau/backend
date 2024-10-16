@@ -230,4 +230,29 @@ export class WebsocketApiGateway
     );
     this.sendChatMessages(request, client.id);
   }
+
+  @SubscribeMessage(wsMessageKind.OPEN_CHAT_EVENT)
+  async handleOpenChat(@MessageBody('chatId') chatId: string, @ConnectedSocket() client: Socket) {
+    const user = await this.checkUserAuth(client);
+    const userId = user._id;
+
+    if (!this.openedChats.has(chatId)) {
+      this.openedChats.set(chatId, new Set());
+    }
+
+    this.openedChats.get(chatId).add(userId);
+  }
+
+  @SubscribeMessage(wsMessageKind.CLOSE_CHAT_EVENT)
+  async handleCloseChat(@MessageBody('chatId') chatId: string, @ConnectedSocket() client: Socket) {
+    const user = await this.checkUserAuth(client);
+    const userId = user._id;
+
+    const openedChat = this.openedChats.get(chatId);
+    openedChat.delete(userId);
+
+    if (openedChat.size === 0) {
+      this.openedChats.delete(chatId);
+    }
+  }
 }
