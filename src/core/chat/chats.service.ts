@@ -76,10 +76,9 @@ const mockAdmin: AdminInterface = {
   isActive: false,
 };
 
-const mockMessages = [
+const mockMessages: Array<MessageInterface> = [
   {
     _id: new mongoose.Types.ObjectId().toHexString(),
-    title: 'TestTitle1',
     body: 'TestBody1',
     attaches: [
       new mongoose.Types.ObjectId().toHexString(),
@@ -91,7 +90,6 @@ const mockMessages = [
   },
   {
     _id: new mongoose.Types.ObjectId().toHexString(),
-    title: 'TestTitle2',
     body: 'TestBody2',
     attaches: [
       new mongoose.Types.ObjectId().toHexString(),
@@ -325,6 +323,6 @@ export class ChatService {
   async getMessages(chatId: string | ObjectId, skip: number, limit?: number) {
     // eslint-disable-next-line no-console
     console.log('Getting messages');
-    return mockResponseMessage;
+    return mockMessages;
   }
 }

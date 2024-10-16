@@ -13,6 +13,7 @@ import { AuthService } from '../../core/auth/auth.service';
 import { WebsocketApiGateway } from './websocket-api.gateway';
 import { AddChatMessageHandler } from '../../core/add-chat-message.handler';
 import { ChatService } from '../../core/chat/chats.service';
+import { QUERIES } from '../../common/queries';
 
 @Module({
   imports: [
@@ -27,6 +28,13 @@ import { ChatService } from '../../core/chat/chats.service';
     AuthModule,
     CqrsModule,
   ],
-  providers: [WebsocketApiGateway, AuthService, JwtService, AddChatMessageHandler, ChatService],
+  providers: [
+    WebsocketApiGateway,
+    AuthService,
+    JwtService,
+    AddChatMessageHandler,
+    ChatService,
+    ...QUERIES,
+  ],
 })
 export class WebsocketApiModule {}

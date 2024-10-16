@@ -31,9 +31,11 @@ import {
   wsDisconnectionPayload,
   wsTokenPayload,
   // wsOpenedChatsData,
+  wsChatPageQueryPayload,
 } from '../../common/types/websockets.types';
 import { NewMessageDto } from './dto/new-message.dto';
 import { MessageInterface } from '../../common/types/chats.types';
+import { GetChatMessagesQuery } from '../../common/queries/get-chat-messages.query';
 
 // Интерфейс и dto созданы для тестирования SocketValidationPipe
 // Удалить на этапе, когда будут реализованы необходимые dto
@@ -69,7 +71,8 @@ export class WebsocketApiGateway
   constructor(
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-    private readonly commandBus: CommandBus
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus
   ) {}
 
   @WebSocketServer()
@@ -169,6 +172,16 @@ export class WebsocketApiGateway
     socket.disconnect();
   }
 
+  private sendChatMessages(messages: Array<MessageInterface>, clientId: string) {
+    const wsMessageData: wsMessageData = {
+      data: {
+        messages,
+      },
+    };
+
+    this.server.sockets.sockets.get(clientId).emit(wsMessageKind.CHAT_PAGE_CONTENT, wsMessageData);
+  }
+
   @SubscribeMessage('test_event')
   async handleTestEvent(@MessageBody('data') data: TestEventMessageDto) {
     // eslint-disable-next-line no-console
@@ -205,5 +218,16 @@ export class WebsocketApiGateway
         this.server.sockets.sockets.get(clientId).emit('NewMessage', savedMessage);
       });
     });
+  }
+
+  @SubscribeMessage(wsMessageKind.CHAT_PAGE_QUERY)
+  async handlePageQuery(
+    @ConnectedSocket() client: Socket,
+    @MessageBody('chatInfo') chatInfo: wsChatPageQueryPayload
+  ) {
+    const request: Array<MessageInterface> = await this.queryBus.execute(
+      new GetChatMessagesQuery(chatInfo.chatId, chatInfo.skip, chatInfo.limit)
+    );
+    this.sendChatMessages(request, client.id);
   }
 }
