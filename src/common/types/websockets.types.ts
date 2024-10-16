@@ -58,3 +58,9 @@ export type wsConnectedUserData = {
   user: AnyUserInterface;
   sockets: Array<string>;
 };
+
+export type wsOpenedChatsData<T extends string> = {
+  [key in T]: Array<string>;
+};
+
+export type WsNewMessage = Omit<MessageInterface, '_id' | 'createdAt'>;
