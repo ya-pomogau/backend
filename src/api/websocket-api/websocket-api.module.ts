@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
 import { JwtModule, JwtService } from '@nestjs/jwt';
-import { CommandBus, CqrsModule, QueryBus } from '@nestjs/cqrs';
+import { CqrsModule, CommandBus, QueryBus } from '@nestjs/cqrs';
 import { BlogModule } from '../../core/blog/blog.module';
 import { CategoriesModule } from '../../core/categories/categories.module';
 import { TasksModule } from '../../core/tasks/tasks.module';
@@ -11,8 +11,9 @@ import { PolicyModule } from '../../core/policy/policy.module';
 import { AuthModule } from '../../core/auth/auth.module';
 import { AuthService } from '../../core/auth/auth.service';
 import { WebsocketApiGateway } from './websocket-api.gateway';
-import { QUERIES } from '../../common/queries';
+import { AddChatMessageHandler } from '../../core/add-chat-message.handler';
 import { ChatService } from '../../core/chat/chats.service';
+import { QUERIES } from '../../common/queries';
 
 @Module({
   imports: [
@@ -27,7 +28,14 @@ import { ChatService } from '../../core/chat/chats.service';
     AuthModule,
     CqrsModule,
   ],
-  providers: [WebsocketApiGateway, AuthService, JwtService, ChatService, ...QUERIES],
+  providers: [
+    WebsocketApiGateway,
+    AuthService,
+    JwtService,
+    AddChatMessageHandler,
+    ChatService,
+    ...QUERIES,
+  ],
 })
 export class WebsocketApiModule {
   constructor(private readonly commandBus: CommandBus, private readonly queryBus: QueryBus) {}

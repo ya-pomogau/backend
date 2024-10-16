@@ -18,6 +18,8 @@ import { IsArray, IsNotEmpty, IsObject, IsString } from 'class-validator';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 
+import { AddChatMessageCommand } from '../../common/commands/add-chat-message.command';
+// import { MessageInterface } from '../../common/types/chats.types';
 import configuration from '../../config/configuration';
 import { SocketAuthGuard } from '../../common/guards/socket-auth.guard';
 import { SocketValidationPipe } from '../../common/pipes/socket-validation.pipe';
@@ -28,11 +30,12 @@ import {
   wsConnectedUserData,
   wsDisconnectionPayload,
   wsTokenPayload,
-  wsOpenedChatsData,
+  // wsOpenedChatsData,
   wsChatPageQueryPayload,
 } from '../../common/types/websockets.types';
-import { GetChatMessagesQuery } from '../../common/queries/get-chat-messages.query';
+import { NewMessageDto } from './dto/new-message.dto';
 import { MessageInterface } from '../../common/types/chats.types';
+import { GetChatMessagesQuery } from '../../common/queries/get-chat-messages.query';
 
 // Интерфейс и dto созданы для тестирования SocketValidationPipe
 // Удалить на этапе, когда будут реализованы необходимые dto
@@ -77,7 +80,9 @@ export class WebsocketApiGateway
 
   private connectedUsers: Map<string, wsConnectedUserData> = new Map();
 
-  private openedChats: Map<string, wsOpenedChatsData<string>> = new Map();
+  // private openedChats: Map<string, string[]> = new Map();
+
+  private openedChats: Map<string, Set<string>> = new Map();
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   afterInit(server: Server) {
@@ -178,9 +183,41 @@ export class WebsocketApiGateway
   }
 
   @SubscribeMessage('test_event')
-  handleTestEvent(@MessageBody('data') data: TestEventMessageDto) {
+  async handleTestEvent(@MessageBody('data') data: TestEventMessageDto) {
     // eslint-disable-next-line no-console
     console.log('This is test event data:', data);
+  }
+
+  @SubscribeMessage('NewMessage')
+  async handleNewMessage(
+    @ConnectedSocket() client: Socket,
+    @MessageBody('NewMessage') NewMessage: NewMessageDto
+  ) {
+    // *** ↓↓ временное решение до появления метода открытия чата ↓↓ ***
+    const { chatId } = NewMessage;
+    const userId = (await this.checkUserAuth(client))._id;
+    const newarr = new Set<string>();
+    if (chatId) {
+      this.openedChats.set(chatId, newarr.add(userId));
+    }
+    // *** ↑↑ временное решение до появления метода открытия чата ↑↑ ***
+
+    return this.commandBus.execute(new AddChatMessageCommand(NewMessage));
+  }
+
+  sendNewMessage(savedMessage: MessageInterface) {
+    const { ...message } = savedMessage;
+    const chatId = message.chatId as unknown as string;
+    const usersInChat = this.openedChats.get(chatId);
+    const connectedUsers: wsConnectedUserData[] = [];
+    usersInChat.forEach((userInChat) => {
+      connectedUsers.push(this.getConnectedUser(userInChat));
+    });
+    connectedUsers.forEach((connectedUser) => {
+      connectedUser.sockets.forEach((clientId) => {
+        this.server.sockets.sockets.get(clientId).emit('NewMessage', savedMessage);
+      });
+    });
   }
 
   @SubscribeMessage(wsMessageKind.CHAT_PAGE_QUERY)
