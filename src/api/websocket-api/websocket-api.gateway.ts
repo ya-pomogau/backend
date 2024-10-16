@@ -28,6 +28,7 @@ import {
   wsConnectedUserData,
   wsDisconnectionPayload,
   wsTokenPayload,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   wsOpenedChatsData,
 } from '../../common/types/websockets.types';
 import { wsOpenedChatsPayloadDto } from './dto/websocket-opened-chats.dto';
