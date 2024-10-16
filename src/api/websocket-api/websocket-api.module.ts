@@ -11,8 +11,9 @@ import { PolicyModule } from '../../core/policy/policy.module';
 import { AuthModule } from '../../core/auth/auth.module';
 import { AuthService } from '../../core/auth/auth.service';
 import { WebsocketApiGateway } from './websocket-api.gateway';
+import { AddChatMessageHandler } from '../../core/add-chat-message.handler';
 import { ChatService } from '../../core/chat/chats.service';
-import { QueryHandlers } from './commands-and-queries/queries';
+import { QUERIES } from '../../common/queries';
 
 @Module({
   imports: [
@@ -27,6 +28,13 @@ import { QueryHandlers } from './commands-and-queries/queries';
     AuthModule,
     CqrsModule,
   ],
-  providers: [...QueryHandlers, WebsocketApiGateway, AuthService, ChatService, JwtService],
+  providers: [
+    WebsocketApiGateway,
+    AuthService,
+    JwtService,
+    AddChatMessageHandler,
+    ChatService,
+    ...QUERIES,
+  ],
 })
 export class WebsocketApiModule {}
