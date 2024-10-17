@@ -170,6 +170,7 @@ export class TasksService {
     if (role === UserRole.RECIPIENT) {
       query.recipient = { _id: userId, address, avatar, name, phone };
     }
+    console.log(query, dto);
     return this.tasksRepo.findOneAndUpdate(query, dto);
   }
 
@@ -237,7 +238,7 @@ export class TasksService {
       };
     }
     if (categoryId) {
-      query.category._id = categoryId;
+      query.category = { _id: categoryId };
     }
     if (!!start && !!end) {
       query.date = {
