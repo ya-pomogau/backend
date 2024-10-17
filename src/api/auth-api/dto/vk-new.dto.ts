@@ -35,7 +35,7 @@ export class VKNewUserDto implements VKNewUserInterface {
   @IsPhoneNumber('RU')
   phone: string;
 
-  @ApiProperty()
+  @ApiProperty({ enum: UserRole })
   @IsEnum(UserRole)
   role: UserRole;
 
