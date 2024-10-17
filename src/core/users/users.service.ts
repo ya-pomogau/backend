@@ -507,7 +507,7 @@ export class UsersService {
     return Promise.resolve(updatedUser);
   }
 
-  private async refreshAndSendToken(user: AnyUserInterface) {
+  async refreshAndSendToken(user: AnyUserInterface) {
     if (user) {
       const token: string = await this.commandBus.execute<AuthenticateCommand, string>(
         new AuthenticateCommand(user)

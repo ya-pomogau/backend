@@ -1,4 +1,6 @@
 import { Body, Controller, Get, Param, Patch, Query, Req, UseGuards } from '@nestjs/common';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { BlogService } from '../../core/blog/blog.service';
 import { Public } from '../../common/decorators/public.decorator';
 import { CategoriesService } from '../../core/categories/categories.service';
@@ -10,7 +12,8 @@ import { AnyUserInterface } from '../../common/types/user.types';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ContactsService } from '../../core/contacts/contacts.service';
 import { PolicyService } from '../../core/policy/policy.service';
-import { AuthService } from '../../core/auth/auth.service';
+import { AuthenticateCommand } from '../../common/commands/authenticate.command';
+import { SendTokenCommand } from '../../common/commands/send-token.command';
 
 @Controller('system')
 export class SystemApiController {
@@ -21,7 +24,8 @@ export class SystemApiController {
     private readonly userService: UsersService,
     private readonly contactsService: ContactsService,
     private readonly policyService: PolicyService,
-    private readonly authService: AuthService
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus
   ) {}
 
   @Get('posts')
@@ -70,7 +74,12 @@ export class SystemApiController {
   public async updateProfile(@Req() req: Express.Request, @Body() dto: UpdateProfileDto) {
     const { _id } = req.user as AnyUserInterface;
     const profile = await this.userService.updateProfile(_id, dto);
-    const token = await this.authService.authenticate({ ...profile });
+    const token = await this.commandBus.execute<AuthenticateCommand>(
+      new AuthenticateCommand(profile)
+    );
+    await this.commandBus.execute<SendTokenCommand, { user: AnyUserInterface; token: string }>(
+      new SendTokenCommand(profile, token)
+    );
     return Promise.resolve({ ...profile, token });
   }
 
