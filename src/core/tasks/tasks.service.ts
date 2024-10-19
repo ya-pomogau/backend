@@ -6,8 +6,6 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { FilterQuery } from 'mongoose';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { TasksRepository } from '../../datalake/task/task.repository';
 import { UsersRepository } from '../../datalake/users/users.repository';
 import { CreateTaskDto, GetTasksDto } from '../../common/dto/tasks.dto';
@@ -27,7 +25,6 @@ import { AnyUserInterface, UserRole } from '../../common/types/user.types';
 import { Volunteer } from '../../datalake/users/schemas/volunteer.schema';
 import { User } from '../../datalake/users/schemas/user.schema';
 import { UsersService } from '../users/users.service';
-import { CreateTaskChatCommand } from '../../common/commands/create-chat.command';
 
 @Injectable()
 export class TasksService {
@@ -35,9 +32,7 @@ export class TasksService {
     private readonly tasksRepo: TasksRepository,
     private readonly usersRepo: UsersRepository,
     private readonly categoryRepo: CategoryRepository,
-    private readonly usersService: UsersService,
-    private readonly commandBus: CommandBus,
-    private readonly queryBus: QueryBus
+    private readonly usersService: UsersService
   ) {}
 
   public async create(dto: CreateTaskDto) {
@@ -154,6 +149,11 @@ export class TasksService {
   }
 
   public async updateTask(taskId: string, user: AnyUserInterface, dto: Partial<CreateTaskDto>) {
+    const { location, ...data } = dto;
+    const task = {
+      ...data,
+      location: { type: 'Point', coordinates: location },
+    };
     const { _id: userId, role, address, avatar, name, phone } = user;
     if (!(role === UserRole.RECIPIENT || role === UserRole.ADMIN)) {
       throw new ForbiddenException(
@@ -170,7 +170,7 @@ export class TasksService {
     if (role === UserRole.RECIPIENT) {
       query.recipient = { _id: userId, address, avatar, name, phone };
     }
-    return this.tasksRepo.findOneAndUpdate(query, dto);
+    return this.tasksRepo.findOneAndUpdate(query, task);
   }
 
   public async getTasksByStatus(
@@ -282,13 +282,11 @@ export class TasksService {
       throw new ForbiddenException('Вам нельзя брать задачи из этой категории!');
     }
     const { name, phone, avatar, address, _id, vkId, role } = volunteer;
-    const updatedTask = await this.tasksRepo.findByIdAndUpdate(
+    return this.tasksRepo.findByIdAndUpdate(
       taskId,
       { status: TaskStatus.ACCEPTED, volunteer: { name, phone, avatar, address, _id, vkId, role } },
       { new: true }
     );
-    await this.commandBus.execute(new CreateTaskChatCommand({ taskId, updatedTask }));
-    return updatedTask;
   }
 
   public async reportTask(taskId: string, userId: string, userRole: UserRole, result: TaskReport) {
