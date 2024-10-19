@@ -48,9 +48,27 @@ export class AdminApiController {
 
   @Get('all')
   @ApiTags('Get a list of administrators')
-  @AccessControlList({ role: UserRole.ADMIN, rights: [AccessRights.confirmUser] })
+  @AccessControlList({ role: UserRole.ADMIN, rights: [AccessRights.confirmUser], isRoot: true })
   public async getAdministrators() {
-    return this.usersService.getAdministrators();
+    const adminsArray = await Promise.all([
+      this.usersService.getAdministrators(true),
+      this.usersService.getAdministrators(false),
+    ]).then(([activeAdmins, inactiveAdmins]) => [...activeAdmins, ...inactiveAdmins].flat());
+    return Promise.resolve(adminsArray);
+  }
+
+  @Get('activated')
+  @ApiTags('Get a list of activated administrators')
+  @AccessControlList({ role: UserRole.ADMIN, isRoot: true })
+  public async getActivatedAdmitistrators() {
+    return this.usersService.getAdministrators(true);
+  }
+
+  @Get('deactivated')
+  @ApiTags('Get a list of deactivated administrators')
+  @AccessControlList({ role: UserRole.ADMIN, isRoot: true })
+  public async getDeactivatedAdmitistrators() {
+    return this.usersService.getAdministrators(false);
   }
 
   @Post('create')
