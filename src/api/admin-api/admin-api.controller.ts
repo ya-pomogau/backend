@@ -14,6 +14,8 @@ import {
 import { MethodNotAllowedException } from '@nestjs/common/exceptions';
 import { ApiTags } from '@nestjs/swagger';
 
+import { CommandBus } from '@nestjs/cqrs';
+import { SetAdminPasswordCommand } from '../../common/commands/set-admin-password.command';
 import { UsersService } from '../../core/users/users.service';
 import { BlogService } from '../../core/blog/blog.service';
 import { CategoriesService } from '../../core/categories/categories.service';
@@ -32,6 +34,7 @@ import { ApiPrivilegesDto } from './dto/privileges.dto';
 import { ApiCreateCategoryDto } from './dto/new-category.dto';
 import { ApiUpdateCategoryDto } from './dto/update-category.dto';
 import { ApiBulkUpdateCategoriesDto } from './dto/bulk-update-categories.dto';
+import { SetAdminPasswordDto } from './dto/set-admin-password.dto';
 
 @UseGuards(JwtAuthGuard)
 @UseGuards(AccessControlGuard)
@@ -43,7 +46,8 @@ export class AdminApiController {
     private readonly blogService: BlogService,
     private readonly categoryService: CategoriesService,
     private readonly tasksService: TasksService,
-    private readonly contactsService: ContactsService
+    private readonly contactsService: ContactsService,
+    private readonly commandBus: CommandBus
   ) {}
 
   @Get('all')
@@ -116,6 +120,13 @@ export class AdminApiController {
   ) {
     const { privileges } = dto;
     return this.usersService.updatePrivileges(req.user as AnyUserInterface, userId, privileges);
+  }
+
+  @Patch(':id/password')
+  @ApiTags('Update administrator password. Root only.')
+  @AccessControlList({ role: UserRole.ADMIN, isRoot: true })
+  public async updatePassword(@Param('id') userId: string, @Body() body: SetAdminPasswordDto) {
+    await this.commandBus.execute(new SetAdminPasswordCommand(userId, body.password));
   }
 
   @Put('users/:id/confirm')

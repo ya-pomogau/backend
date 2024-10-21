@@ -35,6 +35,8 @@ export class User extends Document implements GenericUserModelInterface {
     enum: ['GeneralUser', 'Admin', 'Recipient', 'Volunteer'],
   })
   role: string;
+
+  isRoot: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass<GenericUserModelInterface>(User);
