@@ -80,7 +80,7 @@ export class SystemApiController {
     await this.commandBus.execute<SendTokenCommand, { user: AnyUserInterface; token: string }>(
       new SendTokenCommand(profile, token)
     );
-    return Promise.resolve({ ...profile, token });
+    return { ...profile, token };
   }
 
   @Get('contacts')

@@ -12,7 +12,7 @@ import { AuthModule } from '../../core/auth/auth.module';
 import { AuthService } from '../../core/auth/auth.service';
 import { SystemApiController } from './system-api.controller';
 import { COMMANDS } from '../auth-api/commands-and-queries/commands';
-import { WebsocketApiGateway } from '../websocket-api/websocket-api.gateway';
+import { WebsocketApiModule } from '../websocket-api/websocket-api.module';
 
 @Module({
   imports: [
@@ -26,8 +26,9 @@ import { WebsocketApiGateway } from '../websocket-api/websocket-api.gateway';
     JwtModule,
     AuthModule,
     CqrsModule,
+    WebsocketApiModule,
   ],
   controllers: [SystemApiController],
-  providers: [...COMMANDS, AuthService, JwtService, WebsocketApiGateway],
+  providers: [...COMMANDS, AuthService, JwtService],
 })
 export class SystemApiModule {}
